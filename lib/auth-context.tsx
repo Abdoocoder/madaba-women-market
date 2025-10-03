@@ -17,7 +17,7 @@ import type { User, UserRole } from "./types"
 interface AuthContextType {
   user: User | null
   login: (email: string, password: string) => Promise<boolean>
-  signUp: (email: string, password: string, role: UserRole) => Promise<boolean>;
+  signUp: (email: string, password: string, role: UserRole) => Promise<boolean>
   signInWithGoogle: (role: UserRole) => Promise<boolean>
   logout: () => void
   sendPasswordReset: (email: string) => Promise<boolean>
@@ -40,7 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const userData = userDocSnap.data() as User;
           setUser(userData);
         } else {
-          console.error("User document not found in Firestore");
+          console.error("⚠️ User document not found in Firestore");
           setUser(null);
         }
       } else {
@@ -57,7 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await signInWithEmailAndPassword(auth, email, password);
       return true;
     } catch (error) {
-      console.error("Error logging in:", error);
+      console.error("❌ Error logging in:", error);
       return false;
     }
   }
@@ -77,13 +77,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       };
       
       if (role === 'seller') {
-        newUser.status = 'pending';
+        newUser.status = 'pending'; // admin approval required
       }
 
       await setDoc(userDocRef, newUser);
+      setUser(newUser);
       return true;
     } catch (error) {
-      console.error("Error signing up:", error);
+      console.error("❌ Error signing up:", error);
       return false;
     }
   };
@@ -98,26 +99,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const userDocSnap = await getDoc(userDocRef);
 
       if (!userDocSnap.exists()) {
+        // 🆕 New Google User → Save with chosen role
         const newUser: User = {
           id: firebaseUser.uid,
           email: firebaseUser.email || '',
           name: firebaseUser.displayName || 'New User',
+          photoURL: firebaseUser.photoURL || '',
           role: role,
           createdAt: new Date(),
         };
-        
+
         if (role === 'seller') {
-          newUser.status = 'pending';
+          newUser.status = 'pending'; // waiting for admin approval
         }
-  
+
         await setDoc(userDocRef, newUser);
+        setUser(newUser);
+      } else {
+        // 👤 Existing Google User → Keep original role
+        const existingUser = userDocSnap.data() as User;
+        setUser(existingUser);
       }
       return true;
     } catch (error: any) {
       if (error.code === 'auth/popup-closed-by-user') {
-        console.log("Google sign-in popup was closed by the user.");
+        console.log("⚠️ Google sign-in popup closed by the user.");
       } else {
-        console.error("Error signing in with Google:", error);
+        console.error("❌ Error signing in with Google:", error);
       }
       return false;
     }
@@ -125,6 +133,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     await signOut(auth);
+    setUser(null);
   }
   
   const sendPasswordReset = async (email: string): Promise<boolean> => {
@@ -132,7 +141,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await sendPasswordResetEmail(auth, email);
       return true;
     } catch (error) {
-      console.error("Error sending password reset email:", error);
+      console.error("❌ Error sending password reset email:", error);
       return false;
     }
   };

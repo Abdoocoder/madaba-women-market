@@ -34,7 +34,8 @@ export function NewLoginForm() {
   const { user, login, signUp, signInWithGoogle, sendPasswordReset } = useAuth()
   const router = useRouter()
   const [isSignUp, setIsSignUp] = useState(false)
-  
+  const [googleRole, setGoogleRole] = useState<'customer' | 'seller'>('customer')
+
   const {
     register,
     handleSubmit,
@@ -42,75 +43,76 @@ export function NewLoginForm() {
     getValues,
   } = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      role: 'customer'
-    }
+    defaultValues: { role: 'customer' }
   })
 
   useEffect(() => {
     if (user) {
-        switch (user.role) {
-            case 'admin':
-                router.push('/admin/dashboard');
-                break;
-            case 'seller':
-                if (user.status === 'pending') {
-                  toast.error('حسابك في انتظار موافقة المسؤول.');
-                  // logout(); // Optional: log out the user
-                } else {
-                  router.push('/seller/dashboard');
-                }
-                break;
-            case 'customer':
-                router.push('/');
-                break;
-            default:
-                router.push('/');
-        }
+      switch (user.role) {
+        case 'admin':
+          router.push('/admin/dashboard')
+          break
+        case 'seller':
+          if (user.status === 'pending') {
+            toast.error('حسابك في انتظار موافقة المسؤول.')
+          } else {
+            router.push('/seller/dashboard')
+          }
+          break
+        case 'customer':
+          router.push('/')
+          break
+        default:
+          router.push('/')
+      }
     }
-  }, [user, router]);
+  }, [user, router])
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
-    const toastId = toast.loading(isSignUp ? "جاري إنشاء الحساب..." : "جاري تسجيل الدخول...");
-    let success = false;
+    const toastId = toast.loading(isSignUp ? "جاري إنشاء الحساب..." : "جاري تسجيل الدخول...")
+    let success = false
     if (isSignUp) {
-      success = await signUp(data.email, data.password, data.role);
+      success = await signUp(data.email, data.password, data.role)
     } else {
-      success = await login(data.email, data.password);
+      success = await login(data.email, data.password)
     }
 
     if (success) {
-      toast.success(isSignUp ? "تم إنشاء الحساب بنجاح!" : "تم تسجيل الدخول بنجاح!", { id: toastId });
+      toast.success(isSignUp ? "تم إنشاء الحساب بنجاح!" : "تم تسجيل الدخول بنجاح!", { id: toastId })
     } else {
-      toast.error(isSignUp ? "فشل إنشاء الحساب." : "فشلت المصادقة. تحقق من بريدك الإلكتروني وكلمة المرور.", { id: toastId });
+      toast.error(isSignUp ? "فشل إنشاء الحساب." : "فشلت المصادقة. تحقق من بريدك الإلكتروني وكلمة المرور.", { id: toastId })
     }
   }
-  
+
   const handleGoogleSignIn = async () => {
-    const toastId = toast.loading("جاري تسجيل الدخول باستخدام جوجل...");
-    // TODO: Add role selection for Google Sign In
-    const success = await signInWithGoogle('customer');
-    if (success) {
-      toast.success("تم تسجيل الدخول بنجاح!", { id: toastId });
-    } else {
-      toast.error("فشل تسجيل الدخول باستخدام جوجل. حاول مرة أخرى.", { id: toastId });
+    if (!googleRole) {
+      toast.error("الرجاء اختيار نوع الحساب قبل تسجيل الدخول بجوجل.")
+      return
     }
-  };
-  
+    const toastId = toast.loading("جاري تسجيل الدخول باستخدام جوجل...")
+    const success = await signInWithGoogle(googleRole)
+
+    if (success) {
+      toast.success("تم تسجيل الدخول بنجاح!", { id: toastId })
+    } else {
+      toast.error("فشل تسجيل الدخول باستخدام جوجل. حاول مرة أخرى.", { id: toastId })
+    }
+  }
+
   const handlePasswordReset = async () => {
-    const email = getValues("email");
+    const email = getValues("email")
     if (!email) {
-      toast.error("الرجاء إدخال بريدك الإلكتروني أولاً لطلب إعادة تعيين كلمة المرور.");
-      return;
+      toast.error("الرجاء إدخال بريدك الإلكتروني أولاً لطلب إعادة تعيين كلمة المرور.")
+      return
     }
-    const toastId = toast.loading("جاري إرسال رابط إعادة تعيين كلمة المرور...");
-    const success = await sendPasswordReset(email);
+    const toastId = toast.loading("جاري إرسال رابط إعادة تعيين كلمة المرور...")
+    const success = await sendPasswordReset(email)
     if (success) {
-      toast.success("تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني.", { id: toastId });
+      toast.success("تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني.", { id: toastId })
     } else {
-      toast.error("فشل إرسال بريد إعادة تعيين كلمة المرور. تأكد من صحة البريد الإلكتروني.", { id: toastId });
+      toast.error("فشل إرسال بريد إعادة تعيين كلمة المرور. تأكد من صحة البريد الإلكتروني.", { id: toastId })
     }
-  };
+  }
 
   return (
     <Card className="w-full max-w-md mx-auto mt-10">
@@ -122,26 +124,16 @@ export function NewLoginForm() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">البريد الإلكتروني</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="you@example.com"
-              {...register("email")}
-              dir="ltr"
-            />
+            <Input id="email" type="email" placeholder="you@example.com" {...register("email")} dir="ltr" />
             {errors.email && <p className="text-sm text-destructive text-center">{errors.email.message}</p>}
           </div>
+
           <div className="space-y-2">
             <Label htmlFor="password">كلمة المرور</Label>
-            <Input
-              id="password"
-              type="password"
-              {...register("password")}
-              dir="ltr"
-            />
+            <Input id="password" type="password" {...register("password")} dir="ltr" />
             {errors.password && <p className="text-sm text-destructive text-center">{errors.password.message}</p>}
           </div>
-          
+
           {isSignUp && (
             <div className="space-y-2">
               <Label>نوع الحساب</Label>
@@ -158,11 +150,11 @@ export function NewLoginForm() {
               {errors.role && <p className="text-sm text-destructive text-center">{errors.role.message}</p>}
             </div>
           )}
-          
+
           {!isSignUp && (
             <div className="text-right">
               <Button type="button" variant="link" size="sm" onClick={handlePasswordReset} className="p-0 h-auto">
-                  هل نسيت كلمة المرور؟
+                هل نسيت كلمة المرور؟
               </Button>
             </div>
           )}
@@ -171,8 +163,23 @@ export function NewLoginForm() {
             {isSubmitting ? "جاري التحميل..." : (isSignUp ? 'إنشاء حساب' : 'دخول')}
           </Button>
         </form>
-        
+
         <Separator className="my-6">أو</Separator>
+
+        {/* اختيار الدور لتسجيل الدخول بجوجل */}
+        <div className="space-y-2 mb-4">
+          <Label>نوع الحساب عند التسجيل باستخدام جوجل</Label>
+          <RadioGroup defaultValue="customer" onValueChange={(v) => setGoogleRole(v as 'customer' | 'seller')} className="flex space-x-4">
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="customer" id="google-customer" />
+              <Label htmlFor="google-customer">مشتري</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="seller" id="google-seller" />
+              <Label htmlFor="google-seller">بائع</Label>
+            </div>
+          </RadioGroup>
+        </div>
 
         <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isSubmitting}>
           <GoogleIcon />
@@ -184,7 +191,6 @@ export function NewLoginForm() {
             {isSignUp ? 'هل لديك حساب بالفعل؟ تسجيل الدخول' : 'ليس لديك حساب؟ إنشاء حساب جديد'}
           </Button>
         </div>
-        
       </CardContent>
     </Card>
   )
