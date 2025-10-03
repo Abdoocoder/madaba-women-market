@@ -9,7 +9,7 @@ import {
   signInWithPopup,
   sendPasswordResetEmail
 } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "./firebase";
 import type { User } from "./types"
 
@@ -41,7 +41,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser(userData);
         } else {
           // Handle case where user exists in Auth but not in Firestore
-          // You might want to create a new user document here
           console.error("User document not found in Firestore");
           setUser(null);
         }
@@ -69,8 +68,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signInWithGoogle = async (): Promise<boolean> => {
     const provider = new GoogleAuthProvider();
     try {
-      await signInWithPopup(auth, provider);
-      // You might want to check if the user is new and create a document in Firestore
+      const result = await signInWithPopup(auth, provider);
+      const firebaseUser = result.user;
+      
+      const userDocRef = doc(db, "users", firebaseUser.uid);
+      const userDocSnap = await getDoc(userDocRef);
+
+      if (!userDocSnap.exists()) {
+        // New user, create a document in Firestore
+        await setDoc(userDocRef, {
+          uid: firebaseUser.uid,
+          email: firebaseUser.email,
+          displayName: firebaseUser.displayName,
+          photoURL: firebaseUser.photoURL,
+          role: 'customer' // Default role for new users
+        });
+      }
       return true;
     } catch (error) {
       console.error("Error signing in with Google:", error);
