@@ -3,7 +3,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { ProductCard } from '@/components/product/product-card'
+import { ProductCard } from '@/components/products/product-card'
 import { MOCK_PRODUCTS, MOCK_USERS } from '@/lib/mock-data'
 import { useLocale } from '@/lib/locale-context'
 import { notFound } from 'next/navigation'

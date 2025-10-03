@@ -19,6 +19,7 @@ import { Badge } from "@/components/ui/badge"
 import { LanguageSwitcher } from "./language-switcher"
 import { useState } from "react"
 import type { User as UserType } from "@/lib/types"
+import { ThemeToggle } from "../theme-toggle"
 
 interface HeaderProps {
   cartItemCount?: number
@@ -49,6 +50,7 @@ export function Header({ cartItemCount = 0, user: initialUser }: HeaderProps) {
         </Link>
 
         <div className="hidden md:flex items-center gap-4">
+          <ThemeToggle />
           <LanguageSwitcher />
 
           {user && user.role === "customer" && (
@@ -125,7 +127,10 @@ export function Header({ cartItemCount = 0, user: initialUser }: HeaderProps) {
       {mobileMenuOpen && (
         <div className="md:hidden container pb-4">
             <nav className="flex flex-col gap-4">
-            <LanguageSwitcher />
+            <div className='flex justify-between items-center'>
+              <LanguageSwitcher />
+              <ThemeToggle />
+            </div>
 
             {user && user.role === "customer" && (
                 <div className="flex items-center gap-2">

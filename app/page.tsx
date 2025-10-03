@@ -4,6 +4,8 @@ import { useState, useMemo } from "react"
 import { Header } from "@/components/layout/header"
 import { ProductCard } from "@/components/products/product-card"
 import { ProductFilters } from "@/components/products/product-filters"
+import { FeaturedProducts } from "@/components/products/featured-products"
+import { SuccessStories } from "@/components/success-stories"
 import { MOCK_PRODUCTS } from "@/lib/mock-data"
 import { useCart } from "@/lib/cart-context"
 import { useLocale } from "@/lib/locale-context"
@@ -50,14 +52,17 @@ export default function HomePage({ user }: HomePageProps) {
     <div className="min-h-screen bg-background">
       <Header cartItemCount={totalItems} user={user} />
       <main className="container py-8">
-        <div className="mb-8">
+        <div className="mb-8 text-center">
           <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
             {t("home.welcome")}
           </h1>
           <p className="text-muted-foreground text-lg">{t("home.subtitle")}</p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <FeaturedProducts />
+        <SuccessStories />
+
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mt-12">
           <aside className="lg:col-span-1">
             <div className="sticky top-24">
               <ProductFilters

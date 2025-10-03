@@ -1,4 +1,4 @@
-import type { Product, Seller } from "./types"
+import type { Product, Seller, Review, User } from "./types"
 
 export const MOCK_PRODUCTS: Product[] = [
   {
@@ -95,3 +95,34 @@ export const CATEGORIES = [
   { id: "accessories", nameAr: "إكسسوارات", name: "Accessories" },
   { id: "home", nameAr: "منزل", name: "Home" },
 ]
+
+export const MOCK_REVIEWS: Review[] = [
+    {
+        id: "1",
+        productId: "1",
+        userId: "1",
+        rating: 5,
+        comment: "Absolutely beautiful abaya! The quality is amazing.",
+        createdAt: new Date("2024-02-01"),
+        user: {
+            id: "1",
+            name: "فاطمة علي",
+            avatar: "/woman-avatar.png",
+        }
+    },
+    {
+        id: "2",
+        productId: "1",
+        userId: "2",
+        rating: 4,
+        comment: "Very elegant and comfortable. I love the embroidery.",
+        createdAt: new Date("2024-02-05"),
+        user: {
+            id: "2",
+            name: "عائشة أحمد",
+            avatar: "/woman-avatar.png",
+        }
+    },
+];
+
+export const MOCK_USERS: User[] = MOCK_SELLERS.map(seller => ({...seller, role: 'seller', joinDate: seller.joinedAt}));

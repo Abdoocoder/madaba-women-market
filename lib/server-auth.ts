@@ -34,3 +34,5 @@ export async function getServerUser(): Promise<User | null> {
     
     return user;
 }
+
+export const getAuthenticatedUser = getServerUser;

@@ -7,6 +7,7 @@ import { CartProvider } from "@/lib/cart-context"
 import { LocaleProvider } from "@/lib/locale-context"
 import { Suspense } from "react"
 import "./globals.css"
+import { ThemeProvider } from "@/components/theme-provider"
 
 const cairo = Cairo({
   subsets: ["arabic", "latin"],
@@ -27,13 +28,20 @@ export default function RootLayout({
   return (
     <html lang="ar" dir="rtl">
       <body className={`font-sans ${cairo.variable} antialiased`}>
-        <LocaleProvider>
-          <AuthProvider>
-            <CartProvider>
-              <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
-            </CartProvider>
-          </AuthProvider>
-        </LocaleProvider>
+        <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+        >
+          <LocaleProvider>
+            <AuthProvider>
+              <CartProvider>
+                <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
+              </CartProvider>
+            </AuthProvider>
+          </LocaleProvider>
+        </ThemeProvider>
         <Analytics />
       </body>
     </html>
