@@ -1,74 +1,76 @@
-# Seydaty Market App
+# تطبيق سوق سيدتي
 
-This is a modern e-commerce application built with Next.js and TypeScript.
+هذا تطبيق تجارة إلكترونية حديث مبني باستخدام Next.js و TypeScript.
 
-## Overview
+## نظرة عامة
 
-Seydaty Market App is a feature-rich online marketplace. It includes functionalities for customers, sellers, and administrators. The application is designed to be scalable and maintainable, using a component-based architecture and a robust set of tools and libraries.
+تطبيق سوق سيدتي هو سوق إلكتروني غني بالميزات. يتضمن وظائف للعملاء والبائعين والمسؤولين. تم تصميم التطبيق ليكون قابلاً للتطوير والصيانة، باستخدام بنية قائمة على المكونات ومجموعة قوية من الأدوات والمكتبات.
 
-## Features
+## الميزات
 
-*   **Authentication:** Secure user login and registration.
-*   **Shopping Cart:** A fully functional shopping cart.
-*   **Wishlist:** Users can save their favorite products.
-*   **Product Management:** Admins and sellers can manage products.
-*   **Admin Dashboard:** A dashboard for administrators to manage the platform.
-*   **Seller Dashboard:** A dashboard for sellers to manage their products and orders.
-*   **Localization:** Support for multiple languages (English and Arabic).
-*   **Responsive Design:** The application is optimized for various screen sizes.
+*   **المصادقة:** تسجيل دخول وتسجيل مستخدم آمن.
+*   **عربة التسوق:** عربة تسوق تعمل بكامل طاقتها.
+*   **قائمة الرغبات:** يمكن للمستخدمين حفظ منتجاتهم المفضلة.
+*   **إدارة المنتجات:** يمكن للمسؤولين والبائعين إدارة المنتجات.
+*   **لوحة تحكم المسؤول:** لوحة تحكم للمسؤولين لإدارة المنصة.
+*   **لوحة تحكم البائع:** لوحة تحكم للبائعين لإدارة منتجاتهم وطلباتهم.
+*   **التعريب:** دعم لغات متعددة (الإنجليزية والعربية).
+*   **تصميم متجاوب:** تم تحسين التطبيق لمختلف أحجام الشاشات.
 
-## Getting Started
+## البدء
 
-### Prerequisites
+### المتطلبات الأساسية
 
-*   Node.js (v18 or later)
+*   Node.js (الإصدار 18 أو أحدث)
 *   pnpm
 
-### Installation
+### التثبيت
 
-1.  Clone the repository:
+1.  استنسخ المستودع:
     ```bash
     git clone <repository-url>
     ```
-2.  Navigate to the project directory:
+2.  انتقل إلى دليل المشروع:
     ```bash
     cd <project-directory>
     ```
-3.  Install the dependencies:
+3.  ثبّت الاعتماديات:
     ```bash
     pnpm install
     ```
 
-### Running the Development Server
+### تشغيل خادم التطوير
 
 ```bash
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+افتح [http://localhost:3000](http://localhost:3000) في متصفحك لرؤية النتيجة.
 
-## Technologies Used
+## التقنيات المستخدمة
 
-*   **Framework:** [Next.js](https://nextjs.org/)
-*   **Language:** [TypeScript](https://www.typescriptlang.org/)
-*   **Styling:** [Tailwind CSS](https://tailwindcss.com/)
-*   **UI Components:** [Shadcn/UI](https://ui.shadcn.com/)
-*   **Authentication & Database:** [Firebase](https://firebase.google.com/)
-*   **State Management:** React Context API
-*   **Form Handling:** [React Hook Form](https://react-hook-form.com/)
-*   **Linting:** [ESLint](https://eslint.org/)
+*   **إطار العمل:** [Next.js](https://nextjs.org/)
+*   **اللغة:** [TypeScript](https://www.typescriptlang.org/)
+*   **التصميم:** [Tailwind CSS](https://tailwindcss.com/)
+*   **مكونات واجهة المستخدم:** [Shadcn/UI](https://ui.shadcn.com/), [Radix UI](https://www.radix-ui.com/)
+*   **المصادقة وقاعدة البيانات:** [Firebase](https://firebase.google.com/)
+*   **إدارة الحالة:** React Context API
+*   **معالجة النماذج:** [React Hook Form](https://react-hook-form.com/)
+*   **التدقيق:** [ESLint](https://eslint.org/)
+*   **التحليلات:** [Vercel Analytics](https://vercel.com/analytics)
 
-## Project Structure
+
+## هيكل المشروع
 
 ```
 .
-├── app/                  # Main application routes and pages
-├── components/           # Reusable UI components
-├── lib/                  # Helper functions and utilities
-├── public/               # Static assets (images, fonts, etc.)
-├── styles/               # Global styles
-├── locales/              # Localization files
-├── next.config.mjs       # Next.js configuration
-├── package.json          # Project dependencies and scripts
-└── tsconfig.json         # TypeScript configuration
+├── app/                  # المسارات والصفحات الرئيسية للتطبيق
+├── components/           # مكونات واجهة المستخدم القابلة لإعادة الاستخدام
+├── lib/                  # وظائف ومرافق مساعدة
+├── public/               # الأصول الثابتة (الصور والخطوط وما إلى ذلك)
+├── styles/               # الأنماط العامة
+├── locales/              # ملفات التعريب
+├── next.config.mjs       # تكوين Next.js
+├── package.json          # اعتماديات المشروع والبرامج النصية
+└── tsconfig.json         # تكوين TypeScript
 ```
