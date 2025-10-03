@@ -1,8 +1,8 @@
 "use client"
 
 import type React from "react"
-
-import { useState } from "react"
+import { useState, useRef } from "react"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -14,7 +14,7 @@ import type { Product } from "@/lib/types"
 
 interface ProductFormProps {
   product?: Product
-  onSubmit: (data: Partial<Product>) => void
+  onSubmit: (data: Partial<Product>, imageFile?: File) => void
   onCancel: () => void
 }
 
@@ -25,12 +25,26 @@ export function ProductForm({ product, onSubmit, onCancel }: ProductFormProps) {
     price: product?.price || 0,
     category: product?.category || "",
     stock: product?.stock || 0,
-    image: product?.image || "",
   })
+  const [imagePreview, setImagePreview] = useState(product?.image || null)
+  const [imageFile, setImageFile] = useState<File | undefined>()
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setImageFile(file)
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    onSubmit(formData)
+    onSubmit(formData, imageFile)
   }
 
   return (
@@ -40,6 +54,30 @@ export function ProductForm({ product, onSubmit, onCancel }: ProductFormProps) {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label>صورة المنتج</Label>
+            <div
+              className="w-full h-48 border-2 border-dashed rounded-lg flex items-center justify-center cursor-pointer relative"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              {imagePreview ? (
+                <Image src={imagePreview} alt="معاينة المنتج" layout="fill" objectFit="cover" className="rounded-lg" />
+              ) : (
+                <div className="text-center text-muted-foreground">
+                  <p>اسحب وأفلت الصورة هنا، أو انقر للتحديد</p>
+                  <p className="text-xs">(الحجم الموصى به: 800x800 بكسل)</p>
+                </div>
+              )}
+            </div>
+            <Input
+              ref={fileInputRef}
+              type="file"
+              className="hidden"
+              onChange={handleImageChange}
+              accept="image/png, image/jpeg, image/webp"
+            />
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="nameAr">اسم المنتج</Label>
             <Input
@@ -102,16 +140,6 @@ export function ProductForm({ product, onSubmit, onCancel }: ProductFormProps) {
                 ))}
               </SelectContent>
             </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="image">رابط الصورة</Label>
-            <Input
-              id="image"
-              value={formData.image}
-              onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-              placeholder="/placeholder.svg?height=400&width=400"
-            />
           </div>
 
           <div className="flex gap-2 pt-4">

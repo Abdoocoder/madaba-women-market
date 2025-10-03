@@ -1,22 +1,24 @@
-"use client"
+'use client'
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Package, DollarSign, ShoppingBag, TrendingUp, Plus } from "lucide-react"
-import { Header } from "@/components/layout/header"
 import { StatsCard } from "@/components/seller/stats-card"
 import { ProductForm } from "@/components/seller/product-form"
 import { ProductList } from "@/components/seller/product-list"
+import { SalesChart } from "@/components/seller/sales-chart"
+import { OrderList } from "@/components/seller/order-list"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useAuth } from "@/lib/auth-context"
-import { MOCK_PRODUCTS } from "@/lib/mock-data"
 import type { Product } from "@/lib/types"
 
 export default function SellerDashboardPage() {
   const { user } = useAuth()
   const router = useRouter()
   const [products, setProducts] = useState<Product[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [activeTab, setActiveTab] = useState("products")
   const [showForm, setShowForm] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | undefined>()
 
@@ -25,126 +27,178 @@ export default function SellerDashboardPage() {
       router.push("/login")
       return
     }
-    // Filter products for this seller
-    setProducts(MOCK_PRODUCTS.filter((p) => p.sellerId === user.id))
-  }, [user, router])
 
-  const handleAddProduct = (data: Partial<Product>) => {
-    const newProduct: Product = {
-      id: Date.now().toString(),
-      name: data.nameAr || "",
-      nameAr: data.nameAr || "",
-      description: data.descriptionAr || "",
-      descriptionAr: data.descriptionAr || "",
-      price: data.price || 0,
-      category: data.category || "",
-      image: data.image || "/placeholder.svg?height=400&width=400",
-      sellerId: user?.id || "",
-      sellerName: user?.name || "",
-      stock: data.stock || 0,
-      featured: false,
-      approved: false,
-      createdAt: new Date(),
+    const fetchProducts = async () => {
+      try {
+        setIsLoading(true)
+        const response = await fetch('/api/products');
+        const allProducts = await response.json();
+        // Client-side filter for this seller's products
+        setProducts(allProducts.filter((p: Product) => p.sellerId === user.id));
+      } catch (error) {
+        console.error("Failed to fetch products:", error);
+        // Handle error (e.g., show a toast notification)
+      } finally {
+        setIsLoading(false)
+      }
     }
-    setProducts([...products, newProduct])
-    setShowForm(false)
-    alert("تم إضافة المنتج بنجاح! سيتم مراجعته من قبل الإدارة.")
+
+    fetchProducts();
+  }, [user, router]);
+
+
+  const handleAddProduct = async (data: Partial<Product>, imageFile?: File) => {
+    if (!user) return
+
+    const formData = new FormData();
+    Object.entries(data).forEach(([key, value]) => {
+      formData.append(key, String(value));
+    });
+    if (imageFile) {
+      formData.append('image', imageFile);
+    }
+
+    try {
+      const response = await fetch('/api/products', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create product');
+      }
+
+      const newProduct = await response.json();
+      setProducts([...products, newProduct]);
+      setShowForm(false);
+      setActiveTab("products");
+      alert("تم إضافة المنتج بنجاح!");
+
+    } catch (error) {
+      console.error(error);
+      alert("حدث خطأ أثناء إضافة المنتج.");
+    }
   }
 
-  const handleEditProduct = (data: Partial<Product>) => {
+  const handleEditProduct = async (data: Partial<Product>, imageFile?: File) => {
     if (!editingProduct) return
-    setProducts(
-      products.map((p) =>
-        p.id === editingProduct.id
-          ? {
-              ...p,
-              nameAr: data.nameAr || p.nameAr,
-              descriptionAr: data.descriptionAr || p.descriptionAr,
-              price: data.price || p.price,
-              category: data.category || p.category,
-              stock: data.stock || p.stock,
-              image: data.image || p.image,
-            }
-          : p,
-      ),
-    )
-    setEditingProduct(undefined)
-    setShowForm(false)
-    alert("تم تحديث المنتج بنجاح!")
-  }
+    
+    // Note: The backend PUT endpoint doesn't support image updates (multipart/form-data) yet.
+    // We are only sending JSON data for now.
+    if (imageFile) {
+        console.warn("Image updates are not yet supported on edit. Feature coming soon!");
+    }
 
-  const handleDeleteProduct = (productId: string) => {
-    if (confirm("هل أنت متأكد من حذف هذا المنتج؟")) {
-      setProducts(products.filter((p) => p.id !== productId))
+    try {
+        const response = await fetch(`/api/products/${editingProduct.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to update product');
+        }
+
+        const updatedProduct = await response.json();
+        setProducts(products.map((p) => (p.id === updatedProduct.id ? updatedProduct : p)));
+        setEditingProduct(undefined);
+        setShowForm(false);
+        setActiveTab("products");
+        alert("تم تحديث المنتج بنجاح!");
+
+    } catch (error) {
+        console.error(error);
+        alert("حدث خطأ أثناء تحديث المنتج.");
     }
   }
 
-  const handleEdit = (product: Product) => {
+  const handleDeleteProduct = async (productId: string) => {
+    if (!confirm("هل أنت متأكد من حذف هذا المنتج؟")) return;
+
+    try {
+        const response = await fetch(`/api/products/${productId}`, {
+            method: 'DELETE',
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to delete product');
+        }
+
+        setProducts(products.filter((p) => p.id !== productId));
+        alert("تم حذف المنتج بنجاح!")
+    } catch (error) {
+        console.error(error);
+        alert("حدث خطأ أثناء حذف المنتج.")
+    }
+  }
+
+  const handleShowForm = (product?: Product) => {
     setEditingProduct(product)
-    setShowForm(true)
+    setActiveTab("form")
   }
 
   const handleCancelForm = () => {
-    setShowForm(false)
     setEditingProduct(undefined)
+    setActiveTab("products")
   }
 
   if (!user || user.role !== "seller") {
-    return null
+    return null // Or a loading spinner
   }
 
-  const totalProducts = products.length
-  const approvedProducts = products.filter((p) => p.approved).length
-  const totalRevenue = products.reduce((sum, p) => sum + p.price * (10 - p.stock), 0) // Mock calculation
+  // Mock calculations - replace with real data from API
+  const totalRevenue = products.reduce((sum, p) => sum + p.price * (10 - p.stock), 0)
   const totalStock = products.reduce((sum, p) => sum + p.stock, 0)
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      <main className="container py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">لوحة البائع</h1>
-          <p className="text-muted-foreground">مرحباً {user.name}</p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <StatsCard title="إجمالي المنتجات" value={totalProducts} icon={Package} />
-          <StatsCard title="المنتجات المعتمدة" value={approvedProducts} icon={ShoppingBag} />
-          <StatsCard title="إجمالي المبيعات" value={`${totalRevenue} ر.س`} icon={DollarSign} />
-          <StatsCard title="المخزون الكلي" value={totalStock} icon={TrendingUp} />
-        </div>
-
-        <Tabs defaultValue="products" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="products">منتجاتي</TabsTrigger>
-            <TabsTrigger value="add">إضافة منتج</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="products" className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold">قائمة المنتجات</h2>
-              <Button onClick={() => setShowForm(true)}>
-                <Plus className="ml-2 h-4 w-4" />
-                إضافة منتج جديد
-              </Button>
+    <main className="container mx-auto py-8 px-4 md:px-6">
+        <div className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center">
+            <div>
+                <h1 className="text-3xl font-bold tracking-tight">لوحة تحكم البائع</h1>
+                <p className="text-muted-foreground mt-1">أهلاً بك مجدداً، {user.name}!</p>
             </div>
+            <Button onClick={() => handleShowForm()} className="mt-4 sm:mt-0">
+                <Plus className="mr-2 h-4 w-4" />
+                إضافة منتج جديد
+            </Button>
+        </div>
 
-            {showForm ? (
-              <ProductForm
-                product={editingProduct}
-                onSubmit={editingProduct ? handleEditProduct : handleAddProduct}
-                onCancel={handleCancelForm}
-              />
-            ) : (
-              <ProductList products={products} onEdit={handleEdit} onDelete={handleDeleteProduct} />
-            )}
-          </TabsContent>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+            <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full h-auto">
+                <TabsTrigger value="products">منتجاتي</TabsTrigger>
+                <TabsTrigger value="orders">الطلبات</TabsTrigger>
+                <TabsTrigger value="stats">الإحصائيات</TabsTrigger>
+                <TabsTrigger value="form" className={editingProduct ? 'text-yellow-500' : ''} disabled>{editingProduct ? 'تعديل المنتج' : 'إضافة منتج'}</TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="add">
-            <ProductForm onSubmit={handleAddProduct} onCancel={() => {}} />
-          </TabsContent>
+            <TabsContent value="products">
+                {isLoading ? <p>جاري تحميل المنتجات...</p> : <ProductList products={products} onEdit={handleShowForm} onDelete={handleDeleteProduct} />}
+            </TabsContent>
+
+            <TabsContent value="orders">
+                <OrderList />
+            </TabsContent>
+
+            <TabsContent value="stats">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                    <StatsCard title="إجمالي المنتجات" value={products.length} icon={Package} />
+                    <StatsCard title="المنتجات المعتمدة" value={products.filter((p) => p.approved).length} icon={ShoppingBag} />
+                    <StatsCard title="إجمالي الإيرادات" value={`${totalRevenue.toFixed(2)} د.أ`} icon={DollarSign} description="+20.1% من الشهر الماضي" />
+                    <StatsCard title="المخزون الكلي" value={totalStock} icon={TrendingUp} />
+                </div>
+                <SalesChart />
+            </TabsContent>
+
+            <TabsContent value="form">
+                <ProductForm
+                    key={editingProduct?.id || 'new'}
+                    product={editingProduct}
+                    onSubmit={editingProduct ? handleEditProduct : handleAddProduct}
+                    onCancel={handleCancelForm}
+                />
+            </TabsContent>
         </Tabs>
-      </main>
-    </div>
+    </main>
   )
 }
