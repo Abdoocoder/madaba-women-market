@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { ShoppingCart, User, LogOut, LayoutDashboard } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -20,8 +21,14 @@ interface HeaderProps {
 }
 
 export function Header({ cartItemCount = 0 }: HeaderProps) {
-  const { user, logout } = useAuth()
+  const { user, logout, isLoading } = useAuth()
   const { t } = useLocale()
+  const router = useRouter()
+
+  const handleLogout = async () => {
+    await logout()
+    router.push("/")
+  }
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -48,7 +55,9 @@ export function Header({ cartItemCount = 0 }: HeaderProps) {
             </Link>
           )}
 
-          {user ? (
+          {isLoading ? (
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          ) : user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon">
@@ -78,7 +87,7 @@ export function Header({ cartItemCount = 0 }: HeaderProps) {
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={logout} className="cursor-pointer">
+                <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
                   <LogOut className="ml-2 h-4 w-4" />
                   {t("header.logout")}
                 </DropdownMenuItem>

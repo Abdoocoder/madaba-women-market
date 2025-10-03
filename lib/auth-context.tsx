@@ -1,77 +1,102 @@
 "use client"
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
+import { 
+  onAuthStateChanged, 
+  signInWithEmailAndPassword, 
+  signOut,
+  GoogleAuthProvider,
+  signInWithPopup,
+  sendPasswordResetEmail
+} from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { auth, db } from "./firebase";
 import type { User } from "./types"
 
 interface AuthContextType {
   user: User | null
   login: (email: string, password: string) => Promise<boolean>
+  signInWithGoogle: () => Promise<boolean>
   logout: () => void
+  sendPasswordReset: (email: string) => Promise<boolean>
   isLoading: boolean
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
-
-// Mock users for demo
-const MOCK_USERS: (User & { password: string })[] = [
-  {
-    id: "1",
-    email: "customer@seydaty.com",
-    password: "customer123",
-    name: "فاطمة أحمد",
-    role: "customer",
-    createdAt: new Date(),
-  },
-  {
-    id: "2",
-    email: "seller@seydaty.com",
-    password: "seller123",
-    name: "نورة محمد",
-    role: "seller",
-    createdAt: new Date(),
-  },
-  {
-    id: "3",
-    email: "admin@seydaty.com",
-    password: "admin123",
-    name: "سارة علي",
-    role: "admin",
-    createdAt: new Date(),
-  },
-]
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // Check for stored user session
-    const storedUser = localStorage.getItem("seydaty_user")
-    if (storedUser) {
-      setUser(JSON.parse(storedUser))
-    }
-    setIsLoading(false)
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        // User is signed in, see docs for a list of available properties
+        // https://firebase.google.com/docs/reference/js/firebase.User
+        const userDocRef = doc(db, "users", firebaseUser.uid);
+        const userDocSnap = await getDoc(userDocRef);
+
+        if (userDocSnap.exists()) {
+          const userData = userDocSnap.data() as User;
+          setUser(userData);
+        } else {
+          // Handle case where user exists in Auth but not in Firestore
+          // You might want to create a new user document here
+          console.error("User document not found in Firestore");
+          setUser(null);
+        }
+      } else {
+        // User is signed out
+        setUser(null)
+      }
+      setIsLoading(false)
+    })
+
+    // Cleanup subscription on unmount
+    return () => unsubscribe()
   }, [])
 
   const login = async (email: string, password: string): Promise<boolean> => {
-    const foundUser = MOCK_USERS.find((u) => u.email === email && u.password === password)
-
-    if (foundUser) {
-      const { password: _, ...userWithoutPassword } = foundUser
-      setUser(userWithoutPassword)
-      localStorage.setItem("seydaty_user", JSON.stringify(userWithoutPassword))
-      return true
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      return true;
+    } catch (error) {
+      console.error("Error logging in:", error);
+      return false;
     }
-
-    return false
   }
 
-  const logout = () => {
-    setUser(null)
-    localStorage.removeItem("seydaty_user")
-  }
+  const signInWithGoogle = async (): Promise<boolean> => {
+    const provider = new GoogleAuthProvider();
+    try {
+      await signInWithPopup(auth, provider);
+      // You might want to check if the user is new and create a document in Firestore
+      return true;
+    } catch (error) {
+      console.error("Error signing in with Google:", error);
+      return false;
+    }
+  };
 
-  return <AuthContext.Provider value={{ user, login, logout, isLoading }}>{children}</AuthContext.Provider>
+  const logout = async () => {
+    await signOut(auth);
+  }
+  
+  const sendPasswordReset = async (email: string): Promise<boolean> => {
+    try {
+      await sendPasswordResetEmail(auth, email);
+      return true;
+    } catch (error) {
+      console.error("Error sending password reset email:", error);
+      return false;
+    }
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, login, signInWithGoogle, logout, sendPasswordReset, isLoading }}>
+      {children}
+    </AuthContext.Provider>
+  )
 }
 
 export function useAuth() {
