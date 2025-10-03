@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Cairo } from "next/font/google";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "@/lib/auth-context";
+import { CartProvider } from "@/lib/cart-context";
+import { LocaleProvider } from "@/lib/locale-context";
 import "./globals.css";
 
 const cairo = Cairo({ subsets: ["arabic", "latin"] });
@@ -22,8 +24,12 @@ export default function RootLayout({
       </head>
       <body className={`${cairo.className} flex flex-col min-h-screen`}>
         <AuthProvider>
-          <Toaster position="bottom-center" />
-          <div className="flex-grow">{children}</div>
+          <CartProvider>
+            <LocaleProvider>
+              <Toaster position="bottom-center" />
+              <div className="flex-grow">{children}</div>
+            </LocaleProvider>
+          </CartProvider>
         </AuthProvider>
       </body>
     </html>
