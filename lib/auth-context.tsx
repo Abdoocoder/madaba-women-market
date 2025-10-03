@@ -113,8 +113,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await setDoc(userDocRef, newUser);
       }
       return true;
-    } catch (error) {
-      console.error("Error signing in with Google:", error);
+    } catch (error: any) {
+      if (error.code === 'auth/popup-closed-by-user') {
+        console.log("Google sign-in popup was closed by the user.");
+      } else {
+        console.error("Error signing in with Google:", error);
+      }
       return false;
     }
   };
