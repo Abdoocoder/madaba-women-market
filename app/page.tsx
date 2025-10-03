@@ -8,7 +8,7 @@ import { FeaturedProducts } from "@/components/products/featured-products"
 import { useCart } from "@/lib/cart-context"
 import { useLocale } from "@/lib/locale-context"
 import { collection, getDocs, query, where } from "firebase/firestore"
-import { db } from "@/lib/firebase"
+import { db } from "@/lib/firebaseClient"
 import type { Product } from "@/lib/types"
 
 export type SortOption = "date-desc" | "price-asc" | "price-desc" | "name-asc"
