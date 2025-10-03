@@ -1,5 +1,7 @@
 "use client"
 
+import type React from "react"
+
 import Image from "next/image"
 import Link from "next/link"
 import { ShoppingCart } from "lucide-react"
@@ -11,6 +13,7 @@ import { useCart } from "@/lib/cart-context"
 import { useAuth } from "@/lib/auth-context"
 import { useLocale } from "@/lib/locale-context"
 import { formatCurrency } from "@/lib/utils"
+import { useRouter } from "next/navigation"
 
 interface ProductCardProps {
   product: Product
@@ -20,9 +23,20 @@ export function ProductCard({ product }: ProductCardProps) {
   const { addToCart } = useCart()
   const { user } = useAuth()
   const { t, language } = useLocale()
+  const router = useRouter()
 
   const handleAddToCart = (e: React.MouseEvent) => {
-    e.preventDefault() // Prevent navigating to product page
+    e.preventDefault()
+
+    if (!user) {
+      router.push("/login")
+      return
+    }
+
+    if (user.role !== "customer") {
+      return
+    }
+
     addToCart(product)
   }
 
@@ -52,7 +66,12 @@ export function ProductCard({ product }: ProductCardProps) {
           </div>
         </CardContent>
         <CardFooter className="p-4 pt-0">
-          {user?.role === "customer" ? (
+          {!user ? (
+            <Button onClick={handleAddToCart} className="w-full" disabled={product.stock === 0}>
+              <ShoppingCart className="ml-2 h-4 w-4" />
+              {product.stock === 0 ? t("product.outOfStock") : t("header.login")}
+            </Button>
+          ) : user.role === "customer" ? (
             <Button onClick={handleAddToCart} className="w-full" disabled={product.stock === 0}>
               <ShoppingCart className="ml-2 h-4 w-4" />
               {product.stock === 0 ? t("product.outOfStock") : t("product.addToCart")}
@@ -60,7 +79,7 @@ export function ProductCard({ product }: ProductCardProps) {
           ) : (
             <Button className="w-full" disabled>
               <ShoppingCart className="ml-2 h-4 w-4" />
-              {t("header.login")}
+              {t("product.addToCart")}
             </Button>
           )}
         </CardFooter>

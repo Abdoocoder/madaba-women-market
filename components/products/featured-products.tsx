@@ -1,19 +1,43 @@
 "use client"
 
-import { useMemo } from "react"
+import { useState, useEffect } from "react"
 import { ProductCard } from "./product-card"
-import { MOCK_PRODUCTS } from "@/lib/mock-data"
 import { useLocale } from "@/lib/locale-context"
+import { collection, getDocs, query, where, limit } from "firebase/firestore"
+import { db } from "@/lib/firebase"
 import type { Product } from "@/lib/types"
 
 export function FeaturedProducts() {
   const { t } = useLocale()
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
-  const featuredProducts = useMemo(() => {
-    return MOCK_PRODUCTS.filter((product) => product.featured && product.approved)
+  useEffect(() => {
+    const fetchFeaturedProducts = async () => {
+      try {
+        const productsQuery = query(
+          collection(db, "products"),
+          where("featured", "==", true),
+          where("approved", "==", true),
+          limit(8),
+        )
+        const querySnapshot = await getDocs(productsQuery)
+        const products = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as Product[]
+        setFeaturedProducts(products)
+      } catch (error) {
+        console.error("Error fetching featured products:", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchFeaturedProducts()
   }, [])
 
-  if (featuredProducts.length === 0) {
+  if (isLoading || featuredProducts.length === 0) {
     return null
   }
 
