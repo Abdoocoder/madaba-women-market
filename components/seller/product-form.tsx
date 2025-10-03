@@ -63,7 +63,7 @@ export function ProductForm({ product, onSubmit, onCancel }: ProductFormProps) {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="price">السعر (ر.س)</Label>
+              <Label htmlFor="price">السعر (د.أ)</Label>
               <Input
                 id="price"
                 type="number"

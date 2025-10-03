@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import type { Product } from "@/lib/types"
+import { formatCurrency } from "@/lib/utils"
 
 interface ProductManagementProps {
   products: Product[]
@@ -46,7 +47,7 @@ export function ProductManagement({ products, onApprove, onReject, onToggleFeatu
                       </div>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4 text-sm">
-                          <span className="font-bold text-primary">{product.price} ر.س</span>
+                          <span className="font-bold text-primary">{formatCurrency(product.price)}</span>
                           <span className="text-muted-foreground">الكمية: {product.stock}</span>
                         </div>
                         <div className="flex gap-2">
@@ -100,7 +101,7 @@ export function ProductManagement({ products, onApprove, onReject, onToggleFeatu
                     </div>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4 text-sm">
-                        <span className="font-bold text-primary">{product.price} ر.س</span>
+                        <span className="font-bold text-primary">{formatCurrency(product.price)}</span>
                         <span className="text-muted-foreground">الكمية: {product.stock}</span>
                       </div>
                       <Button

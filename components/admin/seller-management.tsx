@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import type { Seller } from "@/lib/types"
+import { formatDate, formatCurrency } from "@/lib/utils"
 
 interface SellerManagementProps {
   sellers: Seller[]
@@ -31,9 +32,7 @@ export function SellerManagement({ sellers, onApprove, onReject }: SellerManagem
                         <Mail className="h-3 w-3" />
                         <span>{seller.email}</span>
                       </div>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        تاريخ التسجيل: {seller.joinedAt.toLocaleDateString("ar-SA")}
-                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">تاريخ التسجيل: {formatDate(seller.joinedAt)}</p>
                     </div>
                     <div className="flex gap-2">
                       <Button size="sm" onClick={() => onApprove(seller.id)}>
@@ -71,7 +70,7 @@ export function SellerManagement({ sellers, onApprove, onReject }: SellerManagem
                     </div>
                     <div className="flex gap-4 text-sm mt-2">
                       <span className="text-muted-foreground">المنتجات: {seller.totalProducts}</span>
-                      <span className="text-muted-foreground">المبيعات: {seller.totalSales} ر.س</span>
+                      <span className="text-muted-foreground">المبيعات: {formatCurrency(seller.totalSales)}</span>
                     </div>
                   </div>
                 </div>

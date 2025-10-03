@@ -4,6 +4,7 @@ import { Cairo } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { AuthProvider } from "@/lib/auth-context"
 import { CartProvider } from "@/lib/cart-context"
+import { LocaleProvider } from "@/lib/locale-context"
 import { Suspense } from "react"
 import "./globals.css"
 
@@ -26,11 +27,13 @@ export default function RootLayout({
   return (
     <html lang="ar" dir="rtl">
       <body className={`font-sans ${cairo.variable} antialiased`}>
-        <AuthProvider>
-          <CartProvider>
-            <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
-          </CartProvider>
-        </AuthProvider>
+        <LocaleProvider>
+          <AuthProvider>
+            <CartProvider>
+              <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
+            </CartProvider>
+          </AuthProvider>
+        </LocaleProvider>
         <Analytics />
       </body>
     </html>

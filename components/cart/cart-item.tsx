@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import type { CartItem as CartItemType } from "@/lib/types"
 import { useCart } from "@/lib/cart-context"
+import { formatCurrency } from "@/lib/utils"
 
 interface CartItemProps {
   item: CartItemType
@@ -30,7 +31,7 @@ export function CartItem({ item }: CartItemProps) {
             <h3 className="font-semibold mb-1">{item.product.nameAr}</h3>
             <p className="text-sm text-muted-foreground mb-2">{item.product.descriptionAr}</p>
             <div className="flex items-center justify-between">
-              <span className="text-lg font-bold text-primary">{item.product.price} ر.س</span>
+              <span className="text-lg font-bold text-primary">{formatCurrency(item.product.price)}</span>
               <div className="flex items-center gap-2">
                 <Button
                   variant="outline"

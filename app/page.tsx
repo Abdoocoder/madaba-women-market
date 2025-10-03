@@ -6,11 +6,13 @@ import { ProductCard } from "@/components/products/product-card"
 import { ProductFilters } from "@/components/products/product-filters"
 import { MOCK_PRODUCTS } from "@/lib/mock-data"
 import { useCart } from "@/lib/cart-context"
+import { useLocale } from "@/lib/locale-context"
 
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
   const { totalItems } = useCart()
+  const { t } = useLocale()
 
   const filteredProducts = useMemo(() => {
     return MOCK_PRODUCTS.filter((product) => {
@@ -28,9 +30,9 @@ export default function HomePage() {
       <main className="container py-8">
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-            مرحباً بك في سيدتي ماركت
+            {t("home.welcome")}
           </h1>
-          <p className="text-muted-foreground text-lg">اكتشفي أفضل المنتجات من بائعات موثوقات</p>
+          <p className="text-muted-foreground text-lg">{t("home.subtitle")}</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -48,7 +50,7 @@ export default function HomePage() {
           <div className="lg:col-span-3">
             {filteredProducts.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-muted-foreground text-lg">لا توجد منتجات متاحة</p>
+                <p className="text-muted-foreground text-lg">{t("home.noProducts")}</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">

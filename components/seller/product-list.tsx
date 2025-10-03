@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import type { Product } from "@/lib/types"
+import { formatCurrency } from "@/lib/utils"
 
 interface ProductListProps {
   products: Product[]
@@ -54,7 +55,7 @@ export function ProductList({ products, onEdit, onDelete }: ProductListProps) {
                   </div>
                 </div>
                 <div className="flex items-center gap-4 text-sm">
-                  <span className="font-bold text-primary">{product.price} ر.س</span>
+                  <span className="font-bold text-primary">{formatCurrency(product.price)}</span>
                   <span className="text-muted-foreground">الكمية: {product.stock}</span>
                   <Badge variant={product.approved ? "default" : "secondary"}>
                     {product.approved ? "معتمد" : "قيد المراجعة"}

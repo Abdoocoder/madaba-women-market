@@ -11,7 +11,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useAuth } from "@/lib/auth-context"
+import { useLocale } from "@/lib/locale-context"
 import { Badge } from "@/components/ui/badge"
+import { LanguageSwitcher } from "./language-switcher"
 
 interface HeaderProps {
   cartItemCount?: number
@@ -19,17 +21,20 @@ interface HeaderProps {
 
 export function Header({ cartItemCount = 0 }: HeaderProps) {
   const { user, logout } = useAuth()
+  const { t } = useLocale()
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
           <div className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-            سيدتي ماركت
+            {t("app.name")}
           </div>
         </Link>
 
         <div className="flex items-center gap-4">
+          <LanguageSwitcher />
+
           {user && user.role === "customer" && (
             <Link href="/cart">
               <Button variant="ghost" size="icon" className="relative">
@@ -60,7 +65,7 @@ export function Header({ cartItemCount = 0 }: HeaderProps) {
                   <DropdownMenuItem asChild>
                     <Link href="/seller/dashboard" className="cursor-pointer">
                       <LayoutDashboard className="ml-2 h-4 w-4" />
-                      لوحة البائع
+                      {t("header.sellerDashboard")}
                     </Link>
                   </DropdownMenuItem>
                 )}
@@ -68,20 +73,20 @@ export function Header({ cartItemCount = 0 }: HeaderProps) {
                   <DropdownMenuItem asChild>
                     <Link href="/admin/dashboard" className="cursor-pointer">
                       <LayoutDashboard className="ml-2 h-4 w-4" />
-                      لوحة الإدارة
+                      {t("header.adminDashboard")}
                     </Link>
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={logout} className="cursor-pointer">
                   <LogOut className="ml-2 h-4 w-4" />
-                  تسجيل الخروج
+                  {t("header.logout")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
             <Button asChild>
-              <Link href="/login">تسجيل الدخول</Link>
+              <Link href="/login">{t("header.login")}</Link>
             </Button>
           )}
         </div>

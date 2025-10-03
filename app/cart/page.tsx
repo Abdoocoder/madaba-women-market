@@ -9,6 +9,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Separator } from "@/components/ui/separator"
 import { useCart } from "@/lib/cart-context"
 import { useAuth } from "@/lib/auth-context"
+import { formatCurrency } from "@/lib/utils"
 import { useEffect } from "react"
 
 export default function CartPage() {
@@ -73,7 +74,7 @@ export default function CartPage() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">المجموع الفرعي</span>
-                    <span className="font-medium">{totalPrice} ر.س</span>
+                    <span className="font-medium">{formatCurrency(totalPrice)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">الشحن</span>
@@ -82,7 +83,7 @@ export default function CartPage() {
                   <Separator />
                   <div className="flex justify-between text-lg">
                     <span className="font-semibold">المجموع الكلي</span>
-                    <span className="font-bold text-primary">{totalPrice} ر.س</span>
+                    <span className="font-bold text-primary">{formatCurrency(totalPrice)}</span>
                   </div>
                 </CardContent>
                 <CardFooter>
