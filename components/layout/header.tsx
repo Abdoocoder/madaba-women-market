@@ -18,16 +18,20 @@ import { useLocale } from "@/lib/locale-context"
 import { Badge } from "@/components/ui/badge"
 import { LanguageSwitcher } from "./language-switcher"
 import { useState } from "react"
+import type { User as UserType } from "@/lib/types"
 
 interface HeaderProps {
   cartItemCount?: number
+  user: UserType | null
 }
 
-export function Header({ cartItemCount = 0 }: HeaderProps) {
-  const { user, logout, isLoading } = useAuth()
+export function Header({ cartItemCount = 0, user: initialUser }: HeaderProps) {
+  const { user: authUser, logout, isLoading } = useAuth()
   const { t } = useLocale()
   const router = useRouter()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
+  const user = initialUser ?? authUser
 
   const handleLogout = async () => {
     await logout()
@@ -78,7 +82,7 @@ export function Header({ cartItemCount = 0 }: HeaderProps) {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
                 <div className="px-2 py-1.5">
-                  <p className="text-sm font-medium">{user.name}</p>
+                  <p className="text-sm font-medium">{user.displayName}</p>
                   <p className="text-xs text-muted-foreground">{user.email}</p>
                 </div>
                 <DropdownMenuSeparator />
@@ -150,7 +154,7 @@ export function Header({ cartItemCount = 0 }: HeaderProps) {
             ) : user ? (
                 <>
                 <div className="px-2 py-1.5">
-                    <p className="text-sm font-medium">{user.name}</p>
+                    <p className="text-sm font-medium">{user.displayName}</p>
                     <p className="text-xs text-muted-foreground">{user.email}</p>
                 </div>
                 <Separator />

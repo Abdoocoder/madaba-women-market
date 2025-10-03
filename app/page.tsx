@@ -7,11 +7,15 @@ import { ProductFilters } from "@/components/products/product-filters"
 import { MOCK_PRODUCTS } from "@/lib/mock-data"
 import { useCart } from "@/lib/cart-context"
 import { useLocale } from "@/lib/locale-context"
-import type { Product } from "@/lib/types"
+import type { Product, User } from "@/lib/types"
 
 export type SortOption = "price-asc" | "price-desc" | "date-desc" | "name-asc"
 
-export default function HomePage() {
+interface HomePageProps {
+  user: User | null
+}
+
+export default function HomePage({ user }: HomePageProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [sortOption, setSortOption] = useState<SortOption>("date-desc")
@@ -44,7 +48,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header cartItemCount={totalItems} />
+      <Header cartItemCount={totalItems} user={user} />
       <main className="container py-8">
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
