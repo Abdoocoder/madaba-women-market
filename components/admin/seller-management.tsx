@@ -1,5 +1,5 @@
 "use client"
-import { Check, X, Mail } from "lucide-react"
+import { Check, X, Mail, ShieldAlert, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -10,9 +10,11 @@ interface SellerManagementProps {
   sellers: Seller[]
   onApprove: (sellerId: string) => void
   onReject: (sellerId: string) => void
+  onSuspend: (sellerId: string) => void
+  onDelete: (sellerId: string) => void
 }
 
-export function SellerManagement({ sellers, onApprove, onReject }: SellerManagementProps) {
+export function SellerManagement({ sellers, onApprove, onReject, onSuspend, onDelete }: SellerManagementProps) {
   const pendingSellers = sellers.filter((s) => !s.approved)
   const approvedSellers = sellers.filter((s) => s.approved)
 
@@ -62,7 +64,11 @@ export function SellerManagement({ sellers, onApprove, onReject }: SellerManagem
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
                       <h4 className="font-semibold">{seller.name}</h4>
-                      <Badge>معتمد</Badge>
+                      {seller.suspended ? (
+                        <Badge variant="destructive">معلق</Badge>
+                      ) : (
+                        <Badge>معتمد</Badge>
+                      )}
                     </div>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
                       <Mail className="h-3 w-3" />
@@ -72,6 +78,16 @@ export function SellerManagement({ sellers, onApprove, onReject }: SellerManagem
                       <span className="text-muted-foreground">المنتجات: {seller.totalProducts}</span>
                       <span className="text-muted-foreground">المبيعات: {formatCurrency(seller.totalSales)}</span>
                     </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="outline" onClick={() => onSuspend(seller.id)}>
+                      <ShieldAlert className="ml-1 h-4 w-4" />
+                      {seller.suspended ? "رفع التعليق" : "تعليق"}
+                    </Button>
+                    <Button size="sm" variant="destructive" onClick={() => onDelete(seller.id)}>
+                      <Trash2 className="ml-1 h-4 w-4" />
+                      حذف
+                    </Button>
                   </div>
                 </div>
               </CardContent>

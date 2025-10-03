@@ -23,6 +23,7 @@ export interface Product {
   stock: number
   featured: boolean
   approved: boolean
+  suspended?: boolean
   createdAt: Date
   wishlisted?: boolean
 }
@@ -56,6 +57,7 @@ export interface Seller {
   name: string
   email: string
   approved: boolean
+  suspended?: boolean
   totalSales: number
   totalProducts: number
   joinedAt: Date

@@ -8,43 +8,81 @@ import { StatsCard } from "@/components/seller/stats-card"
 import { SellerManagement } from "@/components/admin/seller-management"
 import { ProductManagement } from "@/components/admin/product-management"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Notification } from "@/components/ui/notification"
 import { useAuth } from "@/lib/auth-context"
 import { MOCK_PRODUCTS, MOCK_SELLERS } from "@/lib/mock-data"
 import type { Product, Seller } from "@/lib/types"
+
+type NotificationState = {
+  message: string;
+  type: 'success' | 'error' | 'info';
+} | null;
 
 export default function AdminDashboardPage() {
   const { user } = useAuth()
   const router = useRouter()
   const [sellers, setSellers] = useState<Seller[]>(MOCK_SELLERS)
   const [products, setProducts] = useState<Product[]>(MOCK_PRODUCTS)
+  const [notification, setNotification] = useState<NotificationState>(null)
 
   useEffect(() => {
     if (!user || user.role !== "admin") {
       router.push("/login")
     }
   }, [user, router])
+  
+  const showNotification = (message: string, type: 'success' | 'error' | 'info') => {
+    setNotification({ message, type });
+    setTimeout(() => {
+      setNotification(null);
+    }, 3000);
+  };
 
   const handleApproveSeller = (sellerId: string) => {
     setSellers(sellers.map((s) => (s.id === sellerId ? { ...s, approved: true } : s)))
-    alert("تم قبول البائع بنجاح!")
+    showNotification("تم قبول البائع بنجاح!", "success")
   }
 
   const handleRejectSeller = (sellerId: string) => {
     if (confirm("هل أنت متأكد من رفض هذا البائع؟")) {
       setSellers(sellers.filter((s) => s.id !== sellerId))
-      alert("تم رفض البائع")
+      showNotification("تم رفض البائع", "error")
+    }
+  }
+
+  const handleSuspendSeller = (sellerId: string) => {
+    setSellers(sellers.map((s) => (s.id === sellerId ? { ...s, suspended: !s.suspended } : s)))
+    showNotification("تم تغيير حالة البائع بنجاح!", "info")
+  }
+
+  const handleDeleteSeller = (sellerId: string) => {
+    if (confirm("هل أنت متأكد من حذف هذا البائع؟ سيتم حذف جميع بياناته.")) {
+      setSellers(sellers.filter((s) => s.id !== sellerId))
+      showNotification("تم حذف البائع بنجاح!", "error")
     }
   }
 
   const handleApproveProduct = (productId: string) => {
     setProducts(products.map((p) => (p.id === productId ? { ...p, approved: true } : p)))
-    alert("تم قبول المنتج بنجاح!")
+    showNotification("تم قبول المنتج بنجاح!", "success")
   }
 
   const handleRejectProduct = (productId: string) => {
     if (confirm("هل أنت متأكد من رفض هذا المنتج؟")) {
       setProducts(products.filter((p) => p.id !== productId))
-      alert("تم رفض المنتج")
+      showNotification("تم رفض المنتج", "error")
+    }
+  }
+
+  const handleSuspendProduct = (productId: string) => {
+    setProducts(products.map((p) => (p.id === productId ? { ...p, suspended: !p.suspended } : p)))
+    showNotification("تم تغيير حالة المنتج بنجاح!", "info")
+  }
+
+  const handleDeleteProduct = (productId: string) => {
+    if (confirm("هل أنت متأكد من حذف هذا المنتج؟")) {
+      setProducts(products.filter((p) => p.id !== productId))
+      showNotification("تم حذف المنتج بنجاح!", "error")
     }
   }
 
@@ -65,6 +103,13 @@ export default function AdminDashboardPage() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
+      {notification && (
+        <Notification
+          message={notification.message}
+          type={notification.type}
+          onClose={() => setNotification(null)}
+        />
+      )}
       <main className="container py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">لوحة الإدارة</h1>
@@ -109,7 +154,13 @@ export default function AdminDashboardPage() {
           </TabsList>
 
           <TabsContent value="sellers">
-            <SellerManagement sellers={sellers} onApprove={handleApproveSeller} onReject={handleRejectSeller} />
+            <SellerManagement 
+              sellers={sellers} 
+              onApprove={handleApproveSeller} 
+              onReject={handleRejectSeller}
+              onSuspend={handleSuspendSeller}
+              onDelete={handleDeleteSeller}
+            />
           </TabsContent>
 
           <TabsContent value="products">
@@ -117,6 +168,8 @@ export default function AdminDashboardPage() {
               products={products}
               onApprove={handleApproveProduct}
               onReject={handleRejectProduct}
+              onSuspend={handleSuspendProduct}
+              onDelete={handleDeleteProduct}
               onToggleFeatured={handleToggleFeatured}
             />
           </TabsContent>

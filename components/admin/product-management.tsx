@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import { Check, X, Star } from "lucide-react"
+import { Check, X, Star, ShieldAlert, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -12,10 +12,12 @@ interface ProductManagementProps {
   products: Product[]
   onApprove: (productId: string) => void
   onReject: (productId: string) => void
+  onSuspend: (productId: string) => void
+  onDelete: (productId: string) => void
   onToggleFeatured: (productId: string) => void
 }
 
-export function ProductManagement({ products, onApprove, onReject, onToggleFeatured }: ProductManagementProps) {
+export function ProductManagement({ products, onApprove, onReject, onSuspend, onDelete, onToggleFeatured }: ProductManagementProps) {
   const pendingProducts = products.filter((p) => !p.approved)
   const approvedProducts = products.filter((p) => p.approved)
 
@@ -90,7 +92,11 @@ export function ProductManagement({ products, onApprove, onReject, onToggleFeatu
                       <div>
                         <div className="flex items-center gap-2">
                           <h4 className="font-semibold">{product.nameAr}</h4>
-                          <Badge>معتمد</Badge>
+                          {product.suspended ? (
+                            <Badge variant="destructive">معلق</Badge>
+                          ) : (
+                            <Badge>معتمد</Badge>
+                          )}
                           {product.featured && (
                             <Badge className="bg-gradient-to-r from-purple-600 to-pink-600">مميز</Badge>
                           )}
@@ -104,14 +110,24 @@ export function ProductManagement({ products, onApprove, onReject, onToggleFeatu
                         <span className="font-bold text-primary">{formatCurrency(product.price)}</span>
                         <span className="text-muted-foreground">الكمية: {product.stock}</span>
                       </div>
-                      <Button
-                        size="sm"
-                        variant={product.featured ? "default" : "outline"}
-                        onClick={() => onToggleFeatured(product.id)}
-                      >
-                        <Star className={`ml-1 h-4 w-4 ${product.featured ? "fill-current" : ""}`} />
-                        {product.featured ? "إلغاء التمييز" : "تمييز"}
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant={product.featured ? "default" : "outline"}
+                          onClick={() => onToggleFeatured(product.id)}
+                        >
+                          <Star className={`ml-1 h-4 w-4 ${product.featured ? "fill-current" : ""}`} />
+                          {product.featured ? "إلغاء التمييز" : "تمييز"}
+                        </Button>
+                         <Button size="sm" variant="outline" onClick={() => onSuspend(product.id)}>
+                          <ShieldAlert className="ml-1 h-4 w-4" />
+                          {product.suspended ? "رفع التعليق" : "تعليق"}
+                        </Button>
+                        <Button size="sm" variant="destructive" onClick={() => onDelete(product.id)}>
+                          <Trash2 className="ml-1 h-4 w-4" />
+                          حذف
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </div>
