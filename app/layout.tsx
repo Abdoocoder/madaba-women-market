@@ -11,6 +11,7 @@ const cairo = Cairo({ subsets: ["arabic", "latin"] });
 export const metadata: Metadata = {
   title: "Sayidati Market",
   description: "An e-commerce platform for women's products",
+    generator: 'v0.app'
 };
 
 export default function RootLayout({

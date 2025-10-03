@@ -27,15 +27,15 @@
 ### التثبيت
 
 1.  Clone the repository:
-    ```bash
+    \`\`\`bash
     git clone <repository-url>
-    ```
+    \`\`\`
 2.  Navigate to the project directory:
-    ```bash
+    \`\`\`bash
     cd <project-directory>
-    ```
+    \`\`\`
 3.  Install the dependencies:
-    ```bash
+    \`\`\`bash
     pnpm install
     \`\`\`
 
@@ -73,4 +73,4 @@ pnpm dev
 ├── next.config.mjs       # Next.js configuration
 ├── package.json          # Project dependencies and scripts
 └── tsconfig.json         # TypeScript configuration
-```
+\`\`\`
