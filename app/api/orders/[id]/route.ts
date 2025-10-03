@@ -1,6 +1,7 @@
 'use server'
 
-import { NextResponse } from 'next/server'
+import { NextResponse, NextRequest } from 'next/server'
+import { getAuthenticatedUser } from '@/lib/server-auth'
 
 // This state is not shared with other files. A real database is needed for consistency.
 let MOCK_ORDERS = [
@@ -55,38 +56,26 @@ let MOCK_ORDERS = [
  * @swagger
  * /api/orders/{id}:
  *   put:
- *     description: Updates the status of an order
- *     parameters:
- *       - name: id
- *         in: path
- *         required: true
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               status: { type: 'string', enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'] }
+ *     description: Updates the status of an order for the authenticated seller.
  *     responses:
  *       200:
  *         description: The updated order.
  *       400:
  *         description: Bad request (e.g., missing status).
  *       401:
- *         description: Unauthorized (user does not own this order).
+ *         description: Unauthorized.
  *       404:
- *         description: Order not found.
+ *         description: Order not found or access denied.
  */
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+    const user = await getAuthenticatedUser(request);
+    if (!user || user.role !== 'seller') {
+        return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
+
     try {
         const orderId = params.id;
         const { status } = await request.json();
-
-        // In a real app, get sellerId from session
-        const sellerId = 'user-2'; 
 
         if (!status) {
             return NextResponse.json({ message: 'Status is required' }, { status: 400 });
@@ -98,12 +87,11 @@ export async function PUT(request: Request, { params }: { params: { id: string }
             return NextResponse.json({ message: 'Order not found' }, { status: 404 });
         }
 
-        // Authorization: Check if the order belongs to the seller trying to update it
-        if (MOCK_ORDERS[orderIndex].sellerId !== sellerId) {
-             return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+        // Authorization check: Does the order belong to the authenticated seller?
+        if (MOCK_ORDERS[orderIndex].sellerId !== user.uid) {
+            return NextResponse.json({ message: 'Order not found or access denied' }, { status: 404 });
         }
 
-        // Update the order status in our mock database
         MOCK_ORDERS[orderIndex].status = status;
 
         return NextResponse.json(MOCK_ORDERS[orderIndex]);

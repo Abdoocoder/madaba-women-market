@@ -4,7 +4,13 @@ import { useState, useEffect } from 'react'
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useLocale } from '@/lib/locale-context'
+import { useAuth } from '@/lib/auth-context' // Import the auth hook
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+
+// Helper to create authorization headers
+const createAuthHeaders = (token: string) => ({
+    'Authorization': `Bearer ${token}`,
+});
 
 // Define the structure of the data we expect from the API
 interface SalesData {
@@ -14,6 +20,7 @@ interface SalesData {
 
 export function SalesChart() {
   const { t, language } = useLocale()
+  const { token } = useAuth() // Get the token
   const [monthlyData, setMonthlyData] = useState<SalesData[]>([])
   const [dailyData, setDailyData] = useState<SalesData[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -21,9 +28,17 @@ export function SalesChart() {
 
   useEffect(() => {
     const fetchStats = async () => {
+      if (!token) {
+        setIsLoading(false);
+        setError('Authentication token not found.');
+        return;
+      }
+
       try {
         setIsLoading(true)
-        const response = await fetch('/api/stats')
+        const response = await fetch('/api/stats', {
+            headers: createAuthHeaders(token),
+        })
         if (!response.ok) {
           throw new Error('Failed to fetch sales statistics')
         }
@@ -38,7 +53,7 @@ export function SalesChart() {
     }
 
     fetchStats()
-  }, [])
+  }, [token]) // Re-run if the token changes
 
   const renderChart = (data: SalesData[], yAxisLabel: string) => (
     <ResponsiveContainer width="100%" height={350}>

@@ -13,42 +13,50 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useAuth } from "@/lib/auth-context"
 import type { Product } from "@/lib/types"
 
+// Helper to create authorization headers
+const createAuthHeaders = (token: string) => ({
+    'Authorization': `Bearer ${token}`,
+});
+
 export default function SellerDashboardPage() {
-  const { user } = useAuth()
+  const { user, token } = useAuth()
   const router = useRouter()
   const [products, setProducts] = useState<Product[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [activeTab, setActiveTab] = useState("products")
-  const [showForm, setShowForm] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | undefined>()
 
   useEffect(() => {
-    if (!user || user.role !== "seller") {
-      router.push("/login")
-      return
+    if (!user || user.role !== "seller" || !token) {
+      router.push("/login");
+      return;
     }
 
     const fetchProducts = async () => {
       try {
-        setIsLoading(true)
-        const response = await fetch('/api/products');
-        const allProducts = await response.json();
-        // Client-side filter for this seller's products
-        setProducts(allProducts.filter((p: Product) => p.sellerId === user.id));
+        setIsLoading(true);
+        const response = await fetch('/api/products', {
+            headers: createAuthHeaders(token),
+        });
+        if (!response.ok) {
+            throw new Error('Failed to fetch products');
+        }
+        const sellerProducts = await response.json();
+        // No more client-side filtering needed!
+        setProducts(sellerProducts);
       } catch (error) {
         console.error("Failed to fetch products:", error);
-        // Handle error (e.g., show a toast notification)
       } finally {
         setIsLoading(false)
       }
     }
 
     fetchProducts();
-  }, [user, router]);
+  }, [user, token, router]);
 
 
   const handleAddProduct = async (data: Partial<Product>, imageFile?: File) => {
-    if (!user) return
+    if (!token) return;
 
     const formData = new FormData();
     Object.entries(data).forEach(([key, value]) => {
@@ -61,6 +69,7 @@ export default function SellerDashboardPage() {
     try {
       const response = await fetch('/api/products', {
         method: 'POST',
+        headers: createAuthHeaders(token),
         body: formData,
       });
 
@@ -70,7 +79,7 @@ export default function SellerDashboardPage() {
 
       const newProduct = await response.json();
       setProducts([...products, newProduct]);
-      setShowForm(false);
+      setEditingProduct(undefined);
       setActiveTab("products");
       alert("تم إضافة المنتج بنجاح!");
 
@@ -80,19 +89,16 @@ export default function SellerDashboardPage() {
     }
   }
 
-  const handleEditProduct = async (data: Partial<Product>, imageFile?: File) => {
-    if (!editingProduct) return
-    
-    // Note: The backend PUT endpoint doesn't support image updates (multipart/form-data) yet.
-    // We are only sending JSON data for now.
-    if (imageFile) {
-        console.warn("Image updates are not yet supported on edit. Feature coming soon!");
-    }
+  const handleEditProduct = async (data: Partial<Product>) => {
+    if (!editingProduct || !token) return
 
     try {
         const response = await fetch(`/api/products/${editingProduct.id}`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                ...createAuthHeaders(token),
+                'Content-Type': 'application/json' 
+            },
             body: JSON.stringify(data),
         });
 
@@ -103,7 +109,6 @@ export default function SellerDashboardPage() {
         const updatedProduct = await response.json();
         setProducts(products.map((p) => (p.id === updatedProduct.id ? updatedProduct : p)));
         setEditingProduct(undefined);
-        setShowForm(false);
         setActiveTab("products");
         alert("تم تحديث المنتج بنجاح!");
 
@@ -114,11 +119,12 @@ export default function SellerDashboardPage() {
   }
 
   const handleDeleteProduct = async (productId: string) => {
-    if (!confirm("هل أنت متأكد من حذف هذا المنتج؟")) return;
+    if (!token || !confirm("هل أنت متأكد من حذف هذا المنتج؟")) return;
 
     try {
         const response = await fetch(`/api/products/${productId}`, {
             method: 'DELETE',
+            headers: createAuthHeaders(token),
         });
 
         if (!response.ok) {

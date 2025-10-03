@@ -1,82 +1,75 @@
 'use server'
 
-import { NextResponse } from 'next/server'
+import { NextResponse, NextRequest } from 'next/server'
 import { MOCK_PRODUCTS } from '@/lib/mock-data'
 import type { Product } from '@/lib/types'
+import { getAuthenticatedUser } from '@/lib/server-auth'
 
-// This is a mock database. In a real application, you would use a database.
-// Note: This state is NOT shared with other route files. 
-// A real database is required to have consistent state across API endpoints.
 let products: Product[] = MOCK_PRODUCTS;
+
+async function authorizeSeller(request: NextRequest, productId: string): Promise<{user: any, productIndex: number} | NextResponse> {
+    const user = await getAuthenticatedUser(request);
+    if (!user || user.role !== 'seller') {
+        return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
+
+    const productIndex = products.findIndex((p) => p.id === productId);
+    if (productIndex === -1) {
+        return NextResponse.json({ message: 'Product not found' }, { status: 404 });
+    }
+
+    // Authorization check: Does the product belong to the authenticated seller?
+    if (products[productIndex].sellerId !== user.uid) {
+        // Return 404 to avoid leaking information about which products exist.
+        return NextResponse.json({ message: 'Product not found or access denied' }, { status: 404 });
+    }
+    
+    return { user, productIndex };
+}
+
 
 /**
  * @swagger
  * /api/products/{id}:
  *   get:
- *     description: Returns a single product by ID
- *     parameters:
- *       - name: id
- *         in: path
- *         required: true
- *         schema:
- *           type: string
+ *     description: Returns a single product by ID, owned by the seller.
  *     responses:
  *       200:
  *         description: The requested product.
+ *       401:
+ *         description: Unauthorized.
  *       404:
- *         description: Product not found.
+ *         description: Product not found or access denied.
  */
-export async function GET(request: Request, { params }: { params: { id: string } }) {
-  const productId = params.id
-  const product = products.find((p) => p.id === productId)
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+    const authResult = await authorizeSeller(request, params.id);
+    if (authResult instanceof NextResponse) return authResult;
 
-  if (product) {
-    return NextResponse.json(product)
-  } else {
-    return NextResponse.json({ message: 'Product not found' }, { status: 404 })
-  }
+    const { productIndex } = authResult;
+    return NextResponse.json(products[productIndex]);
 }
 
 /**
  * @swagger
  * /api/products/{id}:
  *   put:
- *     description: Updates an existing product
- *     parameters:
- *       - name: id
- *         in: path
- *         required: true
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               nameAr: { type: 'string' }
- *               descriptionAr: { type: 'string' }
- *               price: { type: 'number' }
+ *     description: Updates an existing product owned by the seller.
  *     responses:
  *       200:
  *         description: The updated product.
+ *       401:
+ *         description: Unauthorized.
  *       404:
- *         description: Product not found.
+ *         description: Product not found or access denied.
  */
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+    const authResult = await authorizeSeller(request, params.id);
+    if (authResult instanceof NextResponse) return authResult;
+
+    const { productIndex } = authResult;
+
     try {
-        const productId = params.id
-        const productIndex = products.findIndex((p) => p.id === productId)
-
-        if (productIndex === -1) {
-            return NextResponse.json({ message: 'Product not found' }, { status: 404 })
-        }
-
-        // For this example, we'll assume a JSON body similar to the POST request.
-        // A real implementation would also need to handle multipart/form-data for image updates.
         const body = await request.json();
-
         const originalProduct = products[productIndex];
         const updatedProduct = {
             ...originalProduct,
@@ -85,11 +78,11 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         };
 
         products[productIndex] = updatedProduct;
+        return NextResponse.json(updatedProduct);
 
-        return NextResponse.json(updatedProduct)
     } catch (error) {
-        console.error('Error updating product:', error)
-        return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 })
+        console.error(`Error updating product ${params.id}:`, error);
+        return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
     }
 }
 
@@ -97,27 +90,21 @@ export async function PUT(request: Request, { params }: { params: { id: string }
  * @swagger
  * /api/products/{id}:
  *   delete:
- *     description: Deletes a product by ID
- *     parameters:
- *       - name: id
- *         in: path
- *         required: true
- *         schema:
- *           type: string
+ *     description: Deletes a product by ID owned by the seller.
  *     responses:
  *       200:
  *         description: Deletion successful.
+ *       401:
+ *         description: Unauthorized.
  *       404:
- *         description: Product not found.
+ *         description: Product not found or access denied.
  */
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
-    const productId = params.id
-    const productIndex = products.findIndex((p) => p.id === productId)
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+    const authResult = await authorizeSeller(request, params.id);
+    if (authResult instanceof NextResponse) return authResult;
 
-    if (productIndex !== -1) {
-        products.splice(productIndex, 1)
-        return NextResponse.json({ message: 'Product deleted successfully' })
-    } else {
-        return NextResponse.json({ message: 'Product not found' }, { status: 404 })
-    }
+    const { productIndex } = authResult;
+
+    products.splice(productIndex, 1);
+    return NextResponse.json({ message: 'Product deleted successfully' });
 }

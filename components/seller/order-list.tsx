@@ -13,6 +13,7 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useLocale } from '@/lib/locale-context'
+import { useAuth } from '@/lib/auth-context' // Import the auth hook
 
 // Define the types for our order and its status
 type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
@@ -24,17 +25,31 @@ interface Order {
   status: OrderStatus;
 }
 
+// Helper to create authorization headers
+const createAuthHeaders = (token: string) => ({
+    'Authorization': `Bearer ${token}`,
+});
+
 export function OrderList() {
   const { t } = useLocale()
+  const { token } = useAuth() // Get the token
   const [orders, setOrders] = useState<Order[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchOrders = async () => {
+      if (!token) {
+        setIsLoading(false);
+        setError('Authentication token not found.');
+        return;
+      }
+
       try {
         setIsLoading(true)
-        const response = await fetch('/api/orders')
+        const response = await fetch('/api/orders', {
+            headers: createAuthHeaders(token),
+        })
         if (!response.ok) {
           throw new Error('Failed to fetch orders')
         }
@@ -48,32 +63,32 @@ export function OrderList() {
     }
 
     fetchOrders()
-  }, [])
+  }, [token]) // Re-run effect if token changes
 
   const handleStatusChange = async (orderId: string, newStatus: OrderStatus) => {
-    // Optimistically update the UI
+    if (!token) return; 
+
     const originalOrders = [...orders]
     const updatedOrders = orders.map((order) =>
       order.id === orderId ? { ...order, status: newStatus } : order
     )
     setOrders(updatedOrders)
 
-    // Make the API call
     try {
       const response = await fetch(`/api/orders/${orderId}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+            ...createAuthHeaders(token),
+            'Content-Type': 'application/json' 
+        },
         body: JSON.stringify({ status: newStatus }),
       })
 
       if (!response.ok) {
-        // If the API call fails, revert the change
         setOrders(originalOrders)
         console.error('Failed to update order status')
-        // You might want to show a toast notification to the user here
       }
     } catch (err) {
-      // Revert on network error
       setOrders(originalOrders)
       console.error('An error occurred while updating status:', err)
     }
@@ -84,7 +99,7 @@ export function OrderList() {
       case 'pending': return 'destructive'
       case 'processing': return 'secondary'
       case 'shipped': return 'default'
-      case 'delivered': return 'success' // Assuming you have a 'success' variant for Badge
+      case 'delivered': return 'success'
       case 'cancelled': return 'outline'
       default: return 'outline'
     }

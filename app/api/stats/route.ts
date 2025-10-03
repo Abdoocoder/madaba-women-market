@@ -1,6 +1,7 @@
 'use server'
 
-import { NextResponse } from 'next/server'
+import { NextResponse, NextRequest } from 'next/server'
+import { getAuthenticatedUser } from '@/lib/server-auth'
 
 // Mock Data for Orders. In a real app, this would be in a database.
 // This should be consistent with the data in /api/orders routes.
@@ -28,16 +29,14 @@ const MONTH_NAMES_AR = ["يناير", "فبراير", "مارس", "أبريل", 
  *       401:
  *         description: Unauthorized.
  */
-export async function GET(request: Request) {
-    // In a real app, you would get the user ID from the session/token.
-    const sellerId = 'user-2';
-
-    if (!sellerId) {
+export async function GET(request: NextRequest) {
+    const user = await getAuthenticatedUser(request);
+    if (!user || user.role !== 'seller') {
         return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
     const sellerOrders = MOCK_ORDERS.filter(order => 
-        order.sellerId === sellerId && (order.status === 'shipped' || order.status === 'delivered')
+        order.sellerId === user.uid && (order.status === 'shipped' || order.status === 'delivered')
     );
 
     // --- Calculate Monthly Sales --- 

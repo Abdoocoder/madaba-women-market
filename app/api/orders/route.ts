@@ -1,6 +1,7 @@
 'use server'
 
-import { NextResponse } from 'next/server'
+import { NextResponse, NextRequest } from 'next/server'
+import { getAuthenticatedUser } from '@/lib/server-auth'
 
 // Mock Data for Orders. In a real app, this would be in a database.
 const MOCK_ORDERS = [
@@ -62,16 +63,13 @@ const MOCK_ORDERS = [
  *       401:
  *         description: Unauthorized.
  */
-export async function GET(request: Request) {
-    // In a real app, you would get the user ID from the session/token.
-    // For now, we'll hardcode it to simulate the logged-in seller.
-    const sellerId = 'user-2';
-
-    if (!sellerId) {
+export async function GET(request: NextRequest) {
+    const user = await getAuthenticatedUser(request);
+    if (!user || user.role !== 'seller') {
         return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
-    const sellerOrders = MOCK_ORDERS.filter(order => order.sellerId === sellerId);
+    const sellerOrders = MOCK_ORDERS.filter(order => order.sellerId === user.uid);
 
     // Sort by most recent date
     sellerOrders.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
