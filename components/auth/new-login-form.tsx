@@ -1,8 +1,12 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
+import toast from "react-hot-toast"
 import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,7 +14,6 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useAuth } from "@/lib/auth-context"
 
-// A simple SVG for Google icon
 const GoogleIcon = () => (
   <svg className="mr-2 h-4 w-4" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M43.6113 20.0833H42V20H24V28H35.303C33.6747 32.6596 29.2235 36 24 36C17.373 36 12 30.627 12 24C12 17.373 17.373 12 24 12C27.0253 12 29.759 13.1233 31.8357 14.9396L37.1213 9.65396C33.5673 6.54456 29.0232 4.5 24 4.5C13.2982 4.5 4.5 13.2982 4.5 24C4.5 34.7018 13.2982 43.5 24 43.5C34.7018 43.5 43.5 34.7018 43.5 24C43.5 22.4939 43.6113 21.2848 43.6113 20.0833Z" fill="#FFC107"/>
@@ -20,15 +23,23 @@ const GoogleIcon = () => (
   </svg>
 );
 
-export function LoginForm() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [error, setError] = useState("")
-  const [message, setMessage] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
+const loginSchema = z.object({
+  email: z.string().email({ message: "البريد الإلكتروني غير صالح" }),
+  password: z.string().min(6, { message: "يجب أن تكون كلمة المرور 6 أحرف على الأقل" }),
+})
+
+export function NewLoginForm() {
   const { user, login, signInWithGoogle, sendPasswordReset } = useAuth()
   const router = useRouter()
-  
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    getValues,
+  } = useForm<z.infer<typeof loginSchema>>({
+    resolver: zodResolver(loginSchema),
+  })
+
   useEffect(() => {
     if (user) {
         switch (user.role) {
@@ -45,53 +56,42 @@ export function LoginForm() {
                 router.push('/');
         }
     }
-}, [user, router]);
+  }, [user, router]);
 
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError("")
-    setMessage("")
-    setIsLoading(true)
-
-    const success = await login(email, password)
-
-    if (!success) {
-      setError("فشلت المصادقة. تحقق من بريدك الإلكتروني وكلمة المرور.")
+  const onSubmit = async (data: z.infer<typeof loginSchema>) => {
+    const toastId = toast.loading("جاري تسجيل الدخول...");
+    const success = await login(data.email, data.password);
+    if (success) {
+      toast.success("تم تسجيل الدخول بنجاح!", { id: toastId });
+    } else {
+      toast.error("فشلت المصادقة. تحقق من بريدك الإلكتروني وكلمة المرور.", { id: toastId });
     }
-    // On success, the useEffect hook will handle the redirect.
-
-    setIsLoading(false)
   }
-
+  
   const handleGoogleSignIn = async () => {
-    setIsLoading(true);
-    setError("");
+    const toastId = toast.loading("جاري تسجيل الدخول باستخدام جوجل...");
     const success = await signInWithGoogle();
-    if (!success) {
-      setError("فشل تسجيل الدخول باستخدام جوجل. حاول مرة أخرى.");
+    if (success) {
+      toast.success("تم تسجيل الدخول بنجاح!", { id: toastId });
+    } else {
+      toast.error("فشل تسجيل الدخول باستخدام جوجل. حاول مرة أخرى.", { id: toastId });
     }
-    // On success, the useEffect hook will handle the redirect.
-    setIsLoading(false);
   };
-
+  
   const handlePasswordReset = async () => {
+    const email = getValues("email");
     if (!email) {
-      setError("الرجاء إدخال بريدك الإلكتروني أولاً لطلب إعادة تعيين كلمة المرور.");
+      toast.error("الرجاء إدخال بريدك الإلكتروني أولاً لطلب إعادة تعيين كلمة المرور.");
       return;
     }
-    setError("");
-    setMessage("");
-    setIsLoading(true);
+    const toastId = toast.loading("جاري إرسال رابط إعادة تعيين كلمة المرور...");
     const success = await sendPasswordReset(email);
     if (success) {
-      setMessage("تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني.");
+      toast.success("تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني.", { id: toastId });
     } else {
-      setError("فشل إرسال بريد إعادة تعيين كلمة المرور. تأكد من صحة البريد الإلكتروني.");
+      toast.error("فشل إرسال بريد إعادة تعيين كلمة المرور. تأكد من صحة البريد الإلكتروني.", { id: toastId });
     }
-    setIsLoading(false);
   };
-
 
   return (
     <Card className="w-full max-w-md mx-auto mt-10">
@@ -100,48 +100,43 @@ export function LoginForm() {
         <CardDescription>مرحباً بك في سيدتي ماركت</CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">البريد الإلكتروني</Label>
             <Input
               id="email"
               type="email"
               placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
+              {...register("email")}
               dir="ltr"
             />
+            {errors.email && <p className="text-sm text-destructive text-center">{errors.email.message}</p>}
           </div>
           <div className="space-y-2">
             <Label htmlFor="password">كلمة المرور</Label>
             <Input
               id="password"
               type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
+              {...register("password")}
               dir="ltr"
             />
+            {errors.password && <p className="text-sm text-destructive text-center">{errors.password.message}</p>}
           </div>
           
-          {error && <p className="text-sm text-destructive text-center">{error}</p>}
-          {message && <p className="text-sm text-green-600 text-center">{message}</p>}
-
           <div className="text-right">
             <Button type="button" variant="link" size="sm" onClick={handlePasswordReset} className="p-0 h-auto">
                 هل نسيت كلمة المرور؟
             </Button>
           </div>
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "جاري التحميل..." : "دخول"}
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? "جاري التحميل..." : "دخول"}
           </Button>
         </form>
         
         <Separator className="my-6">أو</Separator>
 
-        <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isLoading}>
+        <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isSubmitting}>
           <GoogleIcon />
           تسجيل الدخول باستخدام جوجل
         </Button>
