@@ -4,6 +4,7 @@ import { createContext, useContext, useState, useEffect, type ReactNode } from "
 import { 
   onAuthStateChanged, 
   signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword,
   signOut,
   GoogleAuthProvider,
   signInWithPopup,
@@ -11,12 +12,13 @@ import {
 } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "./firebase";
-import type { User } from "./types"
+import type { User, UserRole } from "./types"
 
 interface AuthContextType {
   user: User | null
   login: (email: string, password: string) => Promise<boolean>
-  signInWithGoogle: () => Promise<boolean>
+  signUp: (email: string, password: string, role: UserRole) => Promise<boolean>;
+  signInWithGoogle: (role: UserRole) => Promise<boolean>
   logout: () => void
   sendPasswordReset: (email: string) => Promise<boolean>
   isLoading: boolean
@@ -31,8 +33,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        // User is signed in, see docs for a list of available properties
-        // https://firebase.google.com/docs/reference/js/firebase.User
         const userDocRef = doc(db, "users", firebaseUser.uid);
         const userDocSnap = await getDoc(userDocRef);
 
@@ -40,18 +40,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const userData = userDocSnap.data() as User;
           setUser(userData);
         } else {
-          // Handle case where user exists in Auth but not in Firestore
           console.error("User document not found in Firestore");
           setUser(null);
         }
       } else {
-        // User is signed out
         setUser(null)
       }
       setIsLoading(false)
     })
 
-    // Cleanup subscription on unmount
     return () => unsubscribe()
   }, [])
 
@@ -64,8 +61,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return false;
     }
   }
+  
+  const signUp = async (email: string, password: string, role: UserRole): Promise<boolean> => {
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const firebaseUser = userCredential.user;
+      const userDocRef = doc(db, "users", firebaseUser.uid);
+      
+      const newUser: User = {
+        id: firebaseUser.uid,
+        email: firebaseUser.email || '',
+        name: firebaseUser.displayName || 'New User',
+        role: role,
+        createdAt: new Date(),
+      };
+      
+      if (role === 'seller') {
+        newUser.status = 'pending';
+      }
 
-  const signInWithGoogle = async (): Promise<boolean> => {
+      await setDoc(userDocRef, newUser);
+      return true;
+    } catch (error) {
+      console.error("Error signing up:", error);
+      return false;
+    }
+  };
+
+  const signInWithGoogle = async (role: UserRole): Promise<boolean> => {
     const provider = new GoogleAuthProvider();
     try {
       const result = await signInWithPopup(auth, provider);
@@ -75,14 +98,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const userDocSnap = await getDoc(userDocRef);
 
       if (!userDocSnap.exists()) {
-        // New user, create a document in Firestore
-        await setDoc(userDocRef, {
-          uid: firebaseUser.uid,
-          email: firebaseUser.email,
-          displayName: firebaseUser.displayName,
-          photoURL: firebaseUser.photoURL,
-          role: 'customer' // Default role for new users
-        });
+        const newUser: User = {
+          id: firebaseUser.uid,
+          email: firebaseUser.email || '',
+          name: firebaseUser.displayName || 'New User',
+          role: role,
+          createdAt: new Date(),
+        };
+        
+        if (role === 'seller') {
+          newUser.status = 'pending';
+        }
+  
+        await setDoc(userDocRef, newUser);
       }
       return true;
     } catch (error) {
@@ -106,7 +134,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, signInWithGoogle, logout, sendPasswordReset, isLoading }}>
+    <AuthContext.Provider value={{ user, login, signUp, signInWithGoogle, logout, sendPasswordReset, isLoading }}>
       {children}
     </AuthContext.Provider>
   )

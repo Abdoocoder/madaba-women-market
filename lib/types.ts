@@ -1,10 +1,12 @@
 export type UserRole = "customer" | "seller" | "admin"
+export type UserStatus = "pending" | "approved"
 
 export interface User {
   id: string
   email: string
   name: string
   role: UserRole
+  status?: UserStatus
   avatar?: string
   createdAt: Date
 }

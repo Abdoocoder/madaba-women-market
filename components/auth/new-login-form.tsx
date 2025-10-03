@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { useAuth } from "@/lib/auth-context"
 
 const GoogleIcon = () => (
@@ -23,21 +24,27 @@ const GoogleIcon = () => (
   </svg>
 );
 
-const loginSchema = z.object({
+const formSchema = z.object({
   email: z.string().email({ message: "البريد الإلكتروني غير صالح" }),
   password: z.string().min(6, { message: "يجب أن تكون كلمة المرور 6 أحرف على الأقل" }),
+  role: z.enum(['customer', 'seller'], { required_error: 'الرجاء اختيار نوع الحساب' })
 })
 
 export function NewLoginForm() {
-  const { user, login, signInWithGoogle, sendPasswordReset } = useAuth()
+  const { user, login, signUp, signInWithGoogle, sendPasswordReset } = useAuth()
   const router = useRouter()
+  const [isSignUp, setIsSignUp] = useState(false)
+  
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
     getValues,
-  } = useForm<z.infer<typeof loginSchema>>({
-    resolver: zodResolver(loginSchema),
+  } = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      role: 'customer'
+    }
   })
 
   useEffect(() => {
@@ -47,7 +54,12 @@ export function NewLoginForm() {
                 router.push('/admin/dashboard');
                 break;
             case 'seller':
-                router.push('/seller/dashboard');
+                if (user.status === 'pending') {
+                  toast.error('حسابك في انتظار موافقة المسؤول.');
+                  // logout(); // Optional: log out the user
+                } else {
+                  router.push('/seller/dashboard');
+                }
                 break;
             case 'customer':
                 router.push('/');
@@ -58,19 +70,26 @@ export function NewLoginForm() {
     }
   }, [user, router]);
 
-  const onSubmit = async (data: z.infer<typeof loginSchema>) => {
-    const toastId = toast.loading("جاري تسجيل الدخول...");
-    const success = await login(data.email, data.password);
-    if (success) {
-      toast.success("تم تسجيل الدخول بنجاح!", { id: toastId });
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    const toastId = toast.loading(isSignUp ? "جاري إنشاء الحساب..." : "جاري تسجيل الدخول...");
+    let success = false;
+    if (isSignUp) {
+      success = await signUp(data.email, data.password, data.role);
     } else {
-      toast.error("فشلت المصادقة. تحقق من بريدك الإلكتروني وكلمة المرور.", { id: toastId });
+      success = await login(data.email, data.password);
+    }
+
+    if (success) {
+      toast.success(isSignUp ? "تم إنشاء الحساب بنجاح!" : "تم تسجيل الدخول بنجاح!", { id: toastId });
+    } else {
+      toast.error(isSignUp ? "فشل إنشاء الحساب." : "فشلت المصادقة. تحقق من بريدك الإلكتروني وكلمة المرور.", { id: toastId });
     }
   }
   
   const handleGoogleSignIn = async () => {
     const toastId = toast.loading("جاري تسجيل الدخول باستخدام جوجل...");
-    const success = await signInWithGoogle();
+    // TODO: Add role selection for Google Sign In
+    const success = await signInWithGoogle('customer');
     if (success) {
       toast.success("تم تسجيل الدخول بنجاح!", { id: toastId });
     } else {
@@ -96,7 +115,7 @@ export function NewLoginForm() {
   return (
     <Card className="w-full max-w-md mx-auto mt-10">
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl font-cairo">تسجيل الدخول</CardTitle>
+        <CardTitle className="text-2xl font-cairo">{isSignUp ? 'إنشاء حساب جديد' : 'تسجيل الدخول'}</CardTitle>
         <CardDescription>مرحباً بك في سيدتي ماركت</CardDescription>
       </CardHeader>
       <CardContent>
@@ -123,14 +142,33 @@ export function NewLoginForm() {
             {errors.password && <p className="text-sm text-destructive text-center">{errors.password.message}</p>}
           </div>
           
-          <div className="text-right">
-            <Button type="button" variant="link" size="sm" onClick={handlePasswordReset} className="p-0 h-auto">
-                هل نسيت كلمة المرور؟
-            </Button>
-          </div>
+          {isSignUp && (
+            <div className="space-y-2">
+              <Label>نوع الحساب</Label>
+              <RadioGroup defaultValue="customer" {...register("role")} className="flex space-x-4">
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="customer" id="customer" />
+                  <Label htmlFor="customer">مشتري</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="seller" id="seller" />
+                  <Label htmlFor="seller">بائع</Label>
+                </div>
+              </RadioGroup>
+              {errors.role && <p className="text-sm text-destructive text-center">{errors.role.message}</p>}
+            </div>
+          )}
+          
+          {!isSignUp && (
+            <div className="text-right">
+              <Button type="button" variant="link" size="sm" onClick={handlePasswordReset} className="p-0 h-auto">
+                  هل نسيت كلمة المرور؟
+              </Button>
+            </div>
+          )}
 
           <Button type="submit" className="w-full" disabled={isSubmitting}>
-            {isSubmitting ? "جاري التحميل..." : "دخول"}
+            {isSubmitting ? "جاري التحميل..." : (isSignUp ? 'إنشاء حساب' : 'دخول')}
           </Button>
         </form>
         
@@ -138,8 +176,14 @@ export function NewLoginForm() {
 
         <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isSubmitting}>
           <GoogleIcon />
-          تسجيل الدخول باستخدام جوجل
+          {isSignUp ? 'التسجيل باستخدام جوجل' : 'تسجيل الدخول باستخدام جوجل'}
         </Button>
+
+        <div className="mt-4 text-center">
+          <Button variant="link" onClick={() => setIsSignUp(!isSignUp)}>
+            {isSignUp ? 'هل لديك حساب بالفعل؟ تسجيل الدخول' : 'ليس لديك حساب؟ إنشاء حساب جديد'}
+          </Button>
+        </div>
         
       </CardContent>
     </Card>
