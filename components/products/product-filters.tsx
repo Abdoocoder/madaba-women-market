@@ -4,14 +4,24 @@ import { Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { CATEGORIES } from "@/lib/mock-data"
 import { useLocale } from "@/lib/locale-context"
+import type { SortOption } from "@/app/page"
 
 interface ProductFiltersProps {
   searchQuery: string
   onSearchChange: (query: string) => void
   selectedCategory: string
   onCategoryChange: (category: string) => void
+  sortOption: SortOption
+  onSortChange: (sort: SortOption) => void
 }
 
 export function ProductFilters({
@@ -19,8 +29,17 @@ export function ProductFilters({
   onSearchChange,
   selectedCategory,
   onCategoryChange,
+  sortOption,
+  onSortChange,
 }: ProductFiltersProps) {
   const { t, language } = useLocale()
+
+  const sortOptions = [
+    { value: "date-desc", label: t("sort.newest") },
+    { value: "price-asc", label: t("sort.priceAsc") },
+    { value: "price-desc", label: t("sort.priceDesc") },
+    { value: "name-asc", label: t("sort.nameAsc") },
+  ]
 
   return (
     <div className="space-y-6">
@@ -38,6 +57,22 @@ export function ProductFilters({
             className="pr-10"
           />
         </div>
+      </div>
+
+      <div>
+        <Label className="text-base font-semibold mb-3 block">{t("filters.sortBy")}</Label>
+        <Select value={sortOption} onValueChange={(value) => onSortChange(value as SortOption)}>
+          <SelectTrigger>
+            <SelectValue placeholder={t("filters.sortBy")} />
+          </SelectTrigger>
+          <SelectContent>
+            {sortOptions.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div>

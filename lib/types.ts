@@ -24,6 +24,7 @@ export interface Product {
   featured: boolean
   approved: boolean
   createdAt: Date
+  wishlisted?: boolean
 }
 
 export interface CartItem {
@@ -37,6 +38,16 @@ export interface Order {
   items: CartItem[]
   total: number
   status: "pending" | "processing" | "shipped" | "delivered"
+  createdAt: Date
+}
+
+export interface Review {
+  id: string
+  productId: string
+  userId: string
+  userName: string
+  rating: number
+  comment: string
   createdAt: Date
 }
 

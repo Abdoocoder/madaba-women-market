@@ -7,22 +7,40 @@ import { ProductFilters } from "@/components/products/product-filters"
 import { MOCK_PRODUCTS } from "@/lib/mock-data"
 import { useCart } from "@/lib/cart-context"
 import { useLocale } from "@/lib/locale-context"
+import type { Product } from "@/lib/types"
+
+export type SortOption = "price-asc" | "price-desc" | "date-desc" | "name-asc"
 
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
+  const [sortOption, setSortOption] = useState<SortOption>("date-desc")
   const { totalItems } = useCart()
   const { t } = useLocale()
 
-  const filteredProducts = useMemo(() => {
-    return MOCK_PRODUCTS.filter((product) => {
+  const sortedAndFilteredProducts = useMemo(() => {
+    const filtered = MOCK_PRODUCTS.filter((product) => {
       const matchesSearch =
         product.nameAr.toLowerCase().includes(searchQuery.toLowerCase()) ||
         product.descriptionAr.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesCategory = selectedCategory === "all" || product.category === selectedCategory
       return matchesSearch && matchesCategory && product.approved
     })
-  }, [searchQuery, selectedCategory])
+
+    return [...filtered].sort((a: Product, b: Product) => {
+      switch (sortOption) {
+        case "price-asc":
+          return a.price - b.price
+        case "price-desc":
+          return b.price - a.price
+        case "name-asc":
+          return a.nameAr.localeCompare(b.nameAr)
+        case "date-desc":
+        default:
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      }
+    })
+  }, [searchQuery, selectedCategory, sortOption])
 
   return (
     <div className="min-h-screen bg-background">
@@ -43,18 +61,20 @@ export default function HomePage() {
                 onSearchChange={setSearchQuery}
                 selectedCategory={selectedCategory}
                 onCategoryChange={setSelectedCategory}
+                sortOption={sortOption}
+                onSortChange={setSortOption}
               />
             </div>
           </aside>
 
           <div className="lg:col-span-3">
-            {filteredProducts.length === 0 ? (
+            {sortedAndFilteredProducts.length === 0 ? (
               <div className="text-center py-12">
                 <p className="text-muted-foreground text-lg">{t("home.noProducts")}</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {filteredProducts.map((product) => (
+                {sortedAndFilteredProducts.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
               </div>
