@@ -11,7 +11,7 @@ import {
   sendPasswordResetEmail
 } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import { auth, db } from "./firebaseClient";
+import { auth, db } from "./firebase";
 import type { User, UserRole } from "./types"
 
 interface AuthContextType {
