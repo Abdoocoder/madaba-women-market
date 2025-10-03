@@ -27,23 +27,23 @@ Seydaty Market App is a feature-rich online marketplace. It includes functionali
 ### Installation
 
 1.  Clone the repository:
-    ```bash
+    \`\`\`bash
     git clone <repository-url>
-    ```
+    \`\`\`
 2.  Navigate to the project directory:
-    ```bash
+    \`\`\`bash
     cd <project-directory>
-    ```
+    \`\`\`
 3.  Install the dependencies:
-    ```bash
+    \`\`\`bash
     pnpm install
-    ```
+    \`\`\`
 
 ### Running the Development Server
 
-```bash
+\`\`\`bash
 pnpm dev
-```
+\`\`\`
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
@@ -60,7 +60,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 ## Project Structure
 
-```
+\`\`\`
 .
 ├── app/                  # Main application routes and pages
 ├── components/           # Reusable UI components
@@ -71,4 +71,4 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 ├── next.config.mjs       # Next.js configuration
 ├── package.json          # Project dependencies and scripts
 └── tsconfig.json         # TypeScript configuration
-```
+\`\`\`
