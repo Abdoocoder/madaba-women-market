@@ -129,7 +129,7 @@ export default function AdminDashboardPage() {
             icon={Package}
             description={`${pendingProducts} قيد المراجعة`}
           />
-          <StatsCard title="إجمالي المبيعات" value={`${totalRevenue} ر.س`} icon={DollarSign} />
+          <StatsCard title="إجمالي المبيعات" value={`${totalRevenue} د.أ`} icon={DollarSign} />
           <StatsCard title="معدل النمو" value="+12%" icon={TrendingUp} description="هذا الشهر" />
         </div>
 
