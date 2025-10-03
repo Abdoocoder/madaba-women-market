@@ -26,24 +26,24 @@
 
 ### التثبيت
 
-1.  استنسخ المستودع:
+1.  Clone the repository:
     ```bash
     git clone <repository-url>
     ```
-2.  انتقل إلى دليل المشروع:
+2.  Navigate to the project directory:
     ```bash
     cd <project-directory>
     ```
-3.  ثبّت الاعتماديات:
+3.  Install the dependencies:
     ```bash
     pnpm install
-    ```
+    \`\`\`
 
 ### تشغيل خادم التطوير
 
-```bash
+\`\`\`bash
 pnpm dev
-```
+\`\`\`
 
 افتح [http://localhost:3000](http://localhost:3000) في متصفحك لرؤية النتيجة.
 
@@ -62,15 +62,15 @@ pnpm dev
 
 ## هيكل المشروع
 
-```
+\`\`\`
 .
-├── app/                  # المسارات والصفحات الرئيسية للتطبيق
-├── components/           # مكونات واجهة المستخدم القابلة لإعادة الاستخدام
-├── lib/                  # وظائف ومرافق مساعدة
-├── public/               # الأصول الثابتة (الصور والخطوط وما إلى ذلك)
-├── styles/               # الأنماط العامة
-├── locales/              # ملفات التعريب
-├── next.config.mjs       # تكوين Next.js
-├── package.json          # اعتماديات المشروع والبرامج النصية
-└── tsconfig.json         # تكوين TypeScript
+├── app/                  # Main application routes and pages
+├── components/           # Reusable UI components
+├── lib/                  # Helper functions and utilities
+├── public/               # Static assets (images, fonts, etc.)
+├── styles/               # Global styles
+├── locales/              # Localization files
+├── next.config.mjs       # Next.js configuration
+├── package.json          # Project dependencies and scripts
+└── tsconfig.json         # TypeScript configuration
 ```
