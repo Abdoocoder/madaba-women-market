@@ -34,5 +34,17 @@
   "product.yourReview": "Your Review",
   "product.reviewPlaceholder": "Write your review here...",
   "product.submitReview": "Submit Review",
-  "product.noReviews": "No reviews yet. Be the first to review!"
+  "product.noReviews": "No reviews yet. Be the first to review!",
+  "admin.dashboard": "Admin Dashboard",
+  "admin.sellerManagement": "Seller Management",
+  "admin.name": "Name",
+  "admin.email": "Email",
+  "admin.status": "Status",
+  "admin.actions": "Actions",
+  "admin.approve": "Approve",
+  "admin.reject": "Reject",
+  "admin.loading": "Loading...",
+  "admin.updatingStatus": "Updating seller status...",
+  "admin.statusUpdated": "Seller status updated successfully!",
+  "admin.statusUpdateFailed": "Failed to update seller status."
 }

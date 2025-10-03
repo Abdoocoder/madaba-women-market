@@ -1,25 +1,15 @@
 'use client'
 
-import { useEffect, useState } from 'react';
-import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
 import { useAuth } from '@/lib/auth-context';
+import { useLocale } from '@/lib/locale-context';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Button } from '@/components/ui/button';
-import toast from 'react-hot-toast';
-
-interface Seller {
-  id: string;
-  name: string;
-  email: string;
-  status: 'pending' | 'approved' | 'rejected';
-}
+import { useEffect } from 'react';
 
 const AdminDashboard = () => {
   const { user, isLoading } = useAuth();
   const router = useRouter();
-  const [sellers, setSellers] = useState<Seller[]>([]);
+  const { t } = useLocale();
 
   useEffect(() => {
     if (!isLoading && user?.role !== 'admin') {
@@ -27,68 +17,45 @@ const AdminDashboard = () => {
     }
   }, [user, isLoading, router]);
 
-  useEffect(() => {
-    const fetchSellers = async () => {
-      const querySnapshot = await getDocs(collection(db, 'users'));
-      const sellerList = querySnapshot.docs
-        .map(doc => ({ id: doc.id, ...doc.data() } as Seller))
-        .filter(seller => seller.role === 'seller');
-      setSellers(sellerList);
-    };
-
-    if (user?.role === 'admin') {
-      fetchSellers();
-    }
-  }, [user]);
-
-  const handleApproval = async (sellerId: string, status: 'approved' | 'rejected') => {
-    const toastId = toast.loading('Updating seller status...');
-    try {
-      const sellerRef = doc(db, 'users', sellerId);
-      await updateDoc(sellerRef, { status });
-      setSellers(sellers.map(seller => seller.id === sellerId ? { ...seller, status } : seller));
-      toast.success('Seller status updated successfully!', { id: toastId });
-    } catch (error) {
-      console.error('Error updating seller status:', error);
-      toast.error('Failed to update seller status.', { id: toastId });
-    }
-  };
-
   if (isLoading || user?.role !== 'admin') {
-    return <div>Loading...</div>; // Or a proper loading spinner
+    return <div>{t('admin.loading')}</div>;
   }
 
   return (
     <div className="container mx-auto py-10">
-      <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
-      <h2 className="text-2xl font-bold mb-4">Seller Management</h2>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {sellers.map(seller => (
-            <TableRow key={seller.id}>
-              <TableCell>{seller.name}</TableCell>
-              <TableCell>{seller.email}</TableCell>
-              <TableCell>{seller.status}</TableCell>
-              <TableCell>
-                {seller.status === 'pending' && (
-                  <>
-                    <Button onClick={() => handleApproval(seller.id, 'approved')} className="mr-2">Approve</Button>
-                    <Button onClick={() => handleApproval(seller.id, 'rejected')} variant="destructive">Reject</Button>
-                  </>
-                )}
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      <h1 className="text-3xl font-bold mb-6">{t('admin.dashboard')}</h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <Link href="/admin/dashboard/users">
+          <a className="p-4 border rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
+            <h2 className="text-xl font-bold">Users</h2>
+            <p>Manage all user accounts.</p>
+          </a>
+        </Link>
+        <Link href="/admin/dashboard/sellers">
+          <a className="p-4 border rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
+            <h2 className="text-xl font-bold">Sellers</h2>
+            <p>Manage seller accounts and approvals.</p>
+          </a>
+        </Link>
+        <Link href="/admin/dashboard/products">
+          <a className="p-4 border rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
+            <h2 className="text-xl font-bold">Products</h2>
+            <p>Manage all products.</p>
+          </a>
+        </Link>
+        <Link href="/admin/dashboard/orders">
+          <a className="p-4 border rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
+            <h2 className="text-xl font-bold">Orders</h2>
+            <p>Manage all orders.</p>
+          </a>
+        </Link>
+        <Link href="/admin/dashboard/stats">
+          <a className="p-4 border rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
+            <h2 className="text-xl font-bold">Statistics</h2>
+            <p>View summary statistics.</p>
+          </a>
+        </Link>
+      </div>
     </div>
   );
 };

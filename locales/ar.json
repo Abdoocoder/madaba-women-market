@@ -34,5 +34,17 @@
   "product.yourReview": "مراجعتك",
   "product.reviewPlaceholder": "اكتب مراجعتك هنا...",
   "product.submitReview": "إرسال المراجعة",
-  "product.noReviews": "لا توجد مراجعات حتى الآن. كن أول من يراجع!"
+  "product.noReviews": "لا توجد مراجعات حتى الآن. كن أول من يراجع!",
+  "admin.dashboard": "لوحة تحكم المسؤول",
+  "admin.sellerManagement": "إدارة البائعين",
+  "admin.name": "الاسم",
+  "admin.email": "البريد الإلكتروني",
+  "admin.status": "الحالة",
+  "admin.actions": "الإجراءات",
+  "admin.approve": "الموافقة",
+  "admin.reject": "الرفض",
+  "admin.loading": "جار التحميل...",
+  "admin.updatingStatus": "جار تحديث حالة البائع...",
+  "admin.statusUpdated": "تم تحديث حالة البائع بنجاح!",
+  "admin.statusUpdateFailed": "فشل تحديث حالة البائع."
 }
