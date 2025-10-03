@@ -40,8 +40,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const userData = userDocSnap.data() as User;
           setUser(userData);
         } else {
-          console.error("⚠️ User document not found in Firestore");
-          setUser(null);
+          // If the user document doesn't exist, create it.
+          console.warn("User document not found in Firestore, creating a new one...");
+          const newUser: User = {
+            id: firebaseUser.uid,
+            email: firebaseUser.email || '',
+            name: firebaseUser.displayName || 'New User',
+            photoURL: firebaseUser.photoURL || '',
+            role: 'customer', // Default role
+            createdAt: new Date(),
+          };
+          await setDoc(userDocRef, newUser);
+          setUser(newUser);
         }
       } else {
         setUser(null)
