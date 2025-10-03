@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from '@/components/ui/button';
 import toast from 'react-hot-toast';
+import { useLocale } from '@/lib/locale-context';
 
 interface Seller {
   id: string;
@@ -20,6 +21,7 @@ const AdminDashboard = () => {
   const { user, isLoading } = useAuth();
   const router = useRouter();
   const [sellers, setSellers] = useState<Seller[]>([]);
+  const { t } = useLocale();
 
   useEffect(() => {
     if (!isLoading && user?.role !== 'admin') {
@@ -42,33 +44,33 @@ const AdminDashboard = () => {
   }, [user]);
 
   const handleApproval = async (sellerId: string, status: 'approved' | 'rejected') => {
-    const toastId = toast.loading('Updating seller status...');
+    const toastId = toast.loading(t('admin.updatingStatus'));
     try {
       const sellerRef = doc(db, 'users', sellerId);
       await updateDoc(sellerRef, { status });
       setSellers(sellers.map(seller => seller.id === sellerId ? { ...seller, status } : seller));
-      toast.success('Seller status updated successfully!', { id: toastId });
+      toast.success(t('admin.statusUpdated'), { id: toastId });
     } catch (error) {
       console.error('Error updating seller status:', error);
-      toast.error('Failed to update seller status.', { id: toastId });
+      toast.error(t('admin.statusUpdateFailed'), { id: toastId });
     }
   };
 
   if (isLoading || user?.role !== 'admin') {
-    return <div>Loading...</div>; // Or a proper loading spinner
+    return <div>{t('admin.loading')}</div>; // Or a proper loading spinner
   }
 
   return (
     <div className="container mx-auto py-10">
-      <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
-      <h2 className="text-2xl font-bold mb-4">Seller Management</h2>
+      <h1 className="text-3xl font-bold mb-6">{t('admin.dashboard')}</h1>
+      <h2 className="text-2xl font-bold mb-4">{t('admin.sellerManagement')}</h2>
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Actions</TableHead>
+            <TableHead>{t('admin.name')}</TableHead>
+            <TableHead>{t('admin.email')}</TableHead>
+            <TableHead>{t('admin.status')}</TableHead>
+            <TableHead>{t('admin.actions')}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -80,8 +82,8 @@ const AdminDashboard = () => {
               <TableCell>
                 {seller.status === 'pending' && (
                   <>
-                    <Button onClick={() => handleApproval(seller.id, 'approved')} className="mr-2">Approve</Button>
-                    <Button onClick={() => handleApproval(seller.id, 'rejected')} variant="destructive">Reject</Button>
+                    <Button onClick={() => handleApproval(seller.id, 'approved')} className="mr-2">{t('admin.approve')}</Button>
+                    <Button onClick={() => handleApproval(seller.id, 'rejected')} variant="destructive">{t('admin.reject')}</Button>
                   </>
                 )}
               </TableCell>
