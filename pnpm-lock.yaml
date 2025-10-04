@@ -13,7 +13,7 @@ importers:
         version: 1.4.0
       '@hookform/resolvers':
         specifier: latest
-        version: 5.2.2(react-hook-form@7.63.0(react@19.0.0))
+        version: 5.2.2(react-hook-form@7.64.0(react@19.0.0))
       '@radix-ui/react-accordion':
         specifier: 1.2.2
         version: 1.2.2(@types/react-dom@19.0.0)(@types/react@19.0.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
@@ -148,7 +148,7 @@ importers:
         version: 19.0.0(react@19.0.0)
       react-hook-form:
         specifier: latest
-        version: 7.63.0(react@19.0.0)
+        version: 7.64.0(react@19.0.0)
       react-hot-toast:
         specifier: latest
         version: 2.6.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
@@ -193,7 +193,7 @@ importers:
         specifier: ^10.4.20
         version: 10.4.20(postcss@8.5.0)
       postcss:
-        specifier: ^8.5.0
+        specifier: ^8.5
         version: 8.5.0
       tailwindcss:
         specifier: ^4.1.9
@@ -2519,8 +2519,8 @@ packages:
     peerDependencies:
       react: ^19.0.0
 
-  react-hook-form@7.63.0:
-    resolution: {integrity: sha512-ZwueDMvUeucovM2VjkCf7zIHcs1aAlDimZu2Hvel5C5907gUzMpm4xCrQXtRzCvsBqFjonB4m3x4LzCFI1ZKWA==}
+  react-hook-form@7.64.0:
+    resolution: {integrity: sha512-fnN+vvTiMLnRqKNTVhDysdrUay0kUUAymQnFIznmgDvapjveUWOOPqMNzPg+A+0yf9DuE2h6xzBjN1s+Qx8wcg==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       react: ^16.8.0 || ^17 || ^18 || ^19
@@ -3275,10 +3275,10 @@ snapshots:
       yargs: 17.7.2
     optional: true
 
-  '@hookform/resolvers@5.2.2(react-hook-form@7.63.0(react@19.0.0))':
+  '@hookform/resolvers@5.2.2(react-hook-form@7.64.0(react@19.0.0))':
     dependencies:
       '@standard-schema/utils': 0.3.0
-      react-hook-form: 7.63.0(react@19.0.0)
+      react-hook-form: 7.64.0(react@19.0.0)
 
   '@img/sharp-darwin-arm64@0.33.5':
     optionalDependencies:
@@ -5318,7 +5318,7 @@ snapshots:
       react: 19.0.0
       scheduler: 0.25.0
 
-  react-hook-form@7.63.0(react@19.0.0):
+  react-hook-form@7.64.0(react@19.0.0):
     dependencies:
       react: 19.0.0
 
