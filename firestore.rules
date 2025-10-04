@@ -24,11 +24,9 @@ service cloud.firestore {
     match /users/{userId} {
       // ANYONE can create a user document (signup), but only for their own UID.
       // The document must contain a 'role' field, defaulting to 'customer'.
-      // We also check for a verified email as an extra security measure.
       allow create: if isOwner(userId)
                     && 'role' in request.resource.data && request.resource.data.role == 'customer'
-                    && 'email' in request.resource.data
-                    && request.auth.token.email_verified;
+                    && 'email' in request.resource.data;
 
 
       // Users can read their own data. Admins can read any user's data.
