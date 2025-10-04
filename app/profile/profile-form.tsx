@@ -133,7 +133,7 @@ export default function ProfileForm() {
                                     folder: 'avatars',
                                 }}
                                 onUpload={handleUpload}
-                                uploadPreset="<Your Upload Preset>"
+                                uploadPreset="madaba-women-market-presets"
                             >
                                 <Button as="span" className="w-full">
                                     Upload Picture
