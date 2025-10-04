@@ -1,44 +1,90 @@
-"use client"
 
-import { Header } from "@/components/layout/header"
-import { ProductCard } from "@/components/products/product-card"
-import { MOCK_PRODUCTS } from "@/lib/mock-data"
-import { useCart } from "@/lib/cart-context"
-import { useLocale } from "@/lib/locale-context"
-import { Separator } from "@/components/ui/separator"
+"use client";
+
+import { useState, useEffect } from "react";
+import { useAuth } from "@/lib/auth-context";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { Product } from "@/lib/types";
+import { ProductCard } from "@/components/product-card";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function WishlistPage() {
-  const { totalItems } = useCart()
-  const { t } = useLocale()
+    const { user, isLoading } = useAuth();
+    const [wishlist, setWishlist] = useState<Product[]>([]);
+    const [loadingWishlist, setLoadingWishlist] = useState(true);
+    const { toast } = useToast();
 
-  // In a real app, you'd fetch the user's wishlist from your backend
-  const wishlistProducts = MOCK_PRODUCTS.filter((p) => p.wishlisted)
+    useEffect(() => {
+        const fetchWishlist = async () => {
+            if (!user) {
+                setLoadingWishlist(false);
+                return;
+            }
 
-  return (
-    <div className="min-h-screen bg-background">
-      <Header cartItemCount={totalItems} />
-      <main className="container py-8">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-            {t("wishlist.title")}
-          </h1>
-          <p className="text-muted-foreground text-lg">{t("wishlist.subtitle")}</p>
+            setLoadingWishlist(true);
+            try {
+                const wishlistRef = doc(db, "wishlists", user.id);
+                const wishlistSnap = await getDoc(wishlistRef);
+
+                if (wishlistSnap.exists()) {
+                    const productIds = wishlistSnap.data().products as string[];
+                    const productPromises = productIds.map(id => getDoc(doc(db, "products", id)));
+                    const productDocs = await Promise.all(productPromises);
+                    const wishlistProducts = productDocs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+                    setWishlist(wishlistProducts);
+                }
+            } catch (error) {
+                console.error("Error fetching wishlist: ", error);
+                toast({ title: "Error", description: "Failed to fetch your wishlist.", variant: "destructive" });
+            } finally {
+                setLoadingWishlist(false);
+            }
+        };
+
+        if (!isLoading) {
+            fetchWishlist();
+        }
+    }, [user, isLoading, toast]);
+
+    const handleRemoveFromWishlist = async (productId: string) => {
+        if (!user) return;
+
+        try {
+            const wishlistRef = doc(db, "wishlists", user.id);
+            await updateDoc(wishlistRef, {
+                products: wishlist.filter(p => p.id !== productId).map(p => p.id)
+            });
+            setWishlist(wishlist.filter(p => p.id !== productId));
+            toast({ title: "Success", description: "Product removed from wishlist.", variant: "success" });
+        } catch (error) {
+            console.error("Error removing from wishlist: ", error);
+            toast({ title: "Error", description: "Failed to remove product from wishlist.", variant: "destructive" });
+        }
+    };
+
+
+    if (isLoading || loadingWishlist) {
+        return <div className="container mx-auto px-4 py-8 text-center">Loading your wishlist...</div>;
+    }
+
+    if (!user) {
+        return <div className="container mx-auto px-4 py-8 text-center">Please log in to see your wishlist.</div>;
+    }
+
+    return (
+        <div className="container mx-auto px-4 py-8">
+            <h1 className="text-3xl font-bold mb-8">My Wishlist</h1>
+            {wishlist.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    {wishlist.map(product => (
+                        <ProductCard key={product.id} product={product} onRemoveFromWishlist={handleRemoveFromWishlist} />
+                    ))
+                    }
+                </div>
+            ) : (
+                <p className="text-center text-gray-500">Your wishlist is empty.</p>
+            )}
         </div>
-
-        <Separator className="my-8" />
-
-        {wishlistProducts.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground text-lg">{t("wishlist.empty")}</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {wishlistProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        )}
-      </main>
-    </div>
-  )
+    );
 }

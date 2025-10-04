@@ -20,6 +20,7 @@
   "sort.nameAsc": "Name: A to Z",
   "header.login": "Login",
   "header.logout": "Logout",
+  "header.profile": "Profile",
   "header.sellerDashboard": "Seller Dashboard",
   "header.adminDashboard": "Admin Dashboard",
   "header.wishlist": "Wishlist",

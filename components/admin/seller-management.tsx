@@ -1,100 +1,92 @@
-"use client"
-import { Check, X, Mail, ShieldAlert, Trash2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import type { Seller } from "@/lib/types"
-import { formatDate, formatCurrency } from "@/lib/utils"
 
-interface SellerManagementProps {
-  sellers: Seller[]
-  onApprove: (sellerId: string) => void
-  onReject: (sellerId: string) => void
-  onSuspend: (sellerId: string) => void
-  onDelete: (sellerId: string) => void
+"use client";
+
+import { useEffect, useState } from "react";
+import { collection, getDocs, query, where, updateDoc, doc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { useToast } from "@/components/ui/use-toast";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+
+interface Seller {
+    id: string;
+    name: string;
+    email: string;
+    status: 'pending' | 'approved' | 'rejected';
 }
 
-export function SellerManagement({ sellers, onApprove, onReject, onSuspend, onDelete }: SellerManagementProps) {
-  const pendingSellers = sellers.filter((s) => !s.approved)
-  const approvedSellers = sellers.filter((s) => s.approved)
+export function SellerManagement() {
+    const [sellers, setSellers] = useState<Seller[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const { toast } = useToast();
 
-  return (
-    <div className="space-y-6">
-      {pendingSellers.length > 0 && (
-        <div>
-          <h3 className="text-lg font-semibold mb-4">البائعون قيد المراجعة ({pendingSellers.length})</h3>
-          <div className="space-y-4">
-            {pendingSellers.map((seller) => (
-              <Card key={seller.id}>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <h4 className="font-semibold">{seller.name}</h4>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-                        <Mail className="h-3 w-3" />
-                        <span>{seller.email}</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-1">تاريخ التسجيل: {formatDate(seller.joinedAt)}</p>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button size="sm" onClick={() => onApprove(seller.id)}>
-                        <Check className="ml-1 h-4 w-4" />
-                        قبول
-                      </Button>
-                      <Button size="sm" variant="destructive" onClick={() => onReject(seller.id)}>
-                        <X className="ml-1 h-4 w-4" />
-                        رفض
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      )}
+    useEffect(() => {
+        const fetchSellers = async () => {
+            setIsLoading(true);
+            try {
+                const q = query(collection(db, "users"), where("role", "==", "seller"));
+                const querySnapshot = await getDocs(q);
+                const sellersData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Seller));
+                setSellers(sellersData);
+            } catch (error) {
+                console.error("Error fetching sellers: ", error);
+                toast({ title: "Error", description: "Failed to fetch sellers.", variant: "destructive" });
+            } finally {
+                setIsLoading(false);
+            }
+        };
 
-      <div>
-        <h3 className="text-lg font-semibold mb-4">البائعون المعتمدون ({approvedSellers.length})</h3>
-        <div className="space-y-4">
-          {approvedSellers.map((seller) => (
-            <Card key={seller.id}>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <h4 className="font-semibold">{seller.name}</h4>
-                      {seller.suspended ? (
-                        <Badge variant="destructive">معلق</Badge>
-                      ) : (
-                        <Badge>معتمد</Badge>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-                      <Mail className="h-3 w-3" />
-                      <span>{seller.email}</span>
-                    </div>
-                    <div className="flex gap-4 text-sm mt-2">
-                      <span className="text-muted-foreground">المنتجات: {seller.totalProducts}</span>
-                      <span className="text-muted-foreground">المبيعات: {formatCurrency(seller.totalSales)}</span>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="outline" onClick={() => onSuspend(seller.id)}>
-                      <ShieldAlert className="ml-1 h-4 w-4" />
-                      {seller.suspended ? "رفع التعليق" : "تعليق"}
-                    </Button>
-                    <Button size="sm" variant="destructive" onClick={() => onDelete(seller.id)}>
-                      <Trash2 className="ml-1 h-4 w-4" />
-                      حذف
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-    </div>
-  )
+        fetchSellers();
+    }, [toast]);
+
+    const handleStatusUpdate = async (sellerId: string, status: 'approved' | 'rejected') => {
+        try {
+            const sellerDocRef = doc(db, "users", sellerId);
+            await updateDoc(sellerDocRef, { status });
+            setSellers(sellers.map(seller => seller.id === sellerId ? { ...seller, status } : seller));
+            toast({ title: "Success", description: `Seller has been ${status}.`, variant: "success" });
+        } catch (error) {
+            console.error(`Error updating seller status: `, error);
+            toast({ title: "Error", description: "Failed to update seller status.", variant: "destructive" });
+        }
+    };
+
+    if (isLoading) {
+        return <div>Loading sellers...</div>;
+    }
+
+    return (
+        <Table>
+            <TableHeader>
+                <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Actions</TableHead>
+                </TableRow>
+            </TableHeader>
+            <TableBody>
+                {sellers.map((seller) => (
+                    <TableRow key={seller.id}>
+                        <TableCell>{seller.name}</TableCell>
+                        <TableCell>{seller.email}</TableCell>
+                        <TableCell>
+                            <Badge variant={seller.status === 'approved' ? 'success' : seller.status === 'pending' ? 'secondary' : 'destructive'}>
+                                {seller.status}
+                            </Badge>
+                        </TableCell>
+                        <TableCell>
+                            {seller.status === 'pending' && (
+                                <div className="flex gap-2">
+                                    <Button size="sm" onClick={() => handleStatusUpdate(seller.id, 'approved')}>Approve</Button>
+                                    <Button size="sm" variant="destructive" onClick={() => handleStatusUpdate(seller.id, 'rejected')}>Reject</Button>
+                                </div>
+                            )}
+                        </TableCell>
+                    </TableRow>
+                ))}
+            </TableBody>
+        </Table>
+    );
 }

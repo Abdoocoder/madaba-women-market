@@ -88,6 +88,12 @@ export function Header({ cartItemCount = 0, user: initialUser }: HeaderProps) {
                   <p className="text-xs text-muted-foreground">{user.email}</p>
                 </div>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/profile" className="cursor-pointer">
+                    <User className="mr-2 h-4 w-4" />
+                    {t("header.profile")}
+                  </Link>
+                </DropdownMenuItem>
                 {user.role === "seller" && (
                   <DropdownMenuItem asChild>
                     <Link href="/seller/dashboard" className="cursor-pointer">
@@ -163,6 +169,12 @@ export function Header({ cartItemCount = 0, user: initialUser }: HeaderProps) {
                     <p className="text-xs text-muted-foreground">{user.email}</p>
                 </div>
                 <Separator />
+                <Link href="/profile" onClick={() => setMobileMenuOpen(false)}>
+                    <Button variant="ghost" className="w-full justify-start">
+                        <User className="mr-2 h-4 w-4" />
+                        {t("header.profile")}
+                    </Button>
+                </Link>
                 {user.role === "seller" && (
                     <Link href="/seller/dashboard" onClick={() => setMobileMenuOpen(false)}>
                         <Button variant="ghost" className="w-full justify-start">
