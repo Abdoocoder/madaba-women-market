@@ -53,7 +53,7 @@ export default function ProfileForm() {
     }
 
     const handleAvatarUpload = async () => {
-        if (!avatarFile) return;
+        if (!avatarFile || !user || !user.id) return;
 
         setIsUploading(true);
         const storage = getStorage();
