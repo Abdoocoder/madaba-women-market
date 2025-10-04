@@ -1,4 +1,3 @@
-
 import { Metadata } from 'next';
 import ProfileForm from './profile-form';
 
