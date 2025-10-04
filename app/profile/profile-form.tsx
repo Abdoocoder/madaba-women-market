@@ -1,13 +1,14 @@
+
 "use client";
 
-import { useState, useEffect, Fragment } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { doc, updateDoc } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase";
 import { updateProfile, updateEmail, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
-import { User, Upload, Edit3 } from "lucide-react";
+import { User, Edit3 } from "lucide-react";
+import { CldUploadButton } from 'next-cloudinary';
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -31,9 +32,6 @@ export default function ProfileForm() {
 
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
-    const [newPassword, setNewPassword] = useState("");
-    const [avatarFile, setAvatarFile] = useState<File | null>(null);
-    const [isUploading, setIsUploading] = useState(false);
 
     useEffect(() => {
         if (user) {
@@ -51,17 +49,12 @@ export default function ProfileForm() {
         return null;
     }
 
-    const handleAvatarUpload = async () => {
-        if (!avatarFile || !user || !user.id) return;
+    const handleUpload = async (result: any) => {
+        if (!user || !user.id) return;
 
-        setIsUploading(true);
-        const storage = getStorage();
-        const storageRef = ref(storage, `avatars/${user.id}/${avatarFile.name}`);
+        const photoURL = result.info.secure_url;
 
         try {
-            await uploadBytes(storageRef, avatarFile);
-            const photoURL = await getDownloadURL(storageRef);
-
             const userDocRef = doc(db, "users", user.id);
             await updateDoc(userDocRef, { photoURL });
             
@@ -71,15 +64,13 @@ export default function ProfileForm() {
 
             toast({ title: "Success", description: "Avatar updated successfully!", variant: "success" });
         } catch (error) {
-            console.error("Error uploading avatar: ", error);
-            toast({ title: "Error", description: "Failed to upload avatar.", variant: "destructive" });
-        } finally {
-            setIsUploading(false);
-            setAvatarFile(null);
+            console.error("Error updating avatar: ", error);
+            toast({ title: "Error", description: "Failed to update avatar.", variant: "destructive" });
         }
     };
 
     const handleProfileUpdate = async () => {
+        if (!user || !user.id) return;
         const userDocRef = doc(db, "users", user.id);
         try {
             await updateDoc(userDocRef, { name });
@@ -94,6 +85,7 @@ export default function ProfileForm() {
     };
 
     const handleEmailUpdate = async () => {
+        if (!user || !user.id) return;
         const currentPassword = prompt("Please enter your current password to update your email.");
         if (!currentPassword || !auth.currentUser) return;
 
@@ -133,10 +125,20 @@ export default function ProfileForm() {
                             </div>
                         </CardHeader>
                         <CardContent className="flex flex-col items-center text-center">
-                            <Input id="avatar-upload" type="file" onChange={(e) => setAvatarFile(e.target.files ? e.target.files[0] : null)} className="mb-2" />
-                            <Button onClick={handleAvatarUpload} disabled={isUploading || !avatarFile} className="w-full">
-                                {isUploading ? "Uploading..." : <><Upload className="mr-2 h-4 w-4" /> Upload Picture</>}
-                            </Button>
+                            <CldUploadButton
+                                options={{
+                                    sources: ['local', 'url', 'camera'],
+                                    multiple: false,
+                                    maxFiles: 1,
+                                    folder: 'avatars',
+                                }}
+                                onUpload={handleUpload}
+                                uploadPreset="<Your Upload Preset>"
+                            >
+                                <Button as="span" className="w-full">
+                                    Upload Picture
+                                </Button>
+                            </CldUploadButton>
                         </CardContent>
                     </Card>
                 </div>
