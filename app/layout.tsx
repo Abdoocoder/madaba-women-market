@@ -25,7 +25,7 @@ export default function RootLayout({
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </head>
-      <body className={`${cairo.className} flex flex-col min-h-screen`}>
+      <body className={`${cairo.className} flex flex-col min-h-screen`} suppressHydrationWarning>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -35,7 +35,9 @@ export default function RootLayout({
           <AuthProvider>
             <CartProvider>
               <LocaleProvider>
-                <Toaster position="bottom-center" />
+                <div suppressHydrationWarning>
+                  <Toaster position="bottom-center" />
+                </div>
                 <div className="flex-grow">{children}</div>
               </LocaleProvider>
             </CartProvider>

@@ -1,4 +1,5 @@
 "use client"
+"use client"
 
 import { useState, useMemo, useEffect } from "react"
 import { Header } from "@/components/layout/header"
@@ -11,6 +12,7 @@ import { useLocale } from "@/lib/locale-context"
 import { collection, getDocs, query, where } from "firebase/firestore"
 import { db } from "@/lib/firebase"
 import type { Product } from "@/lib/types"
+import ClientOnly from "@/components/client-only"
 
 export type SortOption = "date-desc" | "price-asc" | "price-desc" | "name-asc"
 
@@ -23,6 +25,11 @@ export default function Home() {
   const [sortOption, setSortOption] = useState<SortOption>("date-desc")
   const [products, setProducts] = useState<Product[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [isMounted, setIsMounted] = useState(false)
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -81,60 +88,73 @@ export default function Home() {
   }, [products, searchQuery, selectedCategory, sortOption])
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header cartItemCount={totalItems} user={user} />
-
-      <main className="container py-8">
-        <div className="mb-12 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-            {t("home.welcome")}
-          </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">{t("home.subtitle")}</p>
-        </div>
-
-        {/* Featured Products Section */}
-        <FeaturedProducts />
-
-        {/* All Products Section */}
-        <div className="mt-12">
-          <h2 className="text-3xl font-bold mb-8">{t("home.allProducts")}</h2>
-
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            {/* Filters Sidebar */}
-            <aside className="lg:col-span-1">
-              <div className="sticky top-24">
-                <ProductFilters
-                  searchQuery={searchQuery}
-                  onSearchChange={setSearchQuery}
-                  selectedCategory={selectedCategory}
-                  onCategoryChange={setSelectedCategory}
-                  sortOption={sortOption}
-                  onSortChange={setSortOption}
-                />
-              </div>
-            </aside>
-
-            {/* Products Grid */}
-            <div className="lg:col-span-3">
-              {isLoading ? (
-                <div className="text-center py-12">
-                  <p className="text-muted-foreground">{t("common.loading")}</p>
-                </div>
-              ) : filteredAndSortedProducts.length === 0 ? (
-                <div className="text-center py-12">
-                  <p className="text-muted-foreground">{t("home.noProducts")}</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {filteredAndSortedProducts.map((product) => (
-                    <ProductCard key={product.id} product={product} />
-                  ))}
-                </div>
-              )}
-            </div>
+    <ClientOnly fallback={
+      <div className="min-h-screen bg-background">
+        <div className="container py-8">
+          <div className="mb-12 text-center">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+              Welcome to Madaba Women Market
+            </h1>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Loading...</p>
           </div>
         </div>
-      </main>
-    </div>
+      </div>
+    }>
+      <div className="min-h-screen bg-background">
+        <Header cartItemCount={isMounted ? totalItems : 0} user={isMounted ? user : null} />
+
+        <main className="container py-8">
+          <div className="mb-12 text-center">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+              {t("home.welcome")}
+            </h1>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">{t("home.subtitle")}</p>
+          </div>
+
+          {/* Featured Products Section */}
+          <FeaturedProducts />
+
+          {/* All Products Section */}
+          <div className="mt-12">
+            <h2 className="text-3xl font-bold mb-8">{t("home.allProducts")}</h2>
+
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+              {/* Filters Sidebar */}
+              <aside className="lg:col-span-1">
+                <div className="sticky top-24">
+                  <ProductFilters
+                    searchQuery={searchQuery}
+                    onSearchChange={setSearchQuery}
+                    selectedCategory={selectedCategory}
+                    onCategoryChange={setSelectedCategory}
+                    sortOption={sortOption}
+                    onSortChange={setSortOption}
+                  />
+                </div>
+              </aside>
+
+              {/* Products Grid */}
+              <div className="lg:col-span-3">
+                {isLoading ? (
+                  <div className="text-center py-12">
+                    <p className="text-muted-foreground">{t("common.loading")}</p>
+                  </div>
+                ) : filteredAndSortedProducts.length === 0 ? (
+                  <div className="text-center py-12">
+                    <p className="text-muted-foreground">{t("home.noProducts")}</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {filteredAndSortedProducts.map((product) => (
+                      <ProductCard key={product.id} product={product} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </ClientOnly>
   )
 }
