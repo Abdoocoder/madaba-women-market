@@ -21,8 +21,10 @@ export default function AdminDashboardClient() {
         {dashboardSections.map((section) => (
           <Link key={section.href} href={section.href} passHref>
             <Button asChild className="w-full h-full text-left flex flex-col items-start p-4 border rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
-              <h2 className="text-xl font-bold">{t(section.title.toLowerCase())}</h2>
-              <p>{t(section.description.toLowerCase())}</p>
+              <div>
+                <h2 className="text-xl font-bold">{t(section.title.toLowerCase())}</h2>
+                <p>{t(section.description.toLowerCase())}</p>
+              </div>
             </Button>
           </Link>
         ))}
