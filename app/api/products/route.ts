@@ -126,3 +126,79 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
     }
 }
+
+/**
+ * @swagger
+ * /api/products:
+ *   put:
+ *     description: Updates an existing product for the authenticated seller
+ *     responses:
+ *       200:
+ *         description: The updated product.
+ *       400:
+ *         description: Bad request (e.g., missing data).
+ *       401:
+ *         description: Unauthorized.
+ *       404:
+ *         description: Product not found.
+ */
+export async function PUT(request: NextRequest) {
+    const user = await getAuthenticatedUser(request);
+    if (!user || user.role !== 'seller') {
+        return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
+
+    try {
+        const body = await request.json();
+        const { id, nameAr, descriptionAr, price, category, stock, image } = body;
+
+        if (!id) {
+            return NextResponse.json({ message: 'Product ID is required' }, { status: 400 });
+        }
+
+        if (!nameAr || !descriptionAr || !price || !category || stock === undefined) {
+            return NextResponse.json({ message: 'Missing required fields' }, { status: 400 });
+        }
+
+        const adminDb = getAdminDb();
+        const productRef = adminDb.collection('products').doc(id);
+        const productDoc = await productRef.get();
+        
+        if (!productDoc.exists) {
+            return NextResponse.json({ message: 'Product not found' }, { status: 404 });
+        }
+
+        const productData = productDoc.data() as Product;
+        
+        // Verify that the product belongs to the authenticated seller
+        if (productData.sellerId !== user.id) {
+            return NextResponse.json({ message: 'Access denied - you can only update your own products' }, { status: 403 });
+        }
+
+        const updatedProduct: Partial<Product> = {
+            name: nameAr,
+            nameAr: nameAr,
+            description: descriptionAr,
+            descriptionAr: descriptionAr,
+            price: Number(price),
+            category: category,
+            stock: Number(stock),
+            ...(image && { image: image }), // Only update image if provided
+        };
+
+        // Update the product in Firestore
+        await productRef.update(updatedProduct);
+        
+        // Get the updated product
+        const updatedDoc = await productRef.get();
+        const finalProduct = { id: updatedDoc.id, ...updatedDoc.data() } as Product;
+
+        return NextResponse.json(finalProduct, { status: 200 });
+    } catch (error) {
+        console.error('Error updating product:', error);
+        return NextResponse.json({ 
+            message: 'Internal Server Error',
+            error: error instanceof Error ? error.message : 'Unknown error'
+        }, { status: 500 });
+    }
+}

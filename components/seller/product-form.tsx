@@ -72,7 +72,7 @@ export function ProductForm({ product, onSubmit, onCancel }: ProductFormProps) {
                     onClick={() => open()}
                   >
                     {imagePreview ? (
-                      <Image src={imagePreview} alt="معاينة المنتج" layout="fill" objectFit="cover" className="rounded-lg" />
+                      <Image src={imagePreview} alt="معاينة المنتج" fill className="object-cover rounded-lg" />
                     ) : (
                       <div className="text-center text-muted-foreground">
                         <p>اسحب وأفلت الصورة هنا، أو انقر للتحديد</p>
