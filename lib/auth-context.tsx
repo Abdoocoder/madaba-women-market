@@ -8,7 +8,9 @@ import {
   signOut,
   GoogleAuthProvider,
   signInWithPopup,
-  sendPasswordResetEmail
+  sendPasswordResetEmail,
+  sendEmailVerification,
+  reload
 } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "./firebase";
@@ -21,6 +23,8 @@ interface AuthContextType {
   signInWithGoogle: (role: UserRole) => Promise<boolean>
   logout: () => void
   sendPasswordReset: (email: string) => Promise<boolean>
+  sendVerificationEmail: () => Promise<boolean>
+  checkEmailVerification: () => Promise<boolean>
   isLoading: boolean
   refreshAuthUser: () => Promise<void>
 }
@@ -64,6 +68,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
+      // Validate inputs
+      if (!email || !password) {
+        throw new Error('Please enter both email and password.');
+      }
+      
       await signInWithEmailAndPassword(auth, email, password);
       return true;
     } catch (error: any) {
@@ -78,17 +87,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else if (error.code === 'auth/wrong-password') {
         errorMessage = "Incorrect password. Please try again.";
       } else if (error.code === 'auth/too-many-requests') {
-        errorMessage = "Too many failed attempts. Please try again later.";
+        errorMessage = "Too many failed attempts. Please try again later or reset your password.";
       } else if (error.code === 'auth/network-request-failed') {
         errorMessage = "Network error. Please check your internet connection.";
+      } else if (error.code === 'auth/user-disabled') {
+        errorMessage = "This account has been disabled. Please contact support.";
+      } else if (error.message) {
+        errorMessage = error.message;
       }
-      
-      console.log("🔍 Debug info:", {
-        errorCode: error.code,
-        errorMessage: error.message,
-        attemptedEmail: email,
-        projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID
-      });
       
       throw new Error(errorMessage);
     }
@@ -204,6 +210,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const sendVerificationEmail = async (): Promise<boolean> => {
+    try {
+      if (auth.currentUser && !auth.currentUser.emailVerified) {
+        await sendEmailVerification(auth.currentUser);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("❌ Error sending verification email:", error);
+      return false;
+    }
+  };
+
+  const checkEmailVerification = async (): Promise<boolean> => {
+    try {
+      if (auth.currentUser) {
+        await reload(auth.currentUser);
+        return auth.currentUser.emailVerified;
+      }
+      return false;
+    } catch (error) {
+      console.error("❌ Error checking email verification:", error);
+      return false;
+    }
+  };
+
   const refreshAuthUser = async () => {
     const firebaseUser = auth.currentUser;
     if (firebaseUser) {
@@ -216,7 +248,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const value = { user, login, signUp, signInWithGoogle, logout, sendPasswordReset, isLoading, refreshAuthUser };
+  const value = { 
+    user, 
+    login, 
+    signUp, 
+    signInWithGoogle, 
+    logout, 
+    sendPasswordReset, 
+    sendVerificationEmail,
+    checkEmailVerification,
+    isLoading, 
+    refreshAuthUser 
+  };
 
   return (
     <AuthContext.Provider value={value}>
