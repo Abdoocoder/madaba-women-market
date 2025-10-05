@@ -112,30 +112,30 @@ Madaba Women Market is a comprehensive e-commerce platform designed to empower w
 ### 💾 **Installation**
 
 1. **Clone the repository**
-   ```bash
+   \`\`\`bash
    git clone <repository-url>
    cd madaba-women-market
-   ```
+   \`\`\`
 
 2. **Install dependencies**
-   ```bash
+   \`\`\`bash
    npm install
    # or
    pnpm install
-   ```
+   \`\`\`
 
 3. **Set up environment variables**
-   ```bash
+   \`\`\`bash
    cp .env.example .env.local
-   ```
+   \`\`\`
    Fill in your Firebase and Cloudinary credentials in `.env.local`
 
 4. **Run development server**
-   ```bash
+   \`\`\`bash
    npm run dev
    # or
    pnpm dev
-   ```
+   \`\`\`
 
 5. **Open your browser**
    Visit [http://localhost:3000](http://localhost:3000)
@@ -187,7 +187,7 @@ Madaba Women Market is a comprehensive e-commerce platform designed to empower w
 
 ## 📁 Project Structure
 
-```
+\`\`\`
 .
 ├── app/                    # Next.js 15 App Router
 │   ├── admin/               # Admin dashboard pages
@@ -207,7 +207,7 @@ Madaba Women Market is a comprehensive e-commerce platform designed to empower w
 ├── firestore.rules         # Firebase security rules
 ├── .env.example            # Environment variables template
 └── DEPLOYMENT.md           # Deployment instructions
-```
+\`\`\`
 
 ## 🏧 Architecture Overview
 
@@ -251,30 +251,30 @@ This application is configured for **free production hosting** using:
 ### 🛠️ **Production Deployment**
 
 1. **Prepare Environment**
-   ```bash
+   \`\`\`bash
    # Copy environment template
    cp .env.example .env.local
    # Fill in your Firebase + Cloudinary credentials
-   ```
+   \`\`\`
 
 2. **Build for Production**
-   ```bash
+   \`\`\`bash
    npm run build
    # or
    pnpm build
    
    # Verify build success
    npm run start
-   ```
+   \`\`\`
 
 3. **Deploy to Vercel**
-   ```bash
+   \`\`\`bash
    # Install Vercel CLI
    npm i -g vercel
    
    # Deploy
    vercel --prod
-   ```
+   \`\`\`
 
 4. **Configure Environment Variables**
    - Add all `.env.local` variables to Vercel dashboard
@@ -298,7 +298,7 @@ This application is configured for **free production hosting** using:
 
 Create `.env.local` with the following configuration:
 
-```bash
+\`\`\`bash
 # Firebase Client Configuration
 NEXT_PUBLIC_FIREBASE_API_KEY=your_firebase_api_key
 NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
@@ -319,7 +319,7 @@ CLOUDINARY_API_SECRET=your_api_secret
 
 # Environment
 NODE_ENV=production
-```
+\`\`\`
 
 ⚠️ **Security Note**: Never commit `.env.local` to version control. Keep your Firebase private keys secure!
 
