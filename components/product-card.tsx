@@ -36,10 +36,10 @@ export function ProductCard({ product, onRemoveFromWishlist }: ProductCardProps)
                 <div className="flex items-center mt-2">
                     <div className="flex items-center gap-1">
                         {[...Array(5)].map((_, i) => (
-                            <Star key={i} className={`w-4 h-4 ${i < (product.rating || 0) ? "text-yellow-400 fill-yellow-400" : "text-muted-foreground"}`} />
+                            <Star key={i} className={`w-4 h-4 text-muted-foreground`} />
                         ))}
                     </div>
-                    <span className="text-xs text-muted-foreground ml-2">({product.reviewCount || 0})</span>
+                    <span className="text-xs text-muted-foreground ml-2">(No reviews yet)</span>
                 </div>
             </CardContent>
             <CardFooter className="p-4 pt-0 flex justify-between items-center">

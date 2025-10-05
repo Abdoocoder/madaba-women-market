@@ -35,7 +35,7 @@ export default function CartPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header cartItemCount={totalItems} />
+      <Header cartItemCount={totalItems} user={user} />
       <main className="container py-8">
         <div className="mb-8">
           <Button variant="ghost" onClick={() => router.push("/")} className="mb-4">

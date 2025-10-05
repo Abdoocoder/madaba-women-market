@@ -71,7 +71,7 @@ export function SellerManagement() {
                         <TableCell>{seller.name}</TableCell>
                         <TableCell>{seller.email}</TableCell>
                         <TableCell>
-                            <Badge variant={seller.status === 'approved' ? 'success' : seller.status === 'pending' ? 'secondary' : 'destructive'}>
+                            <Badge variant={seller.status === 'approved' ? 'default' : seller.status === 'pending' ? 'secondary' : 'destructive'}>
                                 {seller.status}
                             </Badge>
                         </TableCell>

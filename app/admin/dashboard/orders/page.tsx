@@ -35,7 +35,7 @@ const OrderManagementPage = () => {
     }
   }, [user]);
 
-  const handleStatusChange = async (orderId: string, status: 'pending' | 'shipped' | 'completed') => {
+  const handleStatusChange = async (orderId: string, status: 'pending' | 'processing' | 'shipped' | 'delivered') => {
     const toastId = toast.loading('Updating order status...');
     try {
       const orderRef = doc(db, 'orders', orderId);
@@ -69,7 +69,7 @@ const OrderManagementPage = () => {
           {orders.map(o => (
             <TableRow key={o.id}>
               <TableCell>{o.id}</TableCell>
-              <TableCell>{o.userId}</TableCell>
+              <TableCell>{o.customerId}</TableCell>
               <TableCell>{o.total}</TableCell>
               <TableCell>
                 <Select value={o.status} onValueChange={(value) => handleStatusChange(o.id, value as any)}>
@@ -78,8 +78,9 @@ const OrderManagementPage = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="processing">Processing</SelectItem>
                     <SelectItem value="shipped">Shipped</SelectItem>
-                    <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="delivered">Delivered</SelectItem>
                   </SelectContent>
                 </Select>
               </TableCell>

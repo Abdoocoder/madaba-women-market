@@ -20,7 +20,7 @@ interface SalesData {
 
 export function SalesChart() {
   const { t, language } = useLocale()
-  const { token } = useAuth() // Get the token
+  const { getAuthToken } = useAuth() // Get the token function
   const [monthlyData, setMonthlyData] = useState<SalesData[]>([])
   const [dailyData, setDailyData] = useState<SalesData[]>([])
   const [isLoading, setIsLoading] = useState(true)

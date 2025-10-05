@@ -1,22 +1,14 @@
-'use client'
+"use client"
 
 import { useState, useEffect } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
+import { useLocale } from '@/lib/locale-context'
+import { useAuth } from '@/lib/auth-context'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { useLocale } from '@/lib/locale-context'
-import { useAuth } from '@/lib/auth-context' // Import the auth hook
+import type { Order as OrderType } from '@/lib/types'
 
-// Define the types for our order and its status
-type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
 interface Order {
   id: string;
   customer: string;
@@ -25,150 +17,165 @@ interface Order {
   status: OrderStatus;
 }
 
-// Helper to create authorization headers
+type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered';
+
+// Create auth headers for API requests
 const createAuthHeaders = (token: string) => ({
-    'Authorization': `Bearer ${token}`,
-});
+  'Authorization': `Bearer ${token}`,
+  'Content-Type': 'application/json',
+})
 
 export function OrderList() {
   const { t } = useLocale()
-  const { token } = useAuth() // Get the token
+  const { getAuthToken } = useAuth() // Get the token function
   const [orders, setOrders] = useState<Order[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchOrders = async () => {
-      if (!token) {
-        setIsLoading(false);
-        setError('Authentication token not found.');
-        return;
-      }
-
       try {
-        setIsLoading(true)
-        const response = await fetch('/api/orders', {
-            headers: createAuthHeaders(token),
-        })
-        if (!response.ok) {
-          throw new Error('Failed to fetch orders')
+        const token = await getAuthToken()
+        if (!token) {
+          setError('Authentication required')
+          return
         }
-        const data = await response.json()
-        setOrders(data)
+
+        const response = await fetch('/api/orders', {
+          method: 'GET',
+          headers: createAuthHeaders(token),
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+          setOrders(data)
+        } else {
+          setError('Failed to fetch orders')
+        }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'An unknown error occurred')
+        setError('Network error')
+        console.error('Error fetching orders:', err)
       } finally {
         setIsLoading(false)
       }
     }
 
     fetchOrders()
-  }, [token]) // Re-run effect if token changes
+  }, [getAuthToken]) // Re-run effect if getAuthToken changes
 
-  const handleStatusChange = async (orderId: string, newStatus: OrderStatus) => {
+  const handleStatusUpdate = async (orderId: string, newStatus: OrderStatus) => {
+    const token = await getAuthToken()
     if (!token) return; 
-
-    const originalOrders = [...orders]
-    const updatedOrders = orders.map((order) =>
-      order.id === orderId ? { ...order, status: newStatus } : order
-    )
-    setOrders(updatedOrders)
 
     try {
       const response = await fetch(`/api/orders/${orderId}`, {
         method: 'PUT',
-        headers: {
-            ...createAuthHeaders(token),
-            'Content-Type': 'application/json' 
-        },
+        headers: createAuthHeaders(token),
         body: JSON.stringify({ status: newStatus }),
       })
 
-      if (!response.ok) {
-        setOrders(originalOrders)
-        console.error('Failed to update order status')
+      if (response.ok) {
+        // Update local state
+        setOrders(orders.map(order => 
+          order.id === orderId ? { ...order, status: newStatus } : order
+        ))
+      } else {
+        setError('Failed to update order')
       }
     } catch (err) {
-      setOrders(originalOrders)
-      console.error('An error occurred while updating status:', err)
+      setError('Network error')
+      console.error('Error updating order:', err)
     }
   }
 
-  const getStatusVariant = (status: OrderStatus) => {
-    switch (status) {
-      case 'pending': return 'destructive'
-      case 'processing': return 'secondary'
-      case 'shipped': return 'default'
-      case 'delivered': return 'success'
-      case 'cancelled': return 'outline'
-      default: return 'outline'
-    }
-  }
-
+  // Status translations
   const statusTranslations: Record<OrderStatus, string> = {
-    pending: t('order.status.pending') || 'Pending',
-    processing: t('order.status.processing') || 'Processing',
-    shipped: t('order.status.shipped') || 'Shipped',
-    delivered: t('order.status.delivered') || 'Delivered',
-    cancelled: t('order.status.cancelled') || 'Cancelled',
+    pending: t('order.pending') || 'Pending',
+    processing: t('order.processing') || 'Processing', 
+    shipped: t('order.shipped') || 'Shipped',
+    delivered: t('order.delivered') || 'Delivered'
+  }
+
+  // Status badge variants
+  const getStatusVariant = (status: OrderStatus): "default" | "secondary" | "destructive" | "outline" => {
+    switch (status) {
+      case 'pending':
+        return 'secondary'
+      case 'processing':
+        return 'default'
+      case 'shipped':
+        return 'outline'
+      case 'delivered':
+        return 'default'
+      default:
+        return 'secondary'
+    }
   }
 
   if (isLoading) {
-    return <p>{t('messages.loading') || 'Loading orders...'}</p>
+    return <div className="text-center py-4">{t('common.loading') || 'Loading...'}</div>
   }
 
   if (error) {
-    return <p className="text-destructive">{t('messages.error')}: {error}</p>
+    return <div className="text-center py-4 text-red-500">{error}</div>
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t('seller.orderManagement') || 'Order Management'}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Table>
-          <TableHeader>
+    <div className="space-y-4">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>{t('order.id') || 'Order ID'}</TableHead>
+            <TableHead>{t('order.customer') || 'Customer'}</TableHead>
+            <TableHead>{t('order.date') || 'Date'}</TableHead>
+            <TableHead>{t('order.total') || 'Total'}</TableHead>
+            <TableHead>{t('order.status') || 'Status'}</TableHead>
+            <TableHead>{t('order.actions') || 'Actions'}</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {orders.length === 0 ? (
             <TableRow>
-              <TableHead>{t('order.id') || 'Order ID'}</TableHead>
-              <TableHead>{t('order.customer') || 'Customer'}</TableHead>
-              <TableHead>{t('order.date') || 'Date'}</TableHead>
-              <TableHead className="text-right">{t('order.total') || 'Total'}</TableHead>
-              <TableHead className="text-center">{t('order.status') || 'Status'}</TableHead>
+              <TableCell className="text-center">
+                {t('messages.noOrders') || 'No orders found.'}
+              </TableCell>
+              <TableCell></TableCell>
+              <TableCell></TableCell>
+              <TableCell></TableCell>
+              <TableCell></TableCell>
+              <TableCell></TableCell>
             </TableRow>
-          </TableHeader>
-          <TableBody>
-            {orders.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={5} className="text-center">{t('messages.noOrders') || 'No orders found.'}</TableCell>
+          ) : (
+            orders.map((order) => (
+              <TableRow key={order.id}>
+                <TableCell className="font-medium">{order.id}</TableCell>
+                <TableCell>{order.customer}</TableCell>
+                <TableCell>{new Date(order.date).toLocaleDateString()}</TableCell>
+                <TableCell>${order.total.toFixed(2)}</TableCell>
+                <TableCell>
+                  <Badge variant={getStatusVariant(order.status)}>{statusTranslations[order.status]}</Badge>
+                </TableCell>
+                <TableCell>
+                  <Select
+                    value={order.status}
+                    onValueChange={(value: OrderStatus) => handleStatusUpdate(order.id, value)}
+                  >
+                    <SelectTrigger className="w-32">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="processing">Processing</SelectItem>
+                      <SelectItem value="shipped">Shipped</SelectItem>
+                      <SelectItem value="delivered">Delivered</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </TableCell>
               </TableRow>
-            ) : (
-              orders.map((order) => (
-                <TableRow key={order.id}>
-                  <TableCell className="font-medium">{order.id}</TableCell>
-                  <TableCell>{order.customer}</TableCell>
-                  <TableCell>{new Date(order.date).toLocaleDateString()}</TableCell>
-                  <TableCell className="text-right">{`$${order.total.toFixed(2)}`}</TableCell>
-                  <TableCell className="text-center">
-                    <Select value={order.status} onValueChange={(value) => handleStatusChange(order.id, value as OrderStatus)}>
-                      <SelectTrigger className="w-32 mx-auto">
-                        <SelectValue asChild>
-                          <Badge variant={getStatusVariant(order.status)}>{statusTranslations[order.status]}</Badge>
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Object.keys(statusTranslations).map((status) => (
-                           <SelectItem key={status} value={status}>{statusTranslations[status as OrderStatus]}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
+            ))
+          )}
+        </TableBody>
+      </Table>
+    </div>
   )
 }

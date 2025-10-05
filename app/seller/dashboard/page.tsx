@@ -1,122 +1,145 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Package, DollarSign, ShoppingBag, TrendingUp, Plus, AlertCircle } from "lucide-react"
-import { StatsCard } from "@/components/seller/stats-card"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { OrderList } from "@/components/seller/order-list"
 import { ProductForm } from "@/components/seller/product-form"
 import { ProductList } from "@/components/seller/product-list"
 import { SalesChart } from "@/components/seller/sales-chart"
-import { OrderList } from "@/components/seller/order-list"
-import { Button } from "@/components/ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { StatsCard } from "@/components/seller/stats-card"
+import { Plus, DollarSign, Package, ShoppingCart, Clock } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
+import { useLocale } from "@/lib/locale-context"
 import type { Product } from "@/lib/types"
 
-// Helper to create authorization headers
+// Helper function to create auth headers
 const createAuthHeaders = (token: string) => ({
   Authorization: `Bearer ${token}`,
+  "Content-Type": "application/json",
 })
 
 export default function SellerDashboardPage() {
-  const { user, token } = useAuth()
+  const { user, getAuthToken } = useAuth()
   const router = useRouter()
   const [products, setProducts] = useState<Product[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState("products")
-  const [editingProduct, setEditingProduct] = useState<Product | undefined>()
+  const [stats, setStats] = useState<any>(null)
+  const [showAddForm, setShowAddForm] = useState(false)
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null)
+  const { t } = useLocale()
 
   useEffect(() => {
-    if (!user || user.role !== "seller" || !token) {
+    if (!user || user.role !== "seller") {
       router.push("/login")
       return
     }
 
     const fetchProducts = async () => {
+      const token = await getAuthToken()
+      if (!token) return
+
       try {
-        setIsLoading(true)
         const response = await fetch("/api/products", {
           headers: createAuthHeaders(token),
         })
-        if (!response.ok) {
-          throw new Error("Failed to fetch products")
+        if (response.ok) {
+          const data = await response.json()
+          setProducts(data)
         }
-        const sellerProducts = await response.json()
-        // No more client-side filtering needed!
-        setProducts(sellerProducts)
       } catch (error) {
-        console.error("Failed to fetch products:", error)
-      } finally {
-        setIsLoading(false)
+        console.error("Error fetching products:", error)
       }
     }
 
     fetchProducts()
-  }, [user, token, router])
+  }, [user, router, getAuthToken])
 
-  const handleAddProduct = async (data: Partial<Product>, imageFile?: File) => {
+  const fetchStats = async () => {
+    const token = await getAuthToken()
+    if (!token) return
+
+    try {
+      const response = await fetch("/api/stats", {
+        headers: createAuthHeaders(token),
+      })
+      if (response.ok) {
+        const data = await response.json()
+        setStats(data)
+      }
+    } catch (error) {
+      console.error("Error fetching stats:", error)
+    }
+  }
+
+  useEffect(() => {
+    if (user?.role === "seller") {
+      fetchStats()
+    }
+  }, [user])
+
+  const handleAddProduct = async (data: Partial<Product>, imageUrl?: string) => {
+    const token = await getAuthToken()
     if (!token) return
 
     const formData = new FormData()
-    Object.entries(data).forEach(([key, value]) => {
-      formData.append(key, String(value))
-    })
-    if (imageFile) {
-      formData.append("image", imageFile)
+    formData.append("nameAr", data.nameAr || "")
+    formData.append("descriptionAr", data.descriptionAr || "")
+    formData.append("price", String(data.price || 0))
+    formData.append("category", data.category || "")
+    formData.append("stock", String(data.stock || 0))
+    if (imageUrl) {
+      formData.append("imageUrl", imageUrl)
     }
 
     try {
       const response = await fetch("/api/products", {
         method: "POST",
-        headers: createAuthHeaders(token),
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
         body: formData,
       })
 
-      if (!response.ok) {
-        throw new Error("Failed to create product")
+      if (response.ok) {
+        const newProduct = await response.json()
+        setProducts([...products, newProduct])
+        setShowAddForm(false)
       }
-
-      const newProduct = await response.json()
-      setProducts([...products, newProduct])
-      setEditingProduct(undefined)
-      setActiveTab("products")
-      alert("تم إضافة المنتج بنجاح!")
     } catch (error) {
-      console.error(error)
-      alert("حدث خطأ أثناء إضافة المنتج.")
+      console.error("Error adding product:", error)
     }
   }
 
-  const handleEditProduct = async (data: Partial<Product>) => {
+  const handleEditProduct = async (data: Partial<Product>, imageUrl?: string) => {
+    const token = await getAuthToken()
     if (!editingProduct || !token) return
 
     try {
-      const response = await fetch(`/api/products/${editingProduct.id}`, {
-        method: "PUT",
-        headers: {
-          ...createAuthHeaders(token),
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      })
-
-      if (!response.ok) {
-        throw new Error("Failed to update product")
+      const updateData = { ...data }
+      if (imageUrl) {
+        updateData.image = imageUrl
       }
 
-      const updatedProduct = await response.json()
-      setProducts(products.map((p) => (p.id === updatedProduct.id ? updatedProduct : p)))
-      setEditingProduct(undefined)
-      setActiveTab("products")
-      alert("تم تحديث المنتج بنجاح!")
+      const response = await fetch(`/api/products/${editingProduct.id}`, {
+        method: "PUT",
+        headers: createAuthHeaders(token),
+        body: JSON.stringify(updateData),
+      })
+
+      if (response.ok) {
+        const updatedProduct = await response.json()
+        setProducts(products.map((p) => (p.id === editingProduct.id ? updatedProduct : p)))
+        setEditingProduct(null)
+      }
     } catch (error) {
-      console.error(error)
-      alert("حدث خطأ أثناء تحديث المنتج.")
+      console.error("Error updating product:", error)
     }
   }
 
   const handleDeleteProduct = async (productId: string) => {
+    const token = await getAuthToken()
     if (!token || !confirm("هل أنت متأكد من حذف هذا المنتج؟")) return
 
     try {
@@ -125,115 +148,156 @@ export default function SellerDashboardPage() {
         headers: createAuthHeaders(token),
       })
 
-      if (!response.ok) {
-        throw new Error("Failed to delete product")
+      if (response.ok) {
+        setProducts(products.filter((p) => p.id !== productId))
       }
-
-      setProducts(products.filter((p) => p.id !== productId))
-      alert("تم حذف المنتج بنجاح!")
     } catch (error) {
-      console.error(error)
-      alert("حدث خطأ أثناء حذف المنتج.")
+      console.error("Error deleting product:", error)
     }
   }
 
-  const handleShowForm = (product?: Product) => {
-    setEditingProduct(product)
-    setActiveTab("form")
-  }
-
-  const handleCancelForm = () => {
-    setEditingProduct(undefined)
-    setActiveTab("products")
-  }
-
   if (!user || user.role !== "seller") {
-    return null // Or a loading spinner
+    return <div>{t("common.loading")}</div>
   }
-
-  if (user.status === "pending") {
-    return (
-      <main className="container mx-auto py-8 px-4 md:px-6">
-        <Alert className="max-w-2xl mx-auto">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle className="text-lg font-semibold">حسابك قيد المراجعة</AlertTitle>
-          <AlertDescription className="mt-2">
-            شكراً لتسجيلك كبائعة في سيدتي ماركت. حسابك حالياً قيد المراجعة من قبل فريق الإدارة. سيتم إعلامك عبر البريد
-            الإلكتروني فور الموافقة على حسابك وستتمكن من إضافة منتجاتك.
-          </AlertDescription>
-          <div className="mt-4">
-            <Button onClick={() => router.push("/")} variant="outline">
-              العودة للصفحة الرئيسية
-            </Button>
-          </div>
-        </Alert>
-      </main>
-    )
-  }
-
-  // Mock calculations - replace with real data from API
-  const totalRevenue = products.reduce((sum, p) => sum + p.price * (10 - p.stock), 0)
-  const totalStock = products.reduce((sum, p) => sum + p.stock, 0)
 
   return (
-    <main className="container mx-auto py-8 px-4 md:px-6">
-      <div className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">لوحة تحكم البائع</h1>
-          <p className="text-muted-foreground mt-1">أهلاً بك مجدداً، {user.name}!</p>
-        </div>
-        <Button onClick={() => handleShowForm()} className="mt-4 sm:mt-0">
-          <Plus className="mr-2 h-4 w-4" />
-          إضافة منتج جديد
-        </Button>
+    <div className="container mx-auto py-8 px-4 space-y-8">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold">{t("seller.dashboard")}</h1>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full h-auto">
-          <TabsTrigger value="products">منتجاتي</TabsTrigger>
-          <TabsTrigger value="orders">الطلبات</TabsTrigger>
-          <TabsTrigger value="stats">الإحصائيات</TabsTrigger>
-          <TabsTrigger value="form" className={editingProduct ? "text-yellow-500" : ""} disabled>
-            {editingProduct ? "تعديل المنتج" : "إضافة منتج"}
-          </TabsTrigger>
+      <Tabs defaultValue="overview" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="overview">{t("seller.overview")}</TabsTrigger>
+          <TabsTrigger value="products">{t("seller.products")}</TabsTrigger>
+          <TabsTrigger value="orders">{t("seller.orders")}</TabsTrigger>
+          <TabsTrigger value="analytics">{t("seller.analytics")}</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="products">
-          {isLoading ? (
-            <p>جاري تحميل المنتجات...</p>
-          ) : (
-            <ProductList products={products} onEdit={handleShowForm} onDelete={handleDeleteProduct} />
-          )}
+        <TabsContent value="overview" className="space-y-6">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <StatsCard
+              title={t("seller.totalRevenue")}
+              value={stats?.totalRevenue ? `$${stats.totalRevenue.toFixed(2)}` : "$0.00"}
+              description={t("seller.thisMonth")}
+              icon={DollarSign}
+            />
+            <StatsCard
+              title={t("seller.totalOrders")}
+              value={stats?.totalOrders?.toString() || "0"}
+              description={t("seller.completed")}
+              icon={ShoppingCart}
+            />
+            <StatsCard
+              title={t("seller.totalProducts")}
+              value={products.length.toString()}
+              description={t("seller.active")}
+              icon={Package}
+            />
+            <StatsCard
+              title={t("seller.pendingOrders")}
+              value={stats?.pendingOrders?.toString() || "0"}
+              description={t("seller.needsAttention")}
+              icon={Clock}
+            />
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("seller.recentProducts")}</CardTitle>
+                <CardDescription>{t("seller.lastAdded")}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {products.slice(0, 3).map((product) => (
+                    <div key={product.id} className="flex items-center justify-between">
+                      <span className="text-sm font-medium">{product.nameAr}</span>
+                      <span className="text-sm text-muted-foreground">${product.price}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Sales chart temporarily disabled */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Analytics Coming Soon</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">Charts will be available soon</p>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
 
-        <TabsContent value="orders">
+        <TabsContent value="products" className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold">{t("seller.products")}</h2>
+            <Button onClick={() => setShowAddForm(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              {t("seller.addProduct")}
+            </Button>
+          </div>
+
+          {showAddForm && (
+            <ProductForm
+              onSubmit={handleAddProduct}
+              onCancel={() => setShowAddForm(false)}
+            />
+          )}
+
+          {editingProduct && (
+            <ProductForm
+              product={editingProduct}
+              onSubmit={handleEditProduct}
+              onCancel={() => setEditingProduct(null)}
+            />
+          )}
+
+          <ProductList
+            products={products}
+            onEdit={setEditingProduct}
+            onDelete={handleDeleteProduct}
+          />
+        </TabsContent>
+
+        <TabsContent value="orders" className="space-y-6">
+          <h2 className="text-2xl font-bold">{t("seller.orders")}</h2>
           <OrderList />
         </TabsContent>
 
-        <TabsContent value="stats">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <StatsCard title="إجمالي المنتجات" value={products.length} icon={Package} />
-            <StatsCard title="المنتجات المعتمدة" value={products.filter((p) => p.approved).length} icon={ShoppingBag} />
-            <StatsCard
-              title="إجمالي الإيرادات"
-              value={`${totalRevenue.toFixed(2)} د.أ`}
-              icon={DollarSign}
-              description="+20.1% من الشهر الماضي"
-            />
-            <StatsCard title="المخزون الكلي" value={totalStock} icon={TrendingUp} />
+        <TabsContent value="analytics" className="space-y-6">
+          <h2 className="text-2xl font-bold">{t("seller.analytics")}</h2>
+          <div className="grid gap-4 md:grid-cols-2">
+            {/* Sales chart temporarily disabled */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Analytics Coming Soon</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">Charts will be available soon</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("seller.topProducts")}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {products.slice(0, 5).map((product) => (
+                    <div key={product.id} className="flex items-center justify-between">
+                      <span className="text-sm font-medium">{product.nameAr}</span>
+                      <span className="text-sm text-muted-foreground">${product.price}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           </div>
-          <SalesChart />
-        </TabsContent>
-
-        <TabsContent value="form">
-          <ProductForm
-            key={editingProduct?.id || "new"}
-            product={editingProduct}
-            onSubmit={editingProduct ? handleEditProduct : handleAddProduct}
-            onCancel={handleCancelForm}
-          />
         </TabsContent>
       </Tabs>
-    </main>
+    </div>
   )
 }

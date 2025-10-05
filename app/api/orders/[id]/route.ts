@@ -20,14 +20,14 @@ import type { Order } from '@/lib/types'
  *       404:
  *         description: Order not found or access denied.
  */
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     const user = await getAuthenticatedUser(request);
     if (!user || user.role !== 'seller') {
         return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
     try {
-        const orderId = params.id;
+        const { id: orderId } = await params;
         const { status } = await request.json();
 
         if (!status) {
@@ -55,7 +55,8 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
         return NextResponse.json(updatedOrder);
 
     } catch (error) {
-        console.error(`Error updating order ${params.id}:`, error);
+        const { id: orderId } = await params;
+        console.error(`Error updating order ${orderId}:`, error);
         return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
     }
 }

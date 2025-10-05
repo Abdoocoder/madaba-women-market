@@ -6,6 +6,7 @@ import { ProductCard } from "@/components/products/product-card"
 import { ProductFilters } from "@/components/products/product-filters"
 import { FeaturedProducts } from "@/components/products/featured-products"
 import { useCart } from "@/lib/cart-context"
+import { useAuth } from "@/lib/auth-context"
 import { useLocale } from "@/lib/locale-context"
 import { collection, getDocs, query, where } from "firebase/firestore"
 import { db } from "@/lib/firebase"
@@ -15,6 +16,7 @@ export type SortOption = "date-desc" | "price-asc" | "price-desc" | "name-asc"
 
 export default function Home() {
   const { totalItems } = useCart()
+  const { user } = useAuth()
   const { t, language } = useLocale()
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
@@ -80,7 +82,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header cartItemCount={totalItems} />
+      <Header cartItemCount={totalItems} user={user} />
 
       <main className="container py-8">
         <div className="mb-12 text-center">

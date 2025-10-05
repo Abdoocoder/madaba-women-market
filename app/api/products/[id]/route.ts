@@ -45,8 +45,9 @@ async function authorizeSeller(request: NextRequest, productId: string): Promise
  *       404:
  *         description: Product not found or access denied.
  */
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
-    const authResult = await authorizeSeller(request, params.id);
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
+    const authResult = await authorizeSeller(request, id);
     if (authResult instanceof NextResponse) return authResult;
 
     const { product } = authResult;
@@ -66,8 +67,9 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
  *       404:
  *         description: Product not found or access denied.
  */
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
-    const authResult = await authorizeSeller(request, params.id);
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
+    const authResult = await authorizeSeller(request, id);
     if (authResult instanceof NextResponse) return authResult;
 
     const { product } = authResult;
@@ -79,12 +81,12 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
             updatedAt: new Date(),
         };
 
-        await adminDb.collection('products').doc(params.id).update(updatedData);
+        await adminDb.collection('products').doc(id).update(updatedData);
         const updatedProduct = { ...product, ...updatedData };
         
         return NextResponse.json(updatedProduct);
     } catch (error) {
-        console.error(`Error updating product ${params.id}:`, error);
+        console.error(`Error updating product ${id}:`, error);
         return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
     }
 }
@@ -102,15 +104,16 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
  *       404:
  *         description: Product not found or access denied.
  */
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
-    const authResult = await authorizeSeller(request, params.id);
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
+    const authResult = await authorizeSeller(request, id);
     if (authResult instanceof NextResponse) return authResult;
 
     try {
-        await adminDb.collection('products').doc(params.id).delete();
+        await adminDb.collection('products').doc(id).delete();
         return NextResponse.json({ message: 'Product deleted successfully' });
     } catch (error) {
-        console.error(`Error deleting product ${params.id}:`, error);
+        console.error(`Error deleting product ${id}:`, error);
         return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
     }
 }
