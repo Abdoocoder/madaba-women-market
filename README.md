@@ -66,11 +66,11 @@ The current Firebase Admin credentials in `.env.local` are placeholder data. To 
 5. Download the JSON file
 6. Update your `.env.local` file with the real values:
 
-```env
+\`\`\`env
 FIREBASE_PROJECT_ID="your-actual-project-id"
 FIREBASE_CLIENT_EMAIL="your-service-account@project.iam.gserviceaccount.com"
 FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nYOUR_ACTUAL_PRIVATE_KEY\n-----END PRIVATE KEY-----\n"
-```
+\`\`\`
 
 #### 🎨 Cloudinary Setup
 The current Cloudinary API secret is placeholder data. To fix the 400 upload errors:
@@ -79,22 +79,22 @@ The current Cloudinary API secret is placeholder data. To fix the 400 upload err
 2. Copy your **Cloud Name**, **API Key**, and **API Secret**
 3. Update your `.env.local` file:
 
-```env
+\`\`\`env
 NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME="your-actual-cloud-name"
 CLOUDINARY_API_KEY="your-actual-api-key"
 CLOUDINARY_API_SECRET="your-actual-api-secret"
-```
+\`\`\`
 
 #### Quick Setup Helper
 Run the setup helper script for detailed instructions:
-```bash
+\`\`\`bash
 bash setup-credentials.sh
-```
+\`\`\`
 
 After updating the credentials, restart your development server:
-```bash
+\`\`\`bash
 npm run dev
-```
+\`\`\`
 
 ## 🌟 Overview
 
