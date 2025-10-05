@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useLocale } from "@/lib/locale-context"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import AuthDebugPanel from "@/components/auth-debug-panel"
 import type { UserRole } from "@/lib/types"
 
 export default function LoginPage() {
@@ -28,11 +29,15 @@ export default function LoginPage() {
     e.preventDefault()
     setIsSubmitting(true)
     setError(null)
-    const success = await login(email, password)
-    if (success) {
-      router.push("/")
-    } else {
-      setError("Failed to login. Please check your credentials.")
+    
+    try {
+      const success = await login(email, password)
+      if (success) {
+        router.push("/")
+      }
+    } catch (error: any) {
+      setError(error.message || "Failed to login. Please check your credentials.")
+    } finally {
       setIsSubmitting(false)
     }
   }
@@ -77,7 +82,9 @@ export default function LoginPage() {
 
   return (
     <div className="container flex min-h-screen items-center justify-center py-12">
-      <Tabs defaultValue="login" className="w-[450px]">
+      <div className="w-[450px]">
+        <AuthDebugPanel />
+        <Tabs defaultValue="login" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="login">Login</TabsTrigger>
           <TabsTrigger value="signup">Sign Up</TabsTrigger>
@@ -181,6 +188,7 @@ export default function LoginPage() {
           </Card>
         </TabsContent>
       </Tabs>
+      </div>
     </div>
   )
 }

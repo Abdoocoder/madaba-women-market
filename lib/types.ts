@@ -8,6 +8,7 @@ export interface User {
   role: UserRole
   status?: UserStatus
   avatar?: string
+  photoURL?: string
   createdAt: Date
 }
 

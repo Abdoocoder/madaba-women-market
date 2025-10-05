@@ -66,14 +66,47 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error("❌ Error logging in:", error);
-      return false;
+      
+      // Provide more specific error messages
+      let errorMessage = "Failed to login. Please check your credentials.";
+      if (error.code === 'auth/invalid-credential') {
+        errorMessage = "Invalid email or password. Please check your credentials or create a new account.";
+      } else if (error.code === 'auth/user-not-found') {
+        errorMessage = "No account found with this email address.";
+      } else if (error.code === 'auth/wrong-password') {
+        errorMessage = "Incorrect password. Please try again.";
+      } else if (error.code === 'auth/too-many-requests') {
+        errorMessage = "Too many failed attempts. Please try again later.";
+      } else if (error.code === 'auth/network-request-failed') {
+        errorMessage = "Network error. Please check your internet connection.";
+      }
+      
+      console.log("🔍 Debug info:", {
+        errorCode: error.code,
+        errorMessage: error.message,
+        attemptedEmail: email,
+        projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID
+      });
+      
+      throw new Error(errorMessage);
     }
   }
   
   const signUp = async (email: string, password: string, role: UserRole): Promise<boolean> => {
     try {
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        throw new Error('Please enter a valid email address.');
+      }
+      
+      // Validate password strength
+      if (password.length < 6) {
+        throw new Error('Password must be at least 6 characters long.');
+      }
+      
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const firebaseUser = userCredential.user;
       const userDocRef = doc(db, "users", firebaseUser.uid);
@@ -82,7 +115,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         id: firebaseUser.uid,
         email: firebaseUser.email || '',
         name: firebaseUser.displayName || `New ${role.charAt(0).toUpperCase() + role.slice(1)}`,
-        photoURL: '',
+        photoURL: firebaseUser.photoURL || '',
         role: role,
         createdAt: new Date(),
       };
@@ -93,10 +126,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       await setDoc(userDocRef, newUser);
       setUser(newUser);
+      
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error("❌ Error signing up:", error);
-      return false;
+      
+      // Provide user-friendly error messages
+      let errorMessage = "Failed to create account. Please try again.";
+      
+      if (error.code === 'auth/email-already-in-use') {
+        errorMessage = "An account with this email already exists. Please sign in instead.";
+      } else if (error.code === 'auth/weak-password') {
+        errorMessage = "Password is too weak. Please use at least 6 characters.";
+      } else if (error.code === 'auth/invalid-email') {
+        errorMessage = "Please enter a valid email address.";
+      } else if (error.code === 'auth/operation-not-allowed') {
+        errorMessage = "Email/password accounts are not enabled. Please contact support.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      throw new Error(errorMessage);
     }
   };
 
