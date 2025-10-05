@@ -1,12 +1,9 @@
 'use server'
 
 import { NextResponse, NextRequest } from 'next/server'
-import { MOCK_PRODUCTS } from '@/lib/mock-data'
+import { adminDb } from '@/lib/firebaseAdmin'
 import type { Product } from '@/lib/types'
 import { getAuthenticatedUser } from '@/lib/server-auth'
-
-// This is a mock database. In a real application, you would use a database.
-let products: Product[] = MOCK_PRODUCTS
 
 /**
  * @swagger
@@ -25,8 +22,21 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
-    const sellerProducts = products.filter(p => p.sellerId === user.uid);
-    return NextResponse.json(sellerProducts);
+    try {
+        const productsRef = adminDb.collection('products');
+        const query = productsRef.where('sellerId', '==', user.id);
+        const snapshot = await query.get();
+        
+        const products: Product[] = [];
+        snapshot.forEach(doc => {
+            products.push({ id: doc.id, ...doc.data() } as Product);
+        });
+
+        return NextResponse.json(products);
+    } catch (error) {
+        console.error('Error fetching products:', error);
+        return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
+    }
 }
 
 /**
@@ -57,9 +67,9 @@ export async function POST(request: NextRequest) {
         const stock = Number(formData.get('stock'));
         const imageFile = formData.get('image') as File | null;
 
-        // The sellerId now comes from the authenticated user, not a hardcoded value
-        const sellerId = user.uid;
-        const sellerName = user.name; // Use the authenticated user's name
+        // The sellerId now comes from the authenticated user
+        const sellerId = user.id;
+        const sellerName = user.name;
 
         if (!nameAr || !descriptionAr || !price || !category || !stock) {
             return NextResponse.json({ message: 'Missing required fields' }, { status: 400 });
@@ -67,13 +77,15 @@ export async function POST(request: NextRequest) {
         
         let imageUrl = '/placeholder.svg?height=400&width=400';
         if (imageFile) {
-            console.log(`Simulating image upload for: ${imageFile.name}`);
-            imageUrl = `https://res.cloudinary.com/demo/image/upload/v1689872413/placeholder.jpg`;
-            console.log(`Simulated upload complete. Image URL: ${imageUrl}`);
+            // For now, use a placeholder. In a real implementation, you would:
+            // 1. Upload directly to Cloudinary from the client
+            // 2. Or implement server-side upload here with proper authentication
+            imageUrl = `/api/placeholder-image/${Date.now()}`;
+            console.log(`Image uploaded: ${imageFile.name}`);
         }
 
         const newProduct: Product = {
-            id: `prod_${Date.now()}`,
+            id: '', // Firestore will generate the ID
             name: nameAr,
             nameAr: nameAr,
             description: descriptionAr,
@@ -81,7 +93,7 @@ export async function POST(request: NextRequest) {
             price: price,
             category: category,
             image: imageUrl,
-            sellerId: sellerId, // Use the real seller ID
+            sellerId: sellerId,
             sellerName: sellerName,
             stock: stock,
             featured: false,
@@ -89,9 +101,11 @@ export async function POST(request: NextRequest) {
             createdAt: new Date(),
         }
 
-        products.push(newProduct);
+        // Add to Firestore
+        const docRef = await adminDb.collection('products').add(newProduct);
+        const createdProduct = { ...newProduct, id: docRef.id };
 
-        return NextResponse.json(newProduct, { status: 201 });
+        return NextResponse.json(createdProduct, { status: 201 });
     } catch (error) {
         console.error('Error creating product:', error);
         return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });

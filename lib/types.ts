@@ -39,10 +39,12 @@ export interface CartItem {
 export interface Order {
   id: string
   customerId: string
+  sellerId: string
   items: CartItem[]
   total: number
   status: "pending" | "processing" | "shipped" | "delivered"
   createdAt: Date
+  updatedAt?: Date
 }
 
 export interface Review {

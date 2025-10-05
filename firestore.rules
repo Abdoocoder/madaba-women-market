@@ -1,96 +1,55 @@
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // --- Helper Functions ---
-    // Check if user is authenticated
-    function isAuthenticated() {
-      return request.auth != null;
-    }
-
-    // Check if a user has a specific role (e.g., 'admin', 'seller')
-    function hasRole(role) {
-      // Use exists() to avoid errors on non-existent documents (e.g., during signup)
-      return isAuthenticated() && exists(/databases/$(database)/documents/users/$(request.auth.uid)) && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == role;
-    }
-
-    // Check if the user is the owner of the document by userId
-    function isOwner(userId) {
-      return isAuthenticated() && request.auth.uid == userId;
-    }
-
-    // --- Users Collection ---
+    // Users can only read/write their own data
     match /users/{userId} {
-      // ANYONE can create a user document (signup), but only for their own UID.
-      // The document must contain a 'role' field, defaulting to 'customer'.
-      allow create: if isOwner(userId)
-                    && 'role' in request.resource.data && request.resource.data.role == 'customer'
-                    && 'email' in request.resource.data;
-
-
-      // Users can read their own data. Admins can read any user's data.
-      allow read: if isOwner(userId) || hasRole('admin');
-
-      // Users can update their own data, but CANNOT change their role.
-      // Admins can update any user document, including the role.
-      allow update: if (isOwner(userId) && request.resource.data.role == resource.data.role) || hasRole('admin');
-
-      // Only admins can delete user accounts.
-      allow delete: if hasRole('admin');
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read: if request.auth != null && request.auth.uid != null;
     }
-
-    // --- Products Collection ---
+    
+    // Products - sellers can manage their own, everyone can read approved ones
     match /products/{productId} {
-      // Anyone (authenticated or not) can read products.
-      allow read: if true;
-
-      // Sellers can create products.
-      // - Must have the 'seller' role.
-      // - The new product's sellerId must be their own UID.
-      // - Validate required fields and data types for security and data integrity.
-      allow create: if hasRole('seller')
-                    && request.resource.data.sellerId == request.auth.uid
-                    && 'name' in request.resource.data && request.resource.data.name is string
-                    && 'price' in request.resource.data && request.resource.data.price is number
-                    && 'stock' in request.resource.data && request.resource.data.stock is number;
-
-      // Sellers can update their OWN products. Admins can update ANY product.
-      // - The sellerId of a product cannot be changed after creation.
-      allow update: if hasRole('admin') || (hasRole('seller')
-                    && resource.data.sellerId == request.auth.uid
-                    && request.resource.data.sellerId == resource.data.sellerId);
-
-      // Sellers can delete their OWN products. Admins can delete ANY product.
-      allow delete: if hasRole('admin') || (hasRole('seller') && resource.data.sellerId == request.auth.uid);
+      allow read: if resource.data.approved == true || 
+        (request.auth != null && request.auth.uid == resource.data.sellerId);
+      allow create: if request.auth != null && 
+        request.auth.uid == request.resource.data.sellerId;
+      allow update: if request.auth != null && 
+        request.auth.uid == resource.data.sellerId;
+      allow delete: if request.auth != null && 
+        (request.auth.uid == resource.data.sellerId || 
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
     }
-
-    // --- Carts Collection ---
-    match /carts/{userId} {
-      // Users can only read and write to their own cart.
-      allow read, write: if isOwner(userId);
-    }
-
-    // --- Orders Collection ---
+    
+    // Orders - users can access their own orders, sellers can access orders for their products
     match /orders/{orderId} {
-      // Users can create their own orders.
-      // - Must be creating an order for themselves (userId must match UID).
-      // - Validate required fields.
-      allow create: if isOwner(request.resource.data.userId)
-                    && 'items' in request.resource.data && request.resource.data.items is list
-                    && 'total' in request.resource.data && request.resource.data.total is number;
-
-      // Users can read their own orders.
-      // Admins and Sellers can read all orders.
-      // Note: A more granular rule could allow sellers to read only orders containing their products, but this is a good start.
-      allow read: if hasRole('admin') || hasRole('seller') || (isAuthenticated() && resource.data.userId == request.auth.uid);
-
-      // Only Admins can update order status.
-      // Future improvement: Allow sellers to update the status of their items within an order.
-      allow update: if hasRole('admin');
-
-      // Deletion of orders is explicitly disallowed to maintain a historical record.
-      allow delete: if false;
+      allow read, write: if request.auth != null && 
+        (request.auth.uid == resource.data.customerId || 
+         request.auth.uid == resource.data.sellerId ||
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
+      allow create: if request.auth != null && 
+        request.auth.uid == request.resource.data.customerId;
+    }
+    
+    // Wishlists - users can only access their own wishlist
+    match /wishlists/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Categories - read only for all users, write for admins
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow write: if request.auth != null && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // Reviews - users can create reviews, read all approved reviews
+    match /reviews/{reviewId} {
+      allow read: if resource.data.approved == true;
+      allow create: if request.auth != null && 
+        request.auth.uid == request.resource.data.userId;
+      allow update: if request.auth != null && 
+        (request.auth.uid == resource.data.userId ||
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
     }
   }
 }

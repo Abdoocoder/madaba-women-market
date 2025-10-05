@@ -1,30 +1,34 @@
 'use server'
 
 import { NextResponse, NextRequest } from 'next/server'
-import { MOCK_PRODUCTS } from '@/lib/mock-data'
+import { adminDb } from '@/lib/firebaseAdmin'
 import type { Product } from '@/lib/types'
 import { getAuthenticatedUser } from '@/lib/server-auth'
 
-let products: Product[] = MOCK_PRODUCTS;
-
-async function authorizeSeller(request: NextRequest, productId: string): Promise<{user: any, productIndex: number} | NextResponse> {
+async function authorizeSeller(request: NextRequest, productId: string): Promise<{user: any, product: Product} | NextResponse> {
     const user = await getAuthenticatedUser(request);
     if (!user || user.role !== 'seller') {
         return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
-    const productIndex = products.findIndex((p) => p.id === productId);
-    if (productIndex === -1) {
-        return NextResponse.json({ message: 'Product not found' }, { status: 404 });
-    }
+    try {
+        const productDoc = await adminDb.collection('products').doc(productId).get();
+        if (!productDoc.exists) {
+            return NextResponse.json({ message: 'Product not found' }, { status: 404 });
+        }
 
-    // Authorization check: Does the product belong to the authenticated seller?
-    if (products[productIndex].sellerId !== user.uid) {
-        // Return 404 to avoid leaking information about which products exist.
-        return NextResponse.json({ message: 'Product not found or access denied' }, { status: 404 });
+        const product = { id: productDoc.id, ...productDoc.data() } as Product;
+        
+        // Authorization check: Does the product belong to the authenticated seller?
+        if (product.sellerId !== user.id) {
+            return NextResponse.json({ message: 'Product not found or access denied' }, { status: 404 });
+        }
+        
+        return { user, product };
+    } catch (error) {
+        console.error('Error fetching product:', error);
+        return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
     }
-    
-    return { user, productIndex };
 }
 
 
@@ -45,8 +49,8 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     const authResult = await authorizeSeller(request, params.id);
     if (authResult instanceof NextResponse) return authResult;
 
-    const { productIndex } = authResult;
-    return NextResponse.json(products[productIndex]);
+    const { product } = authResult;
+    return NextResponse.json(product);
 }
 
 /**
@@ -66,20 +70,19 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     const authResult = await authorizeSeller(request, params.id);
     if (authResult instanceof NextResponse) return authResult;
 
-    const { productIndex } = authResult;
+    const { product } = authResult;
 
     try {
         const body = await request.json();
-        const originalProduct = products[productIndex];
-        const updatedProduct = {
-            ...originalProduct,
+        const updatedData = {
             ...body,
             updatedAt: new Date(),
         };
 
-        products[productIndex] = updatedProduct;
+        await adminDb.collection('products').doc(params.id).update(updatedData);
+        const updatedProduct = { ...product, ...updatedData };
+        
         return NextResponse.json(updatedProduct);
-
     } catch (error) {
         console.error(`Error updating product ${params.id}:`, error);
         return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
@@ -103,8 +106,11 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     const authResult = await authorizeSeller(request, params.id);
     if (authResult instanceof NextResponse) return authResult;
 
-    const { productIndex } = authResult;
-
-    products.splice(productIndex, 1);
-    return NextResponse.json({ message: 'Product deleted successfully' });
+    try {
+        await adminDb.collection('products').doc(params.id).delete();
+        return NextResponse.json({ message: 'Product deleted successfully' });
+    } catch (error) {
+        console.error(`Error deleting product ${params.id}:`, error);
+        return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
+    }
 }

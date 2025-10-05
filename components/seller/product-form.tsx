@@ -10,11 +10,12 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { CATEGORIES } from "@/lib/mock-data"
+import { CldUploadWidget } from 'next-cloudinary'
 import type { Product } from "@/lib/types"
 
 interface ProductFormProps {
   product?: Product
-  onSubmit: (data: Partial<Product>, imageFile?: File) => void
+  onSubmit: (data: Partial<Product>, imageUrl?: string) => void
   onCancel: () => void
 }
 
@@ -27,24 +28,16 @@ export function ProductForm({ product, onSubmit, onCancel }: ProductFormProps) {
     stock: product?.stock || 0,
   })
   const [imagePreview, setImagePreview] = useState(product?.image || null)
-  const [imageFile, setImageFile] = useState<File | undefined>()
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [imageUrl, setImageUrl] = useState<string | undefined>(product?.image)
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      setImageFile(file)
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string)
-      }
-      reader.readAsDataURL(file)
-    }
+  const handleImageUpload = (result: any) => {
+    setImagePreview(result.info.secure_url)
+    setImageUrl(result.info.secure_url)
   }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    onSubmit(formData, imageFile)
+    onSubmit(formData, imageUrl)
   }
 
   return (
@@ -56,26 +49,32 @@ export function ProductForm({ product, onSubmit, onCancel }: ProductFormProps) {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label>صورة المنتج</Label>
-            <div
-              className="w-full h-48 border-2 border-dashed rounded-lg flex items-center justify-center cursor-pointer relative"
-              onClick={() => fileInputRef.current?.click()}
+            <CldUploadWidget
+              uploadPreset="madaba-women-market"
+              onSuccess={handleImageUpload}
+              options={{
+                folder: "madaba-women-market",
+                resourceType: "image",
+                maxFileSize: 5000000, // 5MB
+                clientAllowedFormats: ["png", "jpg", "jpeg", "webp"]
+              }}
             >
-              {imagePreview ? (
-                <Image src={imagePreview} alt="معاينة المنتج" layout="fill" objectFit="cover" className="rounded-lg" />
-              ) : (
-                <div className="text-center text-muted-foreground">
-                  <p>اسحب وأفلت الصورة هنا، أو انقر للتحديد</p>
-                  <p className="text-xs">(الحجم الموصى به: 800x800 بكسل)</p>
+              {({ open }) => (
+                <div
+                  className="w-full h-48 border-2 border-dashed rounded-lg flex items-center justify-center cursor-pointer relative"
+                  onClick={() => open()}
+                >
+                  {imagePreview ? (
+                    <Image src={imagePreview} alt="معاينة المنتج" layout="fill" objectFit="cover" className="rounded-lg" />
+                  ) : (
+                    <div className="text-center text-muted-foreground">
+                      <p>اسحب وأفلت الصورة هنا، أو انقر للتحديد</p>
+                      <p className="text-xs">(الحجم الموصى به: 800x800 بكسل)</p>
+                    </div>
+                  )}
                 </div>
               )}
-            </div>
-            <Input
-              ref={fileInputRef}
-              type="file"
-              className="hidden"
-              onChange={handleImageChange}
-              accept="image/png, image/jpeg, image/webp"
-            />
+            </CldUploadWidget>
           </div>
 
           <div className="space-y-2">

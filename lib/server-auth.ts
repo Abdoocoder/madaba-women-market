@@ -1,38 +1,71 @@
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
+import { adminAuth, adminDb } from "./firebaseAdmin";
 import { User } from "./types";
+import { NextRequest } from "next/server";
 
-// A mock function to simulate fetching user data from a session
-// In a real application, you would replace this with a library like next-auth or your own session management logic.
-async function getMockUserFromSession(sessionToken: string | undefined): Promise<User | null> {
-    if (!sessionToken) {
+// Get user from Firebase ID token
+export async function getServerUser(): Promise<User | null> {
+    try {
+        const headersList = await headers();
+        const authHeader = headersList.get('authorization');
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return null;
+        }
+
+        const idToken = authHeader.split('Bearer ')[1];
+        const decodedToken = await adminAuth.verifyIdToken(idToken);
+        
+        // Get user data from Firestore
+        const userDoc = await adminDb.collection('users').doc(decodedToken.uid).get();
+        
+        if (!userDoc.exists) {
+            return null;
+        }
+
+        const userData = userDoc.data();
+        return {
+            id: decodedToken.uid,
+            email: decodedToken.email || '',
+            name: userData?.name || decodedToken.name || 'Unknown User',
+            photoURL: userData?.photoURL || decodedToken.picture || '',
+            role: userData?.role || 'customer',
+            createdAt: userData?.createdAt || new Date(),
+        } as User;
+    } catch (error) {
+        console.error('Error verifying token:', error);
         return null;
     }
+}
 
-    // This is a simplified example. In a real app, you would:
-    // 1. Verify the session token.
-    // 2. Fetch the user data from your database based on the session's user ID.
-    // Here, we'll just return a mock user if the token is 'mock-session-token'.
-    if (sessionToken === 'mock-session-token') {
+// Alternative method for API routes that receive NextRequest
+export async function getAuthenticatedUser(request: NextRequest): Promise<User | null> {
+    try {
+        const authHeader = request.headers.get('authorization');
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return null;
+        }
+
+        const idToken = authHeader.split('Bearer ')[1];
+        const decodedToken = await adminAuth.verifyIdToken(idToken);
+        
+        // Get user data from Firestore
+        const userDoc = await adminDb.collection('users').doc(decodedToken.uid).get();
+        
+        if (!userDoc.exists) {
+            return null;
+        }
+
+        const userData = userDoc.data();
         return {
-            uid: 'server-user-uid',
-            email: 'server@example.com',
-            displayName: 'Server User',
-            role: 'customer',
-            createdAt: new Date().toISOString(),
-        };
+            id: decodedToken.uid,
+            email: decodedToken.email || '',
+            name: userData?.name || decodedToken.name || 'Unknown User',
+            photoURL: userData?.photoURL || decodedToken.picture || '',
+            role: userData?.role || 'customer',
+            createdAt: userData?.createdAt || new Date(),
+        } as User;
+    } catch (error) {
+        console.error('Error verifying token:', error);
+        return null;
     }
-
-    return null;
 }
-
-export async function getServerUser(): Promise<User | null> {
-    const sessionToken = cookies().get('sessionToken')?.value;
-    
-    // In a real app, you'd have a robust way to get the user from the session.
-    // For this example, we're using a mock function.
-    const user = await getMockUserFromSession(sessionToken);
-    
-    return user;
-}
-
-export const getAuthenticatedUser = getServerUser;

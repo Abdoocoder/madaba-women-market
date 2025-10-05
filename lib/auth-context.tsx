@@ -27,6 +27,7 @@ interface AuthContextType {
   checkEmailVerification: () => Promise<boolean>
   isLoading: boolean
   refreshAuthUser: () => Promise<void>
+  getAuthToken: () => Promise<string | null>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -38,26 +39,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        const userDocRef = doc(db, "users", firebaseUser.uid);
-        const userDocSnap = await getDoc(userDocRef);
+        try {
+          const userDocRef = doc(db, "users", firebaseUser.uid);
+          const userDocSnap = await getDoc(userDocRef);
 
-        if (userDocSnap.exists()) {
-          const userData = userDocSnap.data() as User;
-          setUser(userData);
-        } else {
-          if (process.env.NODE_ENV === 'development') {
-            console.warn("User document not found in Firestore for an authenticated user.");
+          if (userDocSnap.exists()) {
+            const userData = userDocSnap.data() as User;
+            setUser(userData);
+          } else {
+            // Create new user document
+            const newUser: User = {
+              id: firebaseUser.uid,
+              email: firebaseUser.email || '',
+              name: firebaseUser.displayName || 'New User',
+              photoURL: firebaseUser.photoURL || '',
+              role: 'customer', 
+              createdAt: new Date(),
+            };
+            await setDoc(userDocRef, newUser);
+            setUser(newUser);
           }
-          const newUser: User = {
-            id: firebaseUser.uid,
-            email: firebaseUser.email || '',
-            name: firebaseUser.displayName || 'New User',
-            photoURL: firebaseUser.photoURL || '',
-            role: 'customer', 
-            createdAt: new Date(),
-          };
-          await setDoc(userDocRef, newUser);
-          setUser(newUser);
+        } catch (error) {
+          console.error("Error fetching/creating user document:", error);
+          setUser(null);
         }
       } else {
         setUser(null)
@@ -264,6 +268,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const getAuthToken = async (): Promise<string | null> => {
+    if (auth.currentUser) {
+      try {
+        const token = await auth.currentUser.getIdToken();
+        return token;
+      } catch (error) {
+        console.error("Error getting auth token:", error);
+        return null;
+      }
+    }
+    return null;
+  };
+
   const value = { 
     user, 
     login, 
@@ -274,7 +291,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     sendVerificationEmail,
     checkEmailVerification,
     isLoading, 
-    refreshAuthUser 
+    refreshAuthUser,
+    getAuthToken
   };
 
   return (
