@@ -144,12 +144,15 @@ export default function SellerDashboardPage() {
     if (!editingProduct || !token) return
 
     try {
-      const updateData = { ...data }
+      const updateData = { 
+        id: editingProduct.id, // Include the product ID
+        ...data 
+      }
       if (imageUrl) {
         updateData.image = imageUrl
       }
 
-      const response = await fetch(`/api/products/${editingProduct.id}`, {
+      const response = await fetch('/api/products', { // Remove the ID from URL
         method: "PUT",
         headers: createAuthHeaders(token),
         body: JSON.stringify(updateData),
@@ -159,6 +162,9 @@ export default function SellerDashboardPage() {
         const updatedProduct = await response.json()
         setProducts(products.map((p) => (p.id === editingProduct.id ? updatedProduct : p)))
         setEditingProduct(null)
+      } else {
+        const errorData = await response.json()
+        console.error('Error updating product:', errorData)
       }
     } catch (error) {
       console.error("Error updating product:", error)
