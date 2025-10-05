@@ -45,7 +45,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const userData = userDocSnap.data() as User;
           setUser(userData);
         } else {
-          console.warn("User document not found in Firestore for an authenticated user.");
+          if (process.env.NODE_ENV === 'development') {
+            console.warn("User document not found in Firestore for an authenticated user.");
+          }
           const newUser: User = {
             id: firebaseUser.uid,
             email: firebaseUser.email || '',
@@ -76,7 +78,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await signInWithEmailAndPassword(auth, email, password);
       return true;
     } catch (error: any) {
-      console.error("❌ Error logging in:", error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error("❌ Error logging in:", error.code);
+      }
       
       // Provide more specific error messages
       let errorMessage = "Failed to login. Please check your credentials.";
@@ -135,7 +139,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       return true;
     } catch (error: any) {
-      console.error("❌ Error signing up:", error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error("❌ Error signing up:", error.code);
+      }
       
       // Provide user-friendly error messages
       let errorMessage = "Failed to create account. Please try again.";
@@ -188,9 +194,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return true;
     } catch (error: any) {
       if (error.code === 'auth/popup-closed-by-user') {
-        console.log("⚠️ Google sign-in popup closed by the user.");
+        if (process.env.NODE_ENV === 'development') {
+          console.log("⚠️ Google sign-in popup closed by the user.");
+        }
       } else {
-        console.error("❌ Error signing in with Google:", error);
+        if (process.env.NODE_ENV === 'development') {
+          console.error("❌ Error signing in with Google:", error.code);
+        }
       }
       return false;
     }
@@ -205,7 +215,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await sendPasswordResetEmail(auth, email);
       return true;
     } catch (error) {
-      console.error("❌ Error sending password reset email:", error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error("❌ Error sending password reset email:", error);
+      }
       return false;
     }
   };
@@ -218,7 +230,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       return false;
     } catch (error) {
-      console.error("❌ Error sending verification email:", error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error("❌ Error sending verification email:", error);
+      }
       return false;
     }
   };
@@ -231,7 +245,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       return false;
     } catch (error) {
-      console.error("❌ Error checking email verification:", error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error("❌ Error checking email verification:", error);
+      }
       return false;
     }
   };

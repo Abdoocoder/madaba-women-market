@@ -11,24 +11,29 @@ export function checkFirebaseConfig() {
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
   };
 
-  console.log("🔥 Firebase Configuration Check:");
+  // Only log in development mode
+  const isDevelopment = process.env.NODE_ENV === 'development';
   
   const missingVars: string[] = [];
   Object.entries(config).forEach(([key, value]) => {
     if (!value) {
       missingVars.push(key);
-      console.error(`❌ Missing: ${key}`);
-    } else {
-      console.log(`✅ ${key}: ${value.substring(0, 10)}...`);
+      if (isDevelopment) {
+        console.error(`❌ Missing Firebase config: ${key}`);
+      }
     }
   });
 
   if (missingVars.length > 0) {
-    console.error("🚨 Missing Firebase environment variables:", missingVars);
-    console.log("💡 Please check your .env.local file and ensure all Firebase variables are set.");
+    if (isDevelopment) {
+      console.error("🚨 Missing Firebase environment variables:", missingVars);
+      console.log("💡 Please check your .env.local file and ensure all Firebase variables are set.");
+    }
     return false;
   } else {
-    console.log("✅ All Firebase environment variables are configured!");
+    if (isDevelopment) {
+      console.log("✅ Firebase configuration loaded successfully");
+    }
     return true;
   }
 }
