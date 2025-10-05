@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useAuth } from "@/lib/auth-context"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -29,6 +29,15 @@ export default function UserProfile() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        name: user.name || "",
+        email: user.email || ""
+      })
+    }
+  }, [user])
 
   if (!user) {
     return (
@@ -142,11 +151,11 @@ export default function UserProfile() {
             <Avatar className="h-20 w-20">
               <AvatarImage src={user.photoURL || ""} alt={user.name} />
               <AvatarFallback className="text-lg">
-                {user.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                {user.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase() : 'U'}
               </AvatarFallback>
             </Avatar>
             <div className="space-y-2">
-              <h3 className="text-xl font-semibold">{user.name}</h3>
+              <h3 className="text-xl font-semibold">{user.name || 'Anonymous User'}</h3>
               <p className="text-gray-600">{user.email}</p>
               <div className="flex gap-2">
                 <Badge className={getRoleColor(user.role)}>
@@ -197,7 +206,7 @@ export default function UserProfile() {
                 </Button>
                 <Button type="button" variant="outline" onClick={() => {
                   setIsEditing(false)
-                  setFormData({ name: user.name, email: user.email })
+                  setFormData({ name: user.name || "", email: user.email || "" })
                 }}>
                   Cancel
                 </Button>
