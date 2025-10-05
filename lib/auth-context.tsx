@@ -22,6 +22,7 @@ interface AuthContextType {
   logout: () => void
   sendPasswordReset: (email: string) => Promise<boolean>
   isLoading: boolean
+  refreshAuthUser: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -40,16 +41,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const userData = userDocSnap.data() as User;
           setUser(userData);
         } else {
-          // If the user document doesn't exist, something is wrong.
-          // This can happen if a user is created in Firebase Auth but not in Firestore.
           console.warn("User document not found in Firestore for an authenticated user.");
-          // As a fallback, create a basic user doc, but this indicates an issue.
           const newUser: User = {
             id: firebaseUser.uid,
             email: firebaseUser.email || '',
             name: firebaseUser.displayName || 'New User',
             photoURL: firebaseUser.photoURL || '',
-            role: 'customer', // Default fallback role
+            role: 'customer', 
             createdAt: new Date(),
           };
           await setDoc(userDocRef, newUser);
@@ -67,7 +65,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      // Auth state change will be handled by the useEffect listener
       return true;
     } catch (error) {
       console.error("❌ Error logging in:", error);
@@ -91,11 +88,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       };
       
       if (role === 'seller') {
-        newUser.status = 'pending'; // admin approval required
+        newUser.status = 'pending';
       }
 
       await setDoc(userDocRef, newUser);
-      // Setting user state immediately after sign up for better UX
       setUser(newUser);
       return true;
     } catch (error) {
@@ -114,7 +110,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const userDocSnap = await getDoc(userDocRef);
 
       if (!userDocSnap.exists()) {
-        // 🆕 New Google User → Save with chosen role
         const newUser: User = {
           id: firebaseUser.uid,
           email: firebaseUser.email || '',
@@ -125,15 +120,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         };
 
         if (role === 'seller') {
-          newUser.status = 'pending'; // waiting for admin approval
+          newUser.status = 'pending';
         }
 
         await setDoc(userDocRef, newUser);
         setUser(newUser);
       } else {
-        // 👤 Existing Google User → Just log them in, state will be set by listener
         const existingUser = userDocSnap.data() as User;
-        setUser(existingUser); // Update state immediately for better UX
+        setUser(existingUser);
       }
       return true;
     } catch (error: any) {
@@ -148,7 +142,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     await signOut(auth);
-    // User state will be set to null by the auth state change listener
   }
   
   const sendPasswordReset = async (email: string): Promise<boolean> => {
@@ -161,7 +154,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const value = { user, login, signUp, signInWithGoogle, logout, sendPasswordReset, isLoading };
+  const refreshAuthUser = async () => {
+    const firebaseUser = auth.currentUser;
+    if (firebaseUser) {
+      const userDocRef = doc(db, "users", firebaseUser.uid);
+      const userDocSnap = await getDoc(userDocRef);
+      if (userDocSnap.exists()) {
+        const userData = userDocSnap.data() as User;
+        setUser(userData);
+      }
+    }
+  };
+
+  const value = { user, login, signUp, signInWithGoogle, logout, sendPasswordReset, isLoading, refreshAuthUser };
 
   return (
     <AuthContext.Provider value={value}>

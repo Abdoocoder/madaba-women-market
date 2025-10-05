@@ -17,7 +17,6 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { Badge } from "@/components/ui/badge";
 
-// Mock order data (can be replaced with actual data fetching)
 const orders = [
     { id: "ORD001", date: "2023-10-28", total: "150.00 ر.س", status: "تم التوصيل" },
     { id: "ORD002", date: "2023-11-15", total: "250.00 ر.س", status: "قيد الشحن" },
@@ -25,7 +24,7 @@ const orders = [
 ];
 
 export default function ProfileForm() {
-    const { user, isLoading } = useAuth();
+    const { user, isLoading, refreshAuthUser } = useAuth();
     const router = useRouter();
     const { toast } = useToast();
 
@@ -60,6 +59,8 @@ export default function ProfileForm() {
             if(auth.currentUser) {
                 await updateProfile(auth.currentUser, { photoURL });
             }
+            
+            await refreshAuthUser();
 
             toast({ title: "Success", description: "Avatar updated successfully!", variant: "success" });
         } catch (error) {
@@ -76,6 +77,7 @@ export default function ProfileForm() {
             if(auth.currentUser) {
                 await updateProfile(auth.currentUser, { displayName: name });
             }
+            await refreshAuthUser();
             toast({ title: "Success", description: "Profile updated successfully!", variant: "success" });
         } catch (error) {
             console.error("Error updating profile: ", error);
@@ -96,6 +98,8 @@ export default function ProfileForm() {
 
             const userDocRef = doc(db, "users", user.id);
             await updateDoc(userDocRef, { email });
+            
+            await refreshAuthUser();
 
             toast({ title: "Success", description: "Email updated successfully!", variant: "success" });
         } catch (error) {
