@@ -135,7 +135,6 @@ Madaba Women Market is a comprehensive e-commerce platform designed to empower w
 - Image Optimization
 - Code Splitting & Lazy Loading
 
-
 ## 📁 Project Structure
 
 ```
@@ -188,32 +187,102 @@ Madaba Women Market is a comprehensive e-commerce platform designed to empower w
 4. **Firebase**: Secure database operations with admin SDK
 5. **Real-time**: Firestore provides real-time data updates
 
-## كيفية النشر (Deployment)
-يمكن نشر هذا التطبيق مباشرة من هذه البيئة.
+## 🚀 Deployment
 
-1.  **بناء المشروع:**
-    \`\`\`bash
-    pnpm build
-    \`\`\`
-2.  **النشر:**
-    بعد اكتمال عملية البناء بنجاح، سيتم نشر التطبيق تلقائيًا باستخدام الإعدادات المناسبة لهذا المشروع. يتم التعامل مع النشر على أنه تطبيق خادم (Server-side) للاستفادة الكاملة من ميزات Next.js.
+This application is configured for **free production hosting** using:
 
-## تفاصيل عن المتغيرات البيئية (Environment Variables)
-للتشغيل الصحيح للتطبيق، يجب عليك إنشاء ملف `.env.local` في جذر المشروع وتوفير متغيرات البيئة التالية. هذه المتغيرات ضرورية للاتصال بخدمات Firebase.
+### 🌍 **Free Hosting Stack**
+- **Frontend**: Vercel (100GB bandwidth/month)
+- **Backend**: Firebase Spark (20k reads/writes daily) 
+- **Images**: Cloudinary (25k transformations/month)
+- **Total Cost**: $0/month 🎉
 
-\`\`\`
-# Firebase public configuration
-NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_auth_domain
+### 🛠️ **Production Deployment**
+
+1. **Prepare Environment**
+   ```bash
+   # Copy environment template
+   cp .env.example .env.local
+   # Fill in your Firebase + Cloudinary credentials
+   ```
+
+2. **Build for Production**
+   ```bash
+   pnpm build
+   ```
+
+3. **Deploy to Vercel**
+   ```bash
+   # Install Vercel CLI
+   npm i -g vercel
+   
+   # Deploy
+   vercel --prod
+   ```
+
+4. **Configure Environment Variables**
+   - Add all `.env.local` variables to Vercel dashboard
+   - Ensure Firebase security rules are applied
+   - Test all functionality
+
+### 📊 **Performance Monitoring**
+- Vercel Analytics for frontend performance
+- Firebase Console for backend metrics
+- Cloudinary dashboard for image usage
+
+> 📄 **Detailed deployment guide**: See `DEPLOYMENT.md`
+
+## 🔧 Environment Variables
+
+Create `.env.local` with the following configuration:
+
+```bash
+# Firebase Client Configuration
+NEXT_PUBLIC_FIREBASE_API_KEY=your_firebase_api_key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
 NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_storage_bucket
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
 NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
 
-# Firebase Admin SDK (for server-side operations)
+# Firebase Admin SDK (Server-side)
 FIREBASE_PROJECT_ID=your_project_id
-FIREBASE_CLIENT_EMAIL=your_client_email
-FIREBASE_PRIVATE_KEY=your_private_key
-\`\`\`
+FIREBASE_CLIENT_EMAIL=your_service_account_email
+FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nyour_private_key\n-----END PRIVATE KEY-----\n"
 
-**ملاحظة:** يمكنك العثور على قيم هذه المتغيرات في لوحة تحكم مشروع Firebase الخاص بك. يجب الحفاظ على سرية متغيرات `FIREBASE_PRIVATE_KEY` و `FIREBASE_CLIENT_EMAIL` وعدم تعريضها للعامة.
+# Cloudinary Configuration
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+
+# Environment
+NODE_ENV=production
+```
+
+⚠️ **Security Note**: Never commit `.env.local` to version control. Keep your Firebase private keys secure!
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our contributing guidelines for details.
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- **Next.js Team** for the amazing framework
+- **Firebase Team** for the excellent backend services
+- **Vercel** for free hosting platform
+- **Cloudinary** for image management
+- **Shadcn** for beautiful UI components
+
+---
+
+<div align="center">
+
+**Built with ❤️ for women entrepreneurs**
+
+[🌐 Live Demo](https://your-deployed-url.vercel.app) | [📚 Documentation](DEPLOYMENT.md) | [🐛 Report Bug](https://github.com/your-repo/issues)
+
+</div>
