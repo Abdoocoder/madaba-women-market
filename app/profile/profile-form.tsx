@@ -30,11 +30,13 @@ export default function ProfileForm() {
 
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
+    const [avatar, setAvatar] = useState("");
 
     useEffect(() => {
         if (user) {
             setName(user.name || "");
             setEmail(user.email || "");
+            setAvatar(user.avatar || "");
         }
     }, [user]);
 
@@ -50,15 +52,18 @@ export default function ProfileForm() {
     const handleUpload = async (result: any) => {
         if (!user || !user.id) return;
 
-        const photoURL = result.info.secure_url;
+        const newAvatar = result.info.secure_url;
 
         try {
             const userDocRef = doc(db, "users", user.id);
-            await updateDoc(userDocRef, { photoURL });
+            await updateDoc(userDocRef, { avatar: newAvatar });
             
             if(auth.currentUser) {
-                await updateProfile(auth.currentUser, { photoURL });
+                await updateProfile(auth.currentUser, { photoURL: newAvatar });
             }
+            
+            // Update local state immediately for instant UI feedback
+            setAvatar(newAvatar);
             
             await refreshAuthUser();
 
@@ -117,14 +122,14 @@ export default function ProfileForm() {
                     <Card>
                         <CardHeader className="items-center">
                             <Avatar className="w-24 h-24 mb-4">
-                                <AvatarImage src={user.photoURL || "/placeholder-user.jpg"} />
+                                <AvatarImage src={avatar || "/placeholder-user.jpg"} />
                                 <AvatarFallback><User className="w-12 h-12" /></AvatarFallback>
                             </Avatar>
                             <CardTitle>{user.name}</CardTitle>
                             <CardDescription>{user.email}</CardDescription>
                              <div className="flex items-center gap-2 mt-2">
                                 <Badge>{user.role}</Badge>
-                                {user.role === 'seller' && <Badge variant={user.status === 'approved' ? 'success' : 'secondary'}>{user.status}</Badge>}
+                                {user.role === 'seller' && <Badge variant={user.status === 'approved' ? 'default' : 'secondary'}>{user.status}</Badge>}
                             </div>
                         </CardHeader>
                         <CardContent className="flex flex-col items-center text-center">
