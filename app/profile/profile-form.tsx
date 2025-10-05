@@ -150,7 +150,7 @@ export default function ProfileForm() {
                             </div>
                         </CardHeader>
                         <CardContent className="flex flex-col items-center text-center">
-                            <CloudinaryUploadButton
+                            <CldUploadButton
                                 options={{
                                     sources: ['local', 'url', 'camera'],
                                     multiple: false,
@@ -163,7 +163,7 @@ export default function ProfileForm() {
                                 <Button asChild className="w-full">
                                     <span>Upload Picture</span>
                                 </Button>
-                            </CloudinaryUploadButton>
+                            </CldUploadButton>
                         </CardContent>
                     </Card>
                 </div>
