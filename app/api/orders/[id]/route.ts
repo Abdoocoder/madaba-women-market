@@ -1,7 +1,7 @@
 'use server'
 
 import { NextResponse, NextRequest } from 'next/server'
-import { adminDb } from '@/lib/firebaseAdmin'
+import { getAdminDb } from '@/lib/firebaseAdmin'
 import { getAuthenticatedUser } from '@/lib/server-auth'
 import type { Order } from '@/lib/types'
 
@@ -34,6 +34,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
             return NextResponse.json({ message: 'Status is required' }, { status: 400 });
         }
 
+        const adminDb = getAdminDb();
         const orderDoc = await adminDb.collection('orders').doc(orderId).get();
         if (!orderDoc.exists) {
             return NextResponse.json({ message: 'Order not found' }, { status: 404 });

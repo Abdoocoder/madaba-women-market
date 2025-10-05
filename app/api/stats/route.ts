@@ -1,7 +1,7 @@
 'use server'
 
 import { NextResponse, NextRequest } from 'next/server'
-import { adminDb } from '@/lib/firebaseAdmin'
+import { getAdminDb } from '@/lib/firebaseAdmin'
 import { getAuthenticatedUser } from '@/lib/server-auth'
 import type { Order } from '@/lib/types'
 
@@ -24,12 +24,13 @@ export async function GET(request: NextRequest) {
 
     try {
         // Get orders for this seller
+        const adminDb = getAdminDb();
         const ordersRef = adminDb.collection('orders');
         const query = ordersRef.where('sellerId', '==', user.id);
         const snapshot = await query.get();
         
         const orders: Order[] = [];
-        snapshot.forEach(doc => {
+        snapshot.forEach((doc: any) => {
             orders.push({ id: doc.id, ...doc.data() } as Order);
         });
 

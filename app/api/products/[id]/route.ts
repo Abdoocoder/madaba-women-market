@@ -1,7 +1,7 @@
 'use server'
 
 import { NextResponse, NextRequest } from 'next/server'
-import { adminDb } from '@/lib/firebaseAdmin'
+import { getAdminDb } from '@/lib/firebaseAdmin'
 import type { Product } from '@/lib/types'
 import { getAuthenticatedUser } from '@/lib/server-auth'
 
@@ -12,6 +12,7 @@ async function authorizeSeller(request: NextRequest, productId: string): Promise
     }
 
     try {
+        const adminDb = getAdminDb();
         const productDoc = await adminDb.collection('products').doc(productId).get();
         if (!productDoc.exists) {
             return NextResponse.json({ message: 'Product not found' }, { status: 404 });
@@ -81,6 +82,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
             updatedAt: new Date(),
         };
 
+        const adminDb = getAdminDb();
         await adminDb.collection('products').doc(id).update(updatedData);
         const updatedProduct = { ...product, ...updatedData };
         
@@ -110,6 +112,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     if (authResult instanceof NextResponse) return authResult;
 
     try {
+        const adminDb = getAdminDb();
         await adminDb.collection('products').doc(id).delete();
         return NextResponse.json({ message: 'Product deleted successfully' });
     } catch (error) {

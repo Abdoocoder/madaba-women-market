@@ -1,7 +1,7 @@
 'use server'
 
 import { NextResponse, NextRequest } from 'next/server'
-import { adminDb } from '@/lib/firebaseAdmin'
+import { getAdminDb } from '@/lib/firebaseAdmin'
 import type { Product } from '@/lib/types'
 import { getAuthenticatedUser } from '@/lib/server-auth'
 
@@ -23,12 +23,13 @@ export async function GET(request: NextRequest) {
     }
 
     try {
+        const adminDb = getAdminDb();
         const productsRef = adminDb.collection('products');
         const query = productsRef.where('sellerId', '==', user.id);
         const snapshot = await query.get();
         
         const products: Product[] = [];
-        snapshot.forEach(doc => {
+        snapshot.forEach((doc: any) => {
             products.push({ id: doc.id, ...doc.data() } as Product);
         });
 
@@ -102,6 +103,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Add to Firestore
+        const adminDb = getAdminDb();
         const docRef = await adminDb.collection('products').add(newProduct);
         const createdProduct = { ...newProduct, id: docRef.id };
 

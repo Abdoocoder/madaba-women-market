@@ -1,5 +1,5 @@
 import { cookies, headers } from "next/headers";
-import { adminAuth, adminDb } from "./firebaseAdmin";
+import { getAdminAuth, getAdminDb } from "./firebaseAdmin";
 import { User } from "./types";
 import { NextRequest } from "next/server";
 
@@ -13,6 +13,8 @@ export async function getServerUser(): Promise<User | null> {
         }
 
         const idToken = authHeader.split('Bearer ')[1];
+        const adminAuth = getAdminAuth();
+        const adminDb = getAdminDb();
         const decodedToken = await adminAuth.verifyIdToken(idToken);
         
         // Get user data from Firestore
@@ -46,6 +48,8 @@ export async function getAuthenticatedUser(request: NextRequest): Promise<User |
         }
 
         const idToken = authHeader.split('Bearer ')[1];
+        const adminAuth = getAdminAuth();
+        const adminDb = getAdminDb();
         const decodedToken = await adminAuth.verifyIdToken(idToken);
         
         // Get user data from Firestore
