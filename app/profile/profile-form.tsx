@@ -8,6 +8,7 @@ import { db, auth } from "@/lib/firebase";
 import { updateProfile, updateEmail, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
 import { User, Edit3 } from "lucide-react";
 import { CldUploadButton } from 'next-cloudinary';
+import { useCloudinaryConfig } from '@/hooks/use-cloudinary-config';
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -25,6 +26,7 @@ const orders = [
 
 export default function ProfileForm() {
     const { user, isLoading, refreshAuthUser } = useAuth();
+    const { isConfigured: isCloudinaryConfigured, isLoading: isCloudinaryLoading } = useCloudinaryConfig();
     const router = useRouter();
     const { toast } = useToast();
 
@@ -149,20 +151,26 @@ export default function ProfileForm() {
                             </div>
                         </CardHeader>
                         <CardContent className="flex flex-col items-center text-center">
-                            <CldUploadButton
-                                options={{
-                                    sources: ['local', 'url', 'camera'],
-                                    multiple: false,
-                                    maxFiles: 1,
-                                    folder: 'avatars',
-                                }}
-                                onUpload={handleUpload}
-                                uploadPreset="madaba-women-market-presets"
-                            >
-                                <Button asChild className="w-full">
-                                    <span>Upload Picture</span>
+                            {!isCloudinaryLoading && isCloudinaryConfigured ? (
+                                <CldUploadButton
+                                    options={{
+                                        sources: ['local', 'url', 'camera'],
+                                        multiple: false,
+                                        maxFiles: 1,
+                                        folder: 'avatars',
+                                    }}
+                                    onUpload={handleUpload}
+                                    uploadPreset="madaba-women-market-presets"
+                                >
+                                    <Button asChild className="w-full">
+                                        <span>Upload Picture</span>
+                                    </Button>
+                                </CldUploadButton>
+                            ) : (
+                                <Button disabled className="w-full">
+                                    <span>{isCloudinaryLoading ? 'Loading...' : 'Upload Disabled'}</span>
                                 </Button>
-                            </CldUploadButton>
+                            )}
                         </CardContent>
                     </Card>
                 </div>

@@ -49,32 +49,41 @@ export function ProductForm({ product, onSubmit, onCancel }: ProductFormProps) {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label>صورة المنتج</Label>
-            <CldUploadWidget
-              uploadPreset="madaba-women-market"
-              onSuccess={handleImageUpload}
-              options={{
-                folder: "madaba-women-market",
-                resourceType: "image",
-                maxFileSize: 5000000, // 5MB
-                clientAllowedFormats: ["png", "jpg", "jpeg", "webp"]
-              }}
-            >
-              {({ open }) => (
-                <div
-                  className="w-full h-48 border-2 border-dashed rounded-lg flex items-center justify-center cursor-pointer relative"
-                  onClick={() => open()}
-                >
-                  {imagePreview ? (
-                    <Image src={imagePreview} alt="معاينة المنتج" layout="fill" objectFit="cover" className="rounded-lg" />
-                  ) : (
-                    <div className="text-center text-muted-foreground">
-                      <p>اسحب وأفلت الصورة هنا، أو انقر للتحديد</p>
-                      <p className="text-xs">(الحجم الموصى به: 800x800 بكسل)</p>
-                    </div>
-                  )}
+            {process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ? (
+              <CldUploadWidget
+                uploadPreset="madaba-women-market"
+                onSuccess={handleImageUpload}
+                options={{
+                  folder: "madaba-women-market",
+                  resourceType: "image",
+                  maxFileSize: 5000000, // 5MB
+                  clientAllowedFormats: ["png", "jpg", "jpeg", "webp"]
+                }}
+              >
+                {({ open }) => (
+                  <div
+                    className="w-full h-48 border-2 border-dashed rounded-lg flex items-center justify-center cursor-pointer relative"
+                    onClick={() => open()}
+                  >
+                    {imagePreview ? (
+                      <Image src={imagePreview} alt="معاينة المنتج" layout="fill" objectFit="cover" className="rounded-lg" />
+                    ) : (
+                      <div className="text-center text-muted-foreground">
+                        <p>اسحب وأفلت الصورة هنا، أو انقر للتحديد</p>
+                        <p className="text-xs">(الحجم الموصى به: 800x800 بكسل)</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </CldUploadWidget>
+            ) : (
+              <div className="w-full h-48 border-2 border-dashed rounded-lg flex items-center justify-center bg-gray-100">
+                <div className="text-center text-muted-foreground">
+                  <p>Image upload disabled</p>
+                  <p className="text-xs">(Cloudinary not configured)</p>
                 </div>
-              )}
-            </CldUploadWidget>
+              </div>
+            )}
           </div>
 
           <div className="space-y-2">
