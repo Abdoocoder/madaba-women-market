@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { Badge } from "@/components/ui/badge";
+import { CloudinaryUploadButton } from '@/components/cloudinary-provider';
 
 const orders = [
     { id: "ORD001", date: "2023-10-28", total: "150.00 ر.س", status: "تم التوصيل" },
@@ -36,7 +37,9 @@ export default function ProfileForm() {
         if (user) {
             setName(user.name || "");
             setEmail(user.email || "");
-            setAvatar(user.avatar || "");
+            const userAvatar = user.avatar || "";
+            setAvatar(userAvatar);
+            console.log("User avatar updated:", userAvatar);
         }
     }, [user]);
 
@@ -50,9 +53,23 @@ export default function ProfileForm() {
     }
 
     const handleUpload = async (result: any) => {
+        console.log("Upload result:", result);
+        
         if (!user || !user.id) return;
 
+        // Check if upload was successful
+        if (result.event !== "success" || !result.info?.secure_url) {
+            console.error("Upload failed:", result);
+            toast({ 
+                title: "Error", 
+                description: result.info?.error?.message || "Failed to upload image.", 
+                variant: "destructive" 
+            });
+            return;
+        }
+
         const newAvatar = result.info.secure_url;
+        console.log("New avatar URL:", newAvatar);
 
         try {
             const userDocRef = doc(db, "users", user.id);
@@ -70,7 +87,7 @@ export default function ProfileForm() {
             toast({ title: "Success", description: "Avatar updated successfully!", variant: "success" });
         } catch (error) {
             console.error("Error updating avatar: ", error);
-            toast({ title: "Error", description: "Failed to update avatar.", variant: "destructive" });
+            toast({ title: "Error", description: "Failed to update avatar in database.", variant: "destructive" });
         }
     };
 
@@ -133,7 +150,7 @@ export default function ProfileForm() {
                             </div>
                         </CardHeader>
                         <CardContent className="flex flex-col items-center text-center">
-                            <CldUploadButton
+                            <CloudinaryUploadButton
                                 options={{
                                     sources: ['local', 'url', 'camera'],
                                     multiple: false,
@@ -146,7 +163,7 @@ export default function ProfileForm() {
                                 <Button asChild className="w-full">
                                     <span>Upload Picture</span>
                                 </Button>
-                            </CldUploadButton>
+                            </CloudinaryUploadButton>
                         </CardContent>
                     </Card>
                 </div>
