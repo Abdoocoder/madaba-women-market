@@ -17,12 +17,22 @@ import type { Order } from '@/lib/types'
  *         description: Unauthorized.
  */
 export async function GET(request: NextRequest) {
-    const user = await getAuthenticatedUser(request);
-    if (!user || user.role !== 'seller') {
-        return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-    }
-
     try {
+        const user = await getAuthenticatedUser(request);
+        if (!user) {
+            return NextResponse.json({ 
+                message: 'Authentication required',
+                hint: 'Please check server logs for configuration issues'
+            }, { status: 401 });
+        }
+        
+        if (user.role !== 'seller') {
+            return NextResponse.json({ 
+                message: 'Access denied - seller role required',
+                userRole: user.role 
+            }, { status: 401 });
+        }
+
         // Get orders for this seller
         const adminDb = getAdminDb();
         const ordersRef = adminDb.collection('orders');
@@ -79,6 +89,9 @@ export async function GET(request: NextRequest) {
         });
     } catch (error) {
         console.error('Error fetching stats:', error);
-        return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
+        return NextResponse.json({ 
+            message: 'Internal Server Error',
+            error: error instanceof Error ? error.message : 'Unknown error'
+        }, { status: 500 });
     }
 }

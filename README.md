@@ -48,10 +48,53 @@
 - ✅ Development server running successfully
 - ✅ All TypeScript compilation errors fixed
 - ✅ **Production build completes successfully** ✨ (19/19 pages generated)
-- ✅ Firebase Admin SDK integration working
+- ⚠️ **Configuration Required** - Firebase Admin and Cloudinary credentials need setup
 - ✅ Next.js 15 fully compatible
-- ✅ Firebase integration working
-- ✅ **Ready for production deployment** 🚀
+- ✅ **Ready for production deployment** 🚀 (after credential setup)
+
+### 🔧 Configuration Setup Required
+
+The application is fully functional but requires proper credentials to run:
+
+#### 🔥 Firebase Admin Setup
+The current Firebase Admin credentials in `.env.local` are placeholder data. To fix the 401 authentication errors:
+
+1. Go to [Firebase Console](https://console.firebase.google.com/)
+2. Select your project: `madaba-women-market-ac54c`
+3. Go to **Project Settings > Service Accounts**
+4. Click **"Generate New Private Key"**
+5. Download the JSON file
+6. Update your `.env.local` file with the real values:
+
+```env
+FIREBASE_PROJECT_ID="your-actual-project-id"
+FIREBASE_CLIENT_EMAIL="your-service-account@project.iam.gserviceaccount.com"
+FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nYOUR_ACTUAL_PRIVATE_KEY\n-----END PRIVATE KEY-----\n"
+```
+
+#### 🎨 Cloudinary Setup
+The current Cloudinary API secret is placeholder data. To fix the 400 upload errors:
+
+1. Go to your [Cloudinary Dashboard](https://cloudinary.com/console)
+2. Copy your **Cloud Name**, **API Key**, and **API Secret**
+3. Update your `.env.local` file:
+
+```env
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME="your-actual-cloud-name"
+CLOUDINARY_API_KEY="your-actual-api-key"
+CLOUDINARY_API_SECRET="your-actual-api-secret"
+```
+
+#### Quick Setup Helper
+Run the setup helper script for detailed instructions:
+```bash
+bash setup-credentials.sh
+```
+
+After updating the credentials, restart your development server:
+```bash
+npm run dev
+```
 
 ## 🌟 Overview
 

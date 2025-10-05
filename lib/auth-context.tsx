@@ -272,12 +272,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (auth.currentUser) {
       try {
         const token = await auth.currentUser.getIdToken();
+        console.log('Auth token retrieved:', token.substring(0, 20) + '...');
         return token;
       } catch (error) {
         console.error("Error getting auth token:", error);
         return null;
       }
     }
+    console.log('No current user for auth token');
     return null;
   };
 

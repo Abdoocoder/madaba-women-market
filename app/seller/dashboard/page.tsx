@@ -36,9 +36,29 @@ export default function SellerDashboardPage() {
       return
     }
 
+    // Debug authentication
+    const debugAuth = async () => {
+      const token = await getAuthToken()
+      if (token) {
+        try {
+          const response = await fetch("/api/debug/auth", {
+            headers: createAuthHeaders(token),
+          })
+          const data = await response.json()
+          console.log('Auth debug:', data)
+        } catch (error) {
+          console.error('Auth debug error:', error)
+        }
+      }
+    }
+    debugAuth()
+
     const fetchProducts = async () => {
       const token = await getAuthToken()
-      if (!token) return
+      if (!token) {
+        console.error("No auth token available")
+        return
+      }
 
       try {
         const response = await fetch("/api/products", {
@@ -47,6 +67,8 @@ export default function SellerDashboardPage() {
         if (response.ok) {
           const data = await response.json()
           setProducts(data)
+        } else {
+          console.error("Products API error:", response.status, response.statusText)
         }
       } catch (error) {
         console.error("Error fetching products:", error)
@@ -58,7 +80,10 @@ export default function SellerDashboardPage() {
 
   const fetchStats = async () => {
     const token = await getAuthToken()
-    if (!token) return
+    if (!token) {
+      console.error("No auth token available for stats")
+      return
+    }
 
     try {
       const response = await fetch("/api/stats", {
@@ -67,6 +92,8 @@ export default function SellerDashboardPage() {
       if (response.ok) {
         const data = await response.json()
         setStats(data)
+      } else {
+        console.error("Stats API error:", response.status, response.statusText)
       }
     } catch (error) {
       console.error("Error fetching stats:", error)

@@ -37,10 +37,12 @@ export function OrderList() {
       try {
         const token = await getAuthToken()
         if (!token) {
+          console.error('No auth token available for orders')
           setError('Authentication required')
           return
         }
 
+        console.log('Fetching orders with token:', token.substring(0, 20) + '...')
         const response = await fetch('/api/orders', {
           method: 'GET',
           headers: createAuthHeaders(token),
@@ -50,6 +52,7 @@ export function OrderList() {
           const data = await response.json()
           setOrders(data)
         } else {
+          console.error('Orders API error:', response.status, response.statusText)
           setError('Failed to fetch orders')
         }
       } catch (err) {
