@@ -101,28 +101,20 @@ export const MOCK_REVIEWS: Review[] = [
         id: "1",
         productId: "1",
         userId: "1",
+        userName: "فاطمة علي",
         rating: 5,
         comment: "Absolutely beautiful abaya! The quality is amazing.",
         createdAt: new Date("2024-02-01"),
-        user: {
-            id: "1",
-            name: "فاطمة علي",
-            avatar: "/woman-avatar.png",
-        }
     },
     {
         id: "2",
         productId: "1",
         userId: "2",
+        userName: "عائشة أحمد",
         rating: 4,
         comment: "Very elegant and comfortable. I love the embroidery.",
         createdAt: new Date("2024-02-05"),
-        user: {
-            id: "2",
-            name: "عائشة أحمد",
-            avatar: "/woman-avatar.png",
-        }
     },
 ];
 
-export const MOCK_USERS: User[] = MOCK_SELLERS.map(seller => ({...seller, role: 'seller', joinDate: seller.joinedAt}));
+export const MOCK_USERS: User[] = MOCK_SELLERS.map(seller => ({...seller, role: 'seller', createdAt: seller.joinedAt}));

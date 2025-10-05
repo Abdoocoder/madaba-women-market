@@ -28,14 +28,15 @@ export function SalesChart() {
 
   useEffect(() => {
     const fetchStats = async () => {
-      if (!token) {
-        setIsLoading(false);
-        setError('Authentication token not found.');
-        return;
-      }
-
       try {
         setIsLoading(true)
+        const token = await getAuthToken()
+        if (!token) {
+          setIsLoading(false);
+          setError('Authentication token not found.');
+          return;
+        }
+
         const response = await fetch('/api/stats', {
             headers: createAuthHeaders(token),
         })
@@ -53,11 +54,11 @@ export function SalesChart() {
     }
 
     fetchStats()
-  }, [token]) // Re-run if the token changes
+  }, [getAuthToken]) // Re-run if the getAuthToken function changes
 
   const renderChart = (data: SalesData[], yAxisLabel: string) => (
     <ResponsiveContainer width="100%" height={350}>
-      <BarChart data={data} dir={language === 'ar' ? 'rtl' : 'ltr'}>
+      <BarChart data={data}>
         <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted))" />
         <XAxis
           dataKey="name"
