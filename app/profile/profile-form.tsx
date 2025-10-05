@@ -16,7 +16,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { Badge } from "@/components/ui/badge";
-import { CloudinaryUploadButton } from '@/components/cloudinary-provider';
 
 const orders = [
     { id: "ORD001", date: "2023-10-28", total: "150.00 ر.س", status: "تم التوصيل" },
