@@ -43,7 +43,8 @@ const nextConfig = {
 
   // Production build optimizations
   experimental: {
-    optimizeCss: true,
+    // Temporarily disabled due to critters dependency issue
+    // optimizeCss: true,
   },
 
   // Webpack optimizations for production
