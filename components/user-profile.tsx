@@ -149,7 +149,7 @@ export default function UserProfile() {
         <CardContent className="space-y-6">
           <div className="flex items-center space-x-4">
             <Avatar className="h-20 w-20">
-              <AvatarImage src={user.photoURL || ""} alt={user.name} />
+              {user.photoURL && <AvatarImage src={user.photoURL} alt={user.name} />}
               <AvatarFallback className="text-lg">
                 {user.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase() : 'U'}
               </AvatarFallback>
