@@ -31,8 +31,13 @@ export function ProductForm({ product, onSubmit, onCancel }: ProductFormProps) {
   const [imageUrl, setImageUrl] = useState<string | undefined>(product?.image)
 
   const handleImageUpload = (result: any) => {
+    console.log('🎨 Cloudinary upload result:', result)
     setImagePreview(result.info.secure_url)
     setImageUrl(result.info.secure_url)
+  }
+
+  const handleUploadError = (error: any) => {
+    console.error('❌ Cloudinary upload error:', error)
   }
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -51,8 +56,9 @@ export function ProductForm({ product, onSubmit, onCancel }: ProductFormProps) {
             <Label>صورة المنتج</Label>
             {process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ? (
               <CldUploadWidget
-                uploadPreset="madaba-women-market"
+                uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "unsigned_uploads"}
                 onSuccess={handleImageUpload}
+                onError={handleUploadError}
                 options={{
                   folder: "madaba-women-market",
                   resourceType: "image",
