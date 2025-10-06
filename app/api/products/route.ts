@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
         const price = Number(formData.get('price'));
         const category = formData.get('category') as string;
         const stock = Number(formData.get('stock'));
-        const imageFile = formData.get('image') as File | null;
+        const imageUrl = formData.get('imageUrl') as string || null;
 
         // The sellerId now comes from the authenticated user
         const sellerId = user.id;
@@ -101,14 +101,8 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ message: 'Missing required fields' }, { status: 400 });
         }
         
-        let imageUrl = '/placeholder.svg?height=400&width=400';
-        if (imageFile) {
-            // For now, use a placeholder. In a real implementation, you would:
-            // 1. Upload directly to Cloudinary from the client
-            // 2. Or implement server-side upload here with proper authentication
-            imageUrl = `/api/placeholder-image/${Date.now()}`;
-            console.log(`Image uploaded: ${imageFile.name}`);
-        }
+        // Use the Cloudinary URL if available, otherwise use placeholder
+        const finalImageUrl = imageUrl || '/placeholder.svg?height=400&width=400';
 
         const newProduct: Product = {
             id: '', // Firestore will generate the ID
@@ -118,7 +112,7 @@ export async function POST(request: NextRequest) {
             descriptionAr: descriptionAr,
             price: price,
             category: category,
-            image: imageUrl,
+            image: finalImageUrl,
             sellerId: sellerId,
             sellerName: sellerName,
             stock: stock,

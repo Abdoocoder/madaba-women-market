@@ -77,8 +77,12 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
     try {
         const body = await request.json();
+        const { image, ...otherData } = body;
+        
+        // Use the provided image URL if available, otherwise keep the existing one
         const updatedData = {
-            ...body,
+            ...otherData,
+            ...(image && { image: image }), // Only update image if provided
             updatedAt: new Date(),
         };
 
