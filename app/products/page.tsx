@@ -80,6 +80,15 @@ export default function ProductsPage() {
     return sorted
   }, [products, searchQuery, selectedCategory, sortOption])
 
+  // Format the product count text without using translation interpolation
+  const formatProductCount = () => {
+    const count = filteredAndSortedProducts.length;
+    if (language === "ar") {
+      return `تم العثور على ${count} منتج`;
+    }
+    return `${count} products found`;
+  };
+
   return (
     <ClientOnly>
       <div className="min-h-screen bg-background">
@@ -90,7 +99,7 @@ export default function ProductsPage() {
             </Link>
             <h1 className="text-3xl font-bold mt-4">{t("home.allProducts")}</h1>
             <p className="text-muted-foreground mt-2">
-              {t("home.productsCount", { count: filteredAndSortedProducts.length })}
+              {formatProductCount()}
             </p>
           </div>
 
