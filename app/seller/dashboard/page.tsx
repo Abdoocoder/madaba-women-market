@@ -145,14 +145,13 @@ export default function SellerDashboardPage() {
 
     try {
       const updateData = { 
-        id: editingProduct.id, // Include the product ID
         ...data 
       }
       if (imageUrl) {
         updateData.image = imageUrl
       }
 
-      const response = await fetch('/api/products', { // Remove the ID from URL
+      const response = await fetch(`/api/products/${editingProduct.id}`, {
         method: "PUT",
         headers: createAuthHeaders(token),
         body: JSON.stringify(updateData),
