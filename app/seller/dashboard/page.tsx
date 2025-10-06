@@ -182,7 +182,7 @@ export default function SellerDashboardPage() {
   const handleDeleteProduct = async (productId: string) => {
     console.log('Deleting product with ID:', productId);
     const token = await getAuthToken();
-    if (!token || !confirm("هل أنت متأكد من حذف هذا المنتج؟")) return;
+    if (!token || !confirm(t("seller.confirmDelete"))) return;
 
     try {
       console.log('Calling DELETE API with URL:', `/api/products/${productId}`);
@@ -268,10 +268,10 @@ export default function SellerDashboardPage() {
             {/* Sales chart temporarily disabled */}
             <Card>
               <CardHeader>
-                <CardTitle>Analytics Coming Soon</CardTitle>
+                <CardTitle>{t("seller.analyticsComingSoon")}</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground">Charts will be available soon</p>
+                <p className="text-sm text-muted-foreground">{t("seller.chartsAvailableSoon")}</p>
               </CardContent>
             </Card>
           </div>
@@ -319,10 +319,10 @@ export default function SellerDashboardPage() {
             {/* Sales chart temporarily disabled */}
             <Card>
               <CardHeader>
-                <CardTitle>Analytics Coming Soon</CardTitle>
+                <CardTitle>{t("seller.analyticsComingSoon")}</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground">Charts will be available soon</p>
+                <p className="text-sm text-muted-foreground">{t("seller.chartsAvailableSoon")}</p>
               </CardContent>
             </Card>
             <Card>

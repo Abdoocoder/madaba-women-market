@@ -29,7 +29,7 @@ export default function AdminLayout({
     <div>
       <header className="flex items-center justify-between p-4 bg-gray-100 dark:bg-gray-800 border-b">
         <h1 className="text-2xl font-bold">{t('admin.dashboard')}</h1>
-        <Button onClick={logout}>{t('admin.logout')}</Button>
+        <Button onClick={logout}>{t('header.logout')}</Button>
       </header>
       <main>{children}</main>
     </div>

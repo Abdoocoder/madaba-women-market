@@ -41,7 +41,7 @@ const ProductManagementPageClient = () => {
       setProducts(productList);
     } catch (error) {
       console.error('Error fetching products:', error);
-      toast.error('Failed to fetch products.');
+      toast.error(t('messages.failedToFetchProducts'));
     }
   };
 
@@ -49,7 +49,7 @@ const ProductManagementPageClient = () => {
     if (user?.role === 'admin') {
       fetchProducts();
     }
-  }, [user, getAuthToken]);
+  }, [user, getAuthToken, t]);
 
   if (isLoading || user?.role !== 'admin') {
     return <div>{t('admin.loading')}</div>;
@@ -57,7 +57,7 @@ const ProductManagementPageClient = () => {
 
   return (
     <div className="container mx-auto py-10">
-      <h1 className="text-3xl font-bold mb-6">Product Management</h1>
+      <h1 className="text-3xl font-bold mb-6">{t('admin.productManagement')}</h1>
       <ProductManagement products={products} onProductsUpdate={fetchProducts} />
     </div>
   );

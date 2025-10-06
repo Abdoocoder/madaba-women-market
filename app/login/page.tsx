@@ -53,10 +53,10 @@ export default function LoginPage() {
   // Get password strength color and text
   const getPasswordStrengthInfo = (strength: number) => {
     if (strength === 0) return { color: 'text-gray-400', text: '' };
-    if (strength <= 2) return { color: 'text-red-500', text: 'Weak' };
-    if (strength <= 3) return { color: 'text-yellow-500', text: 'Medium' };
-    if (strength <= 4) return { color: 'text-blue-500', text: 'Strong' };
-    return { color: 'text-green-500', text: 'Very Strong' };
+    if (strength <= 2) return { color: 'text-red-500', text: t('login.weak') };
+    if (strength <= 3) return { color: 'text-yellow-500', text: t('login.medium') };
+    if (strength <= 4) return { color: 'text-blue-500', text: t('login.strong') };
+    return { color: 'text-green-500', text: t('login.veryStrong') };
   }
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -66,13 +66,13 @@ export default function LoginPage() {
     
     // Validation
     if (!email || !password) {
-      setError("Please fill in all fields")
+      setError(t('login.fillAllFields'))
       setIsSubmitting(false)
       return
     }
     
     if (!isValidEmail(email)) {
-      setError("Please enter a valid email address")
+      setError(t('login.validEmail'))
       setIsSubmitting(false)
       return
     }
@@ -83,7 +83,7 @@ export default function LoginPage() {
         router.push("/")
       }
     } catch (error: any) {
-      setError(error.message || "Failed to login. Please check your credentials.")
+      setError(error.message || t('login.failedLogin'))
     } finally {
       setIsSubmitting(false)
     }
@@ -96,25 +96,25 @@ export default function LoginPage() {
     
     // Validation
     if (!email || !password || !confirmPassword) {
-      setError("Please fill in all fields")
+      setError(t('login.fillAllFields'))
       setIsSubmitting(false)
       return
     }
     
     if (!isValidEmail(email)) {
-      setError("Please enter a valid email address")
+      setError(t('login.validEmail'))
       setIsSubmitting(false)
       return
     }
     
     if (password !== confirmPassword) {
-      setError("Passwords do not match")
+      setError(t('login.passwordsDontMatch'))
       setIsSubmitting(false)
       return
     }
     
     if (password.length < 6) {
-      setError("Password must be at least 6 characters long")
+      setError(t('login.passwordLength'))
       setIsSubmitting(false)
       return
     }
@@ -125,7 +125,7 @@ export default function LoginPage() {
         router.push("/")
       }
     } catch (error: any) {
-      setError(error.message || "Failed to create account. Please try again.")
+      setError(error.message || t('login.failedSignup'))
     } finally {
       setIsSubmitting(false)
     }
@@ -137,22 +137,22 @@ export default function LoginPage() {
     if (success) {
       router.push("/")
     } else {
-      setError("Failed to sign in with Google.")
+      setError(t('login.failedGoogle'))
     }
   }
 
   const handlePasswordReset = async () => {
     if (!resetEmail) {
-      setError("Please enter your email address.")
+      setError(t('login.enterEmail'))
       return
     }
     setError(null)
     setResetMessage(null)
     const success = await sendPasswordReset(resetEmail)
     if (success) {
-      setResetMessage("Password reset email sent. Please check your inbox.")
+      setResetMessage(t('login.resetEmailSent'))
     } else {
-      setError("Failed to send password reset email.")
+      setError(t('login.failedReset'))
     }
   }
 
@@ -162,21 +162,21 @@ export default function LoginPage() {
 
         <Tabs defaultValue="login" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="login">Login</TabsTrigger>
-          <TabsTrigger value="signup">Sign Up</TabsTrigger>
+          <TabsTrigger value="login">{t('login.login')}</TabsTrigger>
+          <TabsTrigger value="signup">{t('login.signup')}</TabsTrigger>
         </TabsList>
         
         {/* Login Tab */}
         <TabsContent value="login">
           <Card>
             <CardHeader>
-              <CardTitle>Login to {t("app.name")}</CardTitle>
-              <CardDescription>Enter your credentials to access your account.</CardDescription>
+              <CardTitle>{t('login.loginTo')} {t("app.name")}</CardTitle>
+              <CardDescription>{t('login.enterCredentials')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <form onSubmit={handleLogin} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="login-email">Email</Label>
+                  <Label htmlFor="login-email">{t('admin.email')}</Label>
                   <Input 
                     id="login-email" 
                     type="email" 
@@ -187,11 +187,11 @@ export default function LoginPage() {
                     className={!isValidEmail(email) && email ? 'border-red-300 focus:border-red-500' : ''}
                   />
                   {email && !isValidEmail(email) && (
-                    <p className="text-red-500 text-xs">Please enter a valid email address</p>
+                    <p className="text-red-500 text-xs">{t('login.validEmail')}</p>
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="login-password">Password</Label>
+                  <Label htmlFor="login-password">{t('login.password')}</Label>
                   <div className="relative">
                     <Input 
                       id="login-password" 
@@ -210,7 +210,7 @@ export default function LoginPage() {
                     </button>
                   </div>
                 </div>
-                <Button type="submit" className="w-full" disabled={isSubmitting}>{isSubmitting ? 'Logging in...' : 'Login'}</Button>
+                <Button type="submit" className="w-full" disabled={isSubmitting}>{isSubmitting ? t('login.loggingIn') : t('login.login')}</Button>
               </form>
               
               <div className="relative">
@@ -218,21 +218,21 @@ export default function LoginPage() {
                   <span className="w-full border-t" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+                  <span className="bg-background px-2 text-muted-foreground">{t('login.orContinueWith')}</span>
                 </div>
               </div>
 
               <Button variant="outline" className="w-full" onClick={() => handleGoogleSignIn('customer')}>
-                Sign in with Google
+                {t('login.googleSignIn')}
               </Button>
 
               {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
               
               <div className="mt-4 text-center text-sm">
-                Forgot your password?
+                {t('login.forgotPassword')}
                 <div className="mt-2 space-y-2">
-                    <Input type="email" placeholder="Enter your email" value={resetEmail} onChange={(e) => setResetEmail(e.target.value)} />
-                    <Button variant="link" onClick={handlePasswordReset}>Send reset link</Button>
+                    <Input type="email" placeholder={t('login.enterEmail')} value={resetEmail} onChange={(e) => setResetEmail(e.target.value)} />
+                    <Button variant="link" onClick={handlePasswordReset}>{t('login.sendResetLink')}</Button>
                 </div>
                 {resetMessage && <p className="text-green-600 text-sm mt-2">{resetMessage}</p>}
               </div>
@@ -245,13 +245,13 @@ export default function LoginPage() {
         <TabsContent value="signup">
           <Card>
             <CardHeader>
-              <CardTitle>Create an Account</CardTitle>
-              <CardDescription>Join {t("app.name")} today!</CardDescription>
+              <CardTitle>{t('login.createAccount')}</CardTitle>
+              <CardDescription>{t('login.join')} {t("app.name")} {t('login.today')}!</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="signup-email">Email</Label>
+                  <Label htmlFor="signup-email">{t('admin.email')}</Label>
                   <Input 
                     id="signup-email" 
                     type="email" 
@@ -262,11 +262,11 @@ export default function LoginPage() {
                     className={!isValidEmail(email) && email ? 'border-red-300 focus:border-red-500' : ''}
                   />
                   {email && !isValidEmail(email) && (
-                    <p className="text-red-500 text-xs">Please enter a valid email address</p>
+                    <p className="text-red-500 text-xs">{t('login.validEmail')}</p>
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signup-password">Password</Label>
+                  <Label htmlFor="signup-password">{t('login.password')}</Label>
                   <div className="relative">
                     <Input 
                       id="signup-password" 
@@ -275,7 +275,7 @@ export default function LoginPage() {
                       value={password} 
                       onChange={(e) => handlePasswordChange(e.target.value)}
                       className="pr-10"
-                      placeholder="At least 6 characters"
+                      placeholder={t('login.passwordPlaceholder')}
                     />
                     <button
                       type="button"
@@ -288,7 +288,7 @@ export default function LoginPage() {
                   {password && (
                     <div className="space-y-1">
                       <div className="flex justify-between items-center">
-                        <span className="text-xs text-gray-500">Password strength:</span>
+                        <span className="text-xs text-gray-500">{t('login.passwordStrength')}</span>
                         <span className={`text-xs font-medium ${getPasswordStrengthInfo(passwordStrength).color}`}>
                           {getPasswordStrengthInfo(passwordStrength).text}
                         </span>
@@ -304,18 +304,18 @@ export default function LoginPage() {
                         ></div>
                       </div>
                       <div className="text-xs text-gray-500 space-y-0.5">
-                        {password.length < 6 && <div className="text-red-500">• At least 6 characters</div>}
-                        {password.length >= 6 && <div className="text-green-500">• At least 6 characters ✓</div>}
-                        {!/[A-Z]/.test(password) && <div className="text-gray-400">• One uppercase letter (recommended)</div>}
-                        {/[A-Z]/.test(password) && <div className="text-green-500">• One uppercase letter ✓</div>}
-                        {!/[0-9]/.test(password) && <div className="text-gray-400">• One number (recommended)</div>}
-                        {/[0-9]/.test(password) && <div className="text-green-500">• One number ✓</div>}
+                        {password.length < 6 && <div className="text-red-500">• {t('login.atLeast6')}</div>}
+                        {password.length >= 6 && <div className="text-green-500">• {t('login.atLeast6')} ✓</div>}
+                        {!/[A-Z]/.test(password) && <div className="text-gray-400">• {t('login.oneUppercase')}</div>}
+                        {/[A-Z]/.test(password) && <div className="text-green-500">• {t('login.oneUppercase')} ✓</div>}
+                        {!/[0-9]/.test(password) && <div className="text-gray-400">• {t('login.oneNumber')}</div>}
+                        {/[0-9]/.test(password) && <div className="text-green-500">• {t('login.oneNumber')} ✓</div>}
                       </div>
                     </div>
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="confirm-password">Confirm Password</Label>
+                  <Label htmlFor="confirm-password">{t('login.confirmPassword')}</Label>
                   <div className="relative">
                     <Input 
                       id="confirm-password" 
@@ -324,7 +324,7 @@ export default function LoginPage() {
                       value={confirmPassword} 
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       className={`pr-10 ${confirmPassword && password !== confirmPassword ? 'border-red-300 focus:border-red-500' : confirmPassword && password === confirmPassword ? 'border-green-300 focus:border-green-500' : ''}`}
-                      placeholder="Confirm your password"
+                      placeholder={t('login.confirmPasswordPlaceholder')}
                     />
                     <button
                       type="button"
@@ -335,26 +335,26 @@ export default function LoginPage() {
                     </button>
                   </div>
                   {confirmPassword && password !== confirmPassword && (
-                    <p className="text-red-500 text-xs">Passwords do not match</p>
+                    <p className="text-red-500 text-xs">{t('login.passwordsDontMatch')}</p>
                   )}
                   {confirmPassword && password === confirmPassword && confirmPassword.length > 0 && (
-                    <p className="text-green-500 text-xs">Passwords match ✓</p>
+                    <p className="text-green-500 text-xs">{t('login.passwordsMatch')} ✓</p>
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label>I am a...</Label>
+                  <Label>{t('login.iAm')}</Label>
                   <RadioGroup defaultValue="customer" value={role} onValueChange={(value) => setRole(value as UserRole)} className="flex gap-4">
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="customer" id="r-customer" />
-                      <Label htmlFor="r-customer">Customer</Label>
+                      <Label htmlFor="r-customer">{t('admin.customer')}</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="seller" id="r-seller" />
-                      <Label htmlFor="r-seller">Seller</Label>
+                      <Label htmlFor="r-seller">{t('admin.seller')}</Label>
                     </div>
                   </RadioGroup>
                 </div>
-                <Button type="submit" className="w-full" disabled={isSubmitting}>{isSubmitting ? 'Signing up...' : 'Create Account'}</Button>
+                <Button type="submit" className="w-full" disabled={isSubmitting}>{isSubmitting ? t('login.signingUp') : t('login.createAccount')}</Button>
               </form>
 
               <div className="relative">
@@ -362,12 +362,12 @@ export default function LoginPage() {
                   <span className="w-full border-t" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">Or sign up with</span>
+                  <span className="bg-background px-2 text-muted-foreground">{t('login.orSignUpWith')}</span>
                 </div>
               </div>
 
               <Button variant="outline" className="w-full" onClick={() => handleGoogleSignIn(role)}>
-                Sign up with Google
+                {t('login.googleSignUp')}
               </Button>
               {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
             </CardContent>
