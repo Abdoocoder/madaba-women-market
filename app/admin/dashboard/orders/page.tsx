@@ -103,7 +103,7 @@ const OrderManagementPage = () => {
           {orders.map(o => (
             <TableRow key={o.id}>
               <TableCell>{o.id}</TableCell>
-              <TableCell>{o.customerId}</TableCell>
+              <TableCell>{o.customerName || o.customerId}</TableCell>
               <TableCell>{o.total}</TableCell>
               <TableCell>
                 <Select value={o.status} onValueChange={(value) => handleStatusChange(o.id, value as any)}>

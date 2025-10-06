@@ -46,6 +46,7 @@ export interface Order {
   status: "pending" | "processing" | "shipped" | "delivered"
   createdAt: Date
   updatedAt?: Date
+  customerName?: string
 }
 
 export interface Review {

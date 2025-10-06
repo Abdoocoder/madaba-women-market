@@ -43,9 +43,28 @@ export async function GET(request: NextRequest) {
         const ordersRef = adminDb.collection('orders');
         const snapshot = await ordersRef.get();
         
-        const orders: Order[] = [];
+        // Fetch all customer data in parallel for better performance
+        const customerPromises: Promise<any>[] = [];
+        const orderData: any[] = [];
+        
         snapshot.forEach((doc: any) => {
-            orders.push({ id: doc.id, ...doc.data() } as Order);
+            const order = { id: doc.id, ...doc.data() } as Order;
+            orderData.push(order);
+            // Push promise to fetch customer data
+            customerPromises.push(adminDb.collection('users').doc(order.customerId).get());
+        });
+        
+        // Resolve all customer promises
+        const customerDocs = await Promise.all(customerPromises);
+        
+        // Combine order data with customer names
+        const orders: any[] = orderData.map((order, index) => {
+            const customerDoc = customerDocs[index];
+            const customerData = customerDoc.exists ? customerDoc.data() : null;
+            return {
+                ...order,
+                customerName: customerData?.name || order.customerId
+            };
         });
         
         console.log(`✅ Found ${orders.length} orders for admin`);
