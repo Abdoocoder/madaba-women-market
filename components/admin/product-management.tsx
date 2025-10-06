@@ -33,10 +33,11 @@ export function ProductManagement({ products, onApprove, onReject, onSuspend, on
                   <div className="flex gap-4">
                     <div className="relative w-24 h-24 flex-shrink-0">
                       <Image
-                        src={product.image || "/placeholder.svg"}
+                        src={product.image || "/placeholder.svg?height=200&width=200"}
                         alt={product.nameAr}
                         fill
                         className="object-cover rounded-md"
+                        sizes="100px"
                       />
                     </div>
                     <div className="flex-1">
@@ -81,10 +82,11 @@ export function ProductManagement({ products, onApprove, onReject, onSuspend, on
                 <div className="flex gap-4">
                   <div className="relative w-24 h-24 flex-shrink-0">
                     <Image
-                      src={product.image || "/placeholder.svg"}
+                      src={product.image || "/placeholder.svg?height=200&width=200"}
                       alt={product.nameAr}
                       fill
                       className="object-cover rounded-md"
+                      sizes="100px"
                     />
                   </div>
                   <div className="flex-1">

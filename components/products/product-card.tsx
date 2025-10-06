@@ -44,7 +44,14 @@ export function ProductCard({ product }: ProductCardProps) {
     <Link href={`/products/${product.id}`} className="block">
       <Card className="overflow-hidden hover:shadow-lg transition-shadow h-full flex flex-col">
         <div className="relative aspect-square">
-          <Image src={product.image || "/placeholder.svg"} alt={product.nameAr} fill className="object-cover" />
+          <Image 
+            src={product.image || "/placeholder.svg?height=400&width=400"} 
+            alt={product.nameAr} 
+            fill 
+            className="object-cover" 
+            priority={!!product.featured} // Add priority for featured products
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" // Add sizes for better optimization
+          />
           {product.featured && (
             <Badge className="absolute top-2 right-2 bg-gradient-to-r from-purple-600 to-pink-600">
               {language === "ar" ? "مميز" : "Featured"}

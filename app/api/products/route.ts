@@ -45,12 +45,19 @@ export async function GET(request: NextRequest) {
         
         const products: Product[] = [];
         snapshot.forEach((doc: any) => {
-            products.push({ id: doc.id, ...doc.data() } as Product);
+            const productData = doc.data();
+            // Only add products with valid data
+            if (productData) {
+                products.push({ id: doc.id, ...productData } as Product);
+            }
         });
         
-        console.log(`✅ Found ${products.length} products for seller ${user.id}`);
+        // Filter out any products without valid IDs (shouldn't happen, but just in case)
+        const validProducts = products.filter(product => product.id);
+        
+        console.log(`✅ Found ${validProducts.length} products for seller ${user.id}`);
 
-        return NextResponse.json(products);
+        return NextResponse.json(validProducts);
     } catch (error) {
         console.error('❌ Error fetching products:', error);
         return NextResponse.json({ 
@@ -104,8 +111,7 @@ export async function POST(request: NextRequest) {
         // Use the Cloudinary URL if available, otherwise use placeholder
         const finalImageUrl = imageUrl || '/placeholder.svg?height=400&width=400';
 
-        const newProduct: Product = {
-            id: '', // Firestore will generate the ID
+        const newProductData = {
             name: nameAr,
             nameAr: nameAr,
             description: descriptionAr,
@@ -123,8 +129,8 @@ export async function POST(request: NextRequest) {
 
         // Add to Firestore
         const adminDb = getAdminDb();
-        const docRef = await adminDb.collection('products').add(newProduct);
-        const createdProduct = { ...newProduct, id: docRef.id };
+        const docRef = await adminDb.collection('products').add(newProductData);
+        const createdProduct: Product = { ...newProductData, id: docRef.id };
         
         console.log('✅ Product created successfully:', createdProduct.id);
 

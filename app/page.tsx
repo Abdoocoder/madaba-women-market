@@ -36,10 +36,15 @@ export default function Home() {
       try {
         const productsQuery = query(collection(db, "products"), where("approved", "==", true))
         const querySnapshot = await getDocs(productsQuery)
-        const fetchedProducts = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        })) as Product[]
+        const fetchedProducts = querySnapshot.docs
+          .map((doc) => {
+            const productData = doc.data();
+            return {
+              id: doc.id,
+              ...productData,
+            };
+          })
+          .filter((product: any) => product.id) as Product[] // Filter out products without valid IDs
         setProducts(fetchedProducts)
       } catch (error) {
         console.error("Error fetching products:", error)
@@ -52,7 +57,7 @@ export default function Home() {
   }, [])
 
   const filteredAndSortedProducts = useMemo(() => {
-    let filtered = products
+    let filtered = products.filter(product => product.id) // Filter out products without valid IDs
 
     // Filter by search query
     if (searchQuery) {
