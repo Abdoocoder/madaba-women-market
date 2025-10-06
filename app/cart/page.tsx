@@ -15,7 +15,7 @@ import { useToast } from "@/components/ui/use-toast"
 
 export default function CartPage() {
   const { items, totalItems, totalPrice, clearCart } = useCart()
-  const { user } = useAuth()
+  const { user, getAuthToken } = useAuth()
   const { t } = useLocale()
   const router = useRouter()
   const { toast } = useToast()
@@ -40,10 +40,18 @@ export default function CartPage() {
     setIsProcessing(true)
     
     try {
+      // Get auth token
+      const token = await getAuthToken();
+      
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+      
       const response = await fetch('/api/orders', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           items: items,
