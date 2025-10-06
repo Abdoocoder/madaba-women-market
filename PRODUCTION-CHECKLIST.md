@@ -5,7 +5,7 @@
 ### 1. Environment Variables
 Ensure these are set in your production environment (NOT in your repository):
 
-```env
+\`\`\`env
 # Firebase Client Configuration (Production)
 NEXT_PUBLIC_FIREBASE_API_KEY=your_production_api_key
 NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_production_auth_domain
@@ -26,12 +26,12 @@ CLOUDINARY_API_SECRET=your_production_api_secret
 
 # Additional Security
 NODE_ENV=production
-```
+\`\`\`
 
 ### 2. Firebase Security Rules
 Update your Firestore security rules for production:
 
-```javascript
+\`\`\`javascript
 // Firestore Security Rules (Production)
 rules_version = '2';
 service cloud.firestore {
@@ -55,7 +55,7 @@ service cloud.firestore {
     }
   }
 }
-```
+\`\`\`
 
 ### 3. Firebase Authentication Settings
 - Enable only required sign-in methods
@@ -68,7 +68,7 @@ service cloud.firestore {
 ### 1. Next.js Configuration
 Create/update `next.config.js`:
 
-```javascript
+\`\`\`javascript
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Production optimizations
@@ -122,7 +122,7 @@ const nextConfig = {
 }
 
 module.exports = nextConfig
-```
+\`\`\`
 
 ### 2. Remove Development Dependencies
 Remove all console.logs, debug components, and development tools before deployment.
@@ -159,9 +159,9 @@ Create proper indexes in Firestore for production queries:
 ### 1. Error Tracking
 Consider adding error tracking service like Sentry:
 
-```bash
+\`\`\`bash
 npm install @sentry/nextjs
-```
+\`\`\`
 
 ### 2. Performance Monitoring
 - Use Vercel Analytics if deploying on Vercel

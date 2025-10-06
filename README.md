@@ -67,11 +67,11 @@ The current Firebase Admin credentials in `.env.local` are placeholder data. To 
 5. Download the JSON file
 6. Update your `.env.local` file with the real values:
 
-```env
+\`\`\`env
 FIREBASE_PROJECT_ID="your-actual-project-id"
 FIREBASE_CLIENT_EMAIL="your-service-account@project.iam.gserviceaccount.com"
 FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nYOUR_ACTUAL_PRIVATE_KEY\n-----END PRIVATE KEY-----\n"
-```
+\`\`\`
 
 #### 🎨 Cloudinary Setup
 The current Cloudinary API secret is placeholder data. To fix the 400 upload errors:
@@ -80,22 +80,22 @@ The current Cloudinary API secret is placeholder data. To fix the 400 upload err
 2. Copy your **Cloud Name**, **API Key**, and **API Secret**
 3. Update your `.env.local` file:
 
-```env
+\`\`\`env
 NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME="your-actual-cloud-name"
 CLOUDINARY_API_KEY="your-actual-api-key"
 CLOUDINARY_API_SECRET="your-actual-api-secret"
-```
+\`\`\`
 
 #### Quick Setup Helper
 Run the setup helper script for detailed instructions:
-```bash
+\`\`\`bash
 bash setup-credentials.sh
-```
+\`\`\`
 
 After updating the credentials, restart your development server:
-```bash
+\`\`\`bash
 npm run dev
-```
+\`\`\`
 
 ## 🌟 Overview
 
@@ -156,30 +156,30 @@ Madaba Women Market is a comprehensive e-commerce platform designed to empower w
 ### 💾 **Installation**
 
 1. **Clone the repository**
-   ```bash
+   \`\`\`bash
    git clone <repository-url>
    cd madaba-women-market
-   ```
+   \`\`\`
 
 2. **Install dependencies**
-   ```bash
+   \`\`\`bash
    npm install
    # or
    pnpm install
-   ```
+   \`\`\`
 
 3. **Set up environment variables**
-   ```bash
+   \`\`\`bash
    cp .env.example .env.local
-   ```
+   \`\`\`
    Fill in your Firebase and Cloudinary credentials in `.env.local`
 
 4. **Run development server**
-   ```bash
+   \`\`\`bash
    npm run dev
    # or
    pnpm dev
-   ```
+   \`\`\`
 
 5. **Open your browser**
    Visit [http://localhost:3000](http://localhost:3000)
@@ -231,7 +231,7 @@ Madaba Women Market is a comprehensive e-commerce platform designed to empower w
 
 ## 📁 Project Structure
 
-```
+\`\`\`
 .
 ├── app/                    # Next.js 15 App Router
 │   ├── admin/               # Admin dashboard pages
@@ -251,7 +251,7 @@ Madaba Women Market is a comprehensive e-commerce platform designed to empower w
 ├── firestore.rules         # Firebase security rules
 ├── .env.example            # Environment variables template
 └── DEPLOYMENT.md           # Deployment instructions
-```
+\`\`\`
 
 ## 🏧 Architecture Overview
 
@@ -295,30 +295,30 @@ This application is configured for **free production hosting** using:
 ### 🛠️ **Production Deployment**
 
 1. **Prepare Environment**
-   ```bash
+   \`\`\`bash
    # Copy environment template
    cp .env.example .env.local
    # Fill in your Firebase + Cloudinary credentials
-   ```
+   \`\`\`
 
 2. **Build for Production**
-   ```bash
+   \`\`\`bash
    npm run build
    # or
    pnpm build
    
    # Verify build success
    npm run start
-   ```
+   \`\`\`
 
 3. **Deploy to Vercel**
-   ```bash
+   \`\`\`bash
    # Install Vercel CLI
    npm i -g vercel
    
    # Deploy
    vercel --prod
-   ```
+   \`\`\`
 
 4. **Configure Environment Variables**
    - Add all `.env.local` variables to Vercel dashboard
@@ -342,7 +342,7 @@ This application is configured for **free production hosting** using:
 
 Create `.env.local` with the following configuration:
 
-```bash
+\`\`\`bash
 # Firebase Client Configuration
 NEXT_PUBLIC_FIREBASE_API_KEY=your_firebase_api_key
 NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
@@ -363,7 +363,7 @@ CLOUDINARY_API_SECRET=your_api_secret
 
 # Environment
 NODE_ENV=production
-```
+\`\`\`
 
 ⚠️ **Security Note**: Never commit `.env.local` to version control. Keep your Firebase private keys secure!
 
