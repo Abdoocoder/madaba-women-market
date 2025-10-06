@@ -370,5 +370,21 @@
   "cookies.manage": "Manage Cookies",
   "cookies.manageContent": "You can manage your cookie preferences or accept them all.",
   "cookies.acceptAll": "Accept All",
-  "cookies.managePreferences": "Manage Preferences"
+  "cookies.managePreferences": "Manage Preferences",
+  "cart.emptyCart": "Cart is empty",
+  "cart.addItemsFirst": "Please add items to your cart first",
+  "cart.orderSuccess": "Order created successfully",
+  "cart.orderSuccessDesc": "Your order has been successfully submitted and is being processed",
+  "cart.orderError": "Error creating order",
+  "cart.orderErrorDesc": "An error occurred while creating your order, please try again",
+  "cart.processing": "Processing...",
+  "cart.checkout": "Checkout",
+  "cart.addToCart": "Add to Cart",
+  "cart.quantity": "Quantity",
+  "cart.subtotal": "Subtotal",
+  "cart.shipping": "Shipping",
+  "cart.total": "Total",
+  "cart.continueShopping": "Continue Shopping",
+  "cart.emptyCartMessage": "Your shopping cart is empty",
+  "cart.startShopping": "Start by adding products to your cart"
 }
