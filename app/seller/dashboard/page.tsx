@@ -172,20 +172,24 @@ export default function SellerDashboardPage() {
   }
 
   const handleDeleteProduct = async (productId: string) => {
-    const token = await getAuthToken()
-    if (!token || !confirm("هل أنت متأكد من حذف هذا المنتج؟")) return
+    console.log('Deleting product with ID:', productId);
+    const token = await getAuthToken();
+    if (!token || !confirm("هل أنت متأكد من حذف هذا المنتج؟")) return;
 
     try {
+      console.log('Calling DELETE API with URL:', `/api/products/${productId}`);
       const response = await fetch(`/api/products/${productId}`, {
         method: "DELETE",
         headers: createAuthHeaders(token),
-      })
+      });
 
       if (response.ok) {
-        setProducts(products.filter((p) => p.id !== productId))
+        setProducts(products.filter((p) => p.id !== productId));
+      } else {
+        console.error("Error deleting product. Status:", response.status);
       }
     } catch (error) {
-      console.error("Error deleting product:", error)
+      console.error("Error deleting product:", error);
     }
   }
 

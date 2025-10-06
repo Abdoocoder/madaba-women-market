@@ -107,13 +107,17 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
  *         description: Product not found or access denied.
  */
 export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    console.log('=== DELETE /api/products/[id] called ===');
     const { id } = await params;
+    console.log('Product ID from params:', id);
     const authResult = await authorizeSeller(request, id);
     if (authResult instanceof NextResponse) return authResult;
 
     try {
+        console.log('Deleting product with ID:', id);
         const adminDb = getAdminDb();
         await adminDb.collection('products').doc(id).delete();
+        console.log('Product deleted successfully:', id);
         return NextResponse.json({ message: 'Product deleted successfully' });
     } catch (error) {
         console.error(`Error deleting product ${id}:`, error);
