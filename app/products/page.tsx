@@ -27,24 +27,23 @@ export default function ProductsPage() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const productsQuery = query(collection(db, "products"), where("approved", "==", true))
-        const querySnapshot = await getDocs(productsQuery)
-        const fetchedProducts = querySnapshot.docs
-          .map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }))
-          .filter((product: any) => product.id) as Product[] // Filter out products without valid IDs
-        setProducts(fetchedProducts)
+        const response = await fetch('/api/public/products');
+        if (!response.ok) {
+          throw new Error('Failed to fetch products');
+        }
+        const fetchedProducts = await response.json();
+        // Filter out products without valid IDs
+        const validProducts = fetchedProducts.filter((product: any) => product.id);
+        setProducts(validProducts);
       } catch (error) {
-        console.error("Error fetching products:", error)
+        console.error("Error fetching products:", error);
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
+    };
 
-    fetchProducts()
-  }, [])
+    fetchProducts();
+  }, []);
 
   const filteredAndSortedProducts = useMemo(() => {
     let filtered = products.filter(product => product.id) // Filter out products without valid IDs

@@ -35,9 +35,21 @@ export default function ProductDetailPage() {
 
     useEffect(() => {
         const fetchProductAndWishlist = async () => {
-            const fetchedProduct = MOCK_PRODUCTS.find((p) => p.id === id);
-            if (fetchedProduct) {
+            try {
+                // Fetch product from public API
+                const response = await fetch(`/api/public/products/${id}`);
+                
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        notFound();
+                    }
+                    throw new Error('Failed to fetch product');
+                }
+                
+                const fetchedProduct = await response.json();
                 setProduct(fetchedProduct);
+                
+                // Fetch reviews (keeping mock data for now, but this should be replaced with real reviews)
                 setReviews(MOCK_REVIEWS.filter((r) => r.productId === id));
 
                 if (user) {
@@ -47,12 +59,13 @@ export default function ProductDetailPage() {
                         setWishlisted(true);
                     }
                 }
-            } else {
+            } catch (error) {
+                console.error('Error fetching product:', error);
                 notFound();
             }
         };
 
-        if (!isAuthLoading) {
+        if (id && !isAuthLoading) {
             fetchProductAndWishlist();
         }
     }, [id, user, isAuthLoading]);
