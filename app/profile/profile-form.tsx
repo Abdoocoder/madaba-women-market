@@ -9,6 +9,7 @@ import { updateProfile, updateEmail, reauthenticateWithCredential, EmailAuthProv
 import { User, Edit3 } from "lucide-react";
 import { CldUploadButton } from 'next-cloudinary';
 import { useCloudinaryConfig } from '@/hooks/use-cloudinary-config';
+import { useLocale } from '@/lib/locale-context';
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,7 @@ const orders = [
 
 export default function ProfileForm() {
     const { user, isLoading, refreshAuthUser } = useAuth();
+    const { t } = useLocale();
     const { isConfigured: isCloudinaryConfigured, isLoading: isCloudinaryLoading } = useCloudinaryConfig();
     const router = useRouter();
     const { toast } = useToast();
@@ -45,7 +47,7 @@ export default function ProfileForm() {
     }, [user]);
 
     if (isLoading) {
-        return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
+        return <div className="flex justify-center items-center min-h-screen">{t('common.loading')}</div>;
     }
 
     if (!user) {
@@ -63,7 +65,7 @@ export default function ProfileForm() {
             console.error("Upload failed:", result);
             toast({ 
                 title: "Error", 
-                description: result.info?.error?.message || "Failed to upload image.", 
+                description: t('messages.failedToUploadImage'), 
                 variant: "destructive" 
             });
             return;
@@ -85,10 +87,10 @@ export default function ProfileForm() {
             
             await refreshAuthUser();
 
-            toast({ title: "Success", description: "Avatar updated successfully!", variant: "success" });
+            toast({ title: "Success", description: t('messages.avatarUpdated'), variant: "success" });
         } catch (error) {
             console.error("Error updating avatar: ", error);
-            toast({ title: "Error", description: "Failed to update avatar in database.", variant: "destructive" });
+            toast({ title: "Error", description: t('messages.failedToUpdateAvatar'), variant: "destructive" });
         }
     };
 
@@ -101,16 +103,16 @@ export default function ProfileForm() {
                 await updateProfile(auth.currentUser, { displayName: name });
             }
             await refreshAuthUser();
-            toast({ title: "Success", description: "Profile updated successfully!", variant: "success" });
+            toast({ title: "Success", description: t('messages.profileUpdated'), variant: "success" });
         } catch (error) {
             console.error("Error updating profile: ", error);
-            toast({ title: "Error", description: "Failed to update profile.", variant: "destructive" });
+            toast({ title: "Error", description: t('messages.failedToUpdateProfile'), variant: "destructive" });
         }
     };
 
     const handleEmailUpdate = async () => {
         if (!user || !user.id) return;
-        const currentPassword = prompt("Please enter your current password to update your email.");
+        const currentPassword = prompt(t('messages.enterPassword'));
         if (!currentPassword || !auth.currentUser) return;
 
         const credential = EmailAuthProvider.credential(auth.currentUser.email || "", currentPassword);
@@ -124,16 +126,16 @@ export default function ProfileForm() {
             
             await refreshAuthUser();
 
-            toast({ title: "Success", description: "Email updated successfully!", variant: "success" });
+            toast({ title: "Success", description: t('messages.emailUpdated'), variant: "success" });
         } catch (error) {
             console.error("Error updating email: ", error);
-            toast({ title: "Error", description: "Failed to update email. Please check your password.", variant: "destructive" });
+            toast({ title: "Error", description: t('messages.failedToUpdateEmail'), variant: "destructive" });
         }
     };
 
     return (
         <div className="container mx-auto px-4 py-8">
-            <h1 className="text-3xl font-bold mb-8 text-center md:text-left">My Profile</h1>
+            <h1 className="text-3xl font-bold mb-8 text-center md:text-left">{t('profile.myProfile')}</h1>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div className="md:col-span-1">
@@ -163,12 +165,12 @@ export default function ProfileForm() {
                                     uploadPreset="madaba-women-market-presets"
                                 >
                                     <Button asChild className="w-full">
-                                        <span>Upload Picture</span>
+                                        <span>{t('product.uploadPicture')}</span>
                                     </Button>
                                 </CldUploadButton>
                             ) : (
                                 <Button disabled className="w-full">
-                                    <span>{isCloudinaryLoading ? 'Loading...' : 'Upload Disabled'}</span>
+                                    <span>{isCloudinaryLoading ? t('messages.uploadLoading') : t('messages.uploadDisabled')}</span>
                                 </Button>
                             )}
                         </CardContent>
@@ -178,21 +180,21 @@ export default function ProfileForm() {
                 <div className="md:col-span-2 space-y-8">
                     <Card>
                         <CardHeader>
-                            <CardTitle>Account Settings</CardTitle>
+                            <CardTitle>{t('profile.accountSettings')}</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="space-y-2">
-                                <Label htmlFor="name">Name</Label>
+                                <Label htmlFor="name">{t('admin.name')}</Label>
                                 <Input id="name" value={name} onChange={(e) => setName(e.target.value)} />
                             </div>
                            <div className="flex justify-end">
-                              <Button onClick={handleProfileUpdate}>Save Name</Button>
+                              <Button onClick={handleProfileUpdate}>{t('common.save')}</Button>
                            </div>
                             <div className="space-y-2 mt-4">
-                                <Label htmlFor="email">Email</Label>
+                                <Label htmlFor="email">{t('admin.email')}</Label>
                                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
                                     <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-                                    <Button variant="outline" onClick={handleEmailUpdate} className="w-full sm:w-auto"><Edit3 className="mr-2 h-4 w-4" />Update Email</Button>
+                                    <Button variant="outline" onClick={handleEmailUpdate} className="w-full sm:w-auto"><Edit3 className="mr-2 h-4 w-4" />{t('common.updateEmail')}</Button>
                                 </div>
                             </div>
                         </CardContent>
@@ -201,16 +203,16 @@ export default function ProfileForm() {
                     {user.role === 'customer' && (
                         <Card>
                             <CardHeader>
-                                <CardTitle>Order History</CardTitle>
+                                <CardTitle>{t('messages.orderHistory')}</CardTitle>
                             </CardHeader>
                             <CardContent className="overflow-x-auto">
                                 <table className="w-full min-w-[600px]">
                                     <thead>
                                         <tr className="text-left">
-                                            <th className="py-2 px-4">Order ID</th>
-                                            <th className="py-2 px-4">Date</th>
-                                            <th className="py-2 px-4">Total</th>
-                                            <th className="py-2 px-4">Status</th>
+                                            <th className="py-2 px-4">{t('order.id')}</th>
+                                            <th className="py-2 px-4">{t('order.date')}</th>
+                                            <th className="py-2 px-4">{t('order.total')}</th>
+                                            <th className="py-2 px-4">{t('order.status')}</th>
                                         </tr>
                                     </thead>
                                     <tbody>

@@ -1,68 +1,102 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { collection, getDocs, query, where, updateDoc, doc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
 import { useToast } from "@/components/ui/use-toast";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/lib/auth-context";
+import { useLocale } from "@/lib/locale-context";
+import toast from "react-hot-toast";
 
 interface Seller {
     id: string;
     name: string;
     email: string;
     status: 'pending' | 'approved' | 'rejected';
+    role?: string;
 }
 
 export function SellerManagement() {
+    const { getAuthToken } = useAuth();
+    const { t } = useLocale();
     const [sellers, setSellers] = useState<Seller[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const { toast } = useToast();
+    const { toast: useToastFn } = useToast();
 
     useEffect(() => {
         const fetchSellers = async () => {
             setIsLoading(true);
             try {
-                const q = query(collection(db, "users"), where("role", "==", "seller"));
-                const querySnapshot = await getDocs(q);
-                const sellersData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Seller));
+                const token = await getAuthToken();
+                if (!token) {
+                    throw new Error('No authentication token available');
+                }
+
+                const response = await fetch('/api/admin/sellers', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch sellers: ${response.status} ${response.statusText}`);
+                }
+
+                const sellersData = await response.json();
                 setSellers(sellersData);
             } catch (error) {
                 console.error("Error fetching sellers: ", error);
-                toast({ title: "Error", description: "Failed to fetch sellers.", variant: "destructive" });
+                useToastFn({ title: "Error", description: "Failed to fetch sellers.", variant: "destructive" });
             } finally {
                 setIsLoading(false);
             }
         };
 
         fetchSellers();
-    }, [toast]);
+    }, [getAuthToken, useToastFn]);
 
     const handleStatusUpdate = async (sellerId: string, status: 'approved' | 'rejected') => {
         try {
-            const sellerDocRef = doc(db, "users", sellerId);
-            await updateDoc(sellerDocRef, { status });
+            const token = await getAuthToken();
+            if (!token) {
+                throw new Error('No authentication token available');
+            }
+
+            const response = await fetch('/api/admin/sellers', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ sellerId, status }),
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to update seller status: ${response.status} ${response.statusText}`);
+            }
+
+            const result = await response.json();
             setSellers(sellers.map(seller => seller.id === sellerId ? { ...seller, status } : seller));
-            toast({ title: "Success", description: `Seller has been ${status}.`, variant: "success" });
+            toast.success(t("admin.statusUpdated"));
         } catch (error) {
             console.error(`Error updating seller status: `, error);
-            toast({ title: "Error", description: "Failed to update seller status.", variant: "destructive" });
+            toast.error(t("admin.statusUpdateFailed"));
         }
     };
 
     if (isLoading) {
-        return <div>Loading sellers...</div>;
+        return <div>{t("common.loading")}</div>;
     }
 
     return (
         <Table>
             <TableHeader>
                 <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Actions</TableHead>
+                    <TableHead>{t("admin.name")}</TableHead>
+                    <TableHead>{t("admin.email")}</TableHead>
+                    <TableHead>{t("admin.status")}</TableHead>
+                    <TableHead>{t("admin.actions")}</TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
@@ -72,14 +106,14 @@ export function SellerManagement() {
                         <TableCell>{seller.email}</TableCell>
                         <TableCell>
                             <Badge variant={seller.status === 'approved' ? 'default' : seller.status === 'pending' ? 'secondary' : 'destructive'}>
-                                {seller.status}
+                                {t(`admin.${seller.status}`)}
                             </Badge>
                         </TableCell>
                         <TableCell>
                             {seller.status === 'pending' && (
                                 <div className="flex gap-2">
-                                    <Button size="sm" onClick={() => handleStatusUpdate(seller.id, 'approved')}>Approve</Button>
-                                    <Button size="sm" variant="destructive" onClick={() => handleStatusUpdate(seller.id, 'rejected')}>Reject</Button>
+                                    <Button size="sm" onClick={() => handleStatusUpdate(seller.id, 'approved')}>{t("admin.approve")}</Button>
+                                    <Button size="sm" variant="destructive" onClick={() => handleStatusUpdate(seller.id, 'rejected')}>{t("admin.reject")}</Button>
                                 </div>
                             )}
                         </TableCell>

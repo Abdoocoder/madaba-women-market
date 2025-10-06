@@ -1,8 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react';
-import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
 import { useAuth } from '@/lib/auth-context';
 import { useRouter } from 'next/navigation';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -19,7 +17,7 @@ interface Seller {
 }
 
 export default function SellerManagementClient() {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, getAuthToken } = useAuth();
   const router = useRouter();
   const [sellers, setSellers] = useState<Seller[]>([]);
   const { t } = useLocale();
@@ -32,23 +30,57 @@ export default function SellerManagementClient() {
 
   useEffect(() => {
     const fetchSellers = async () => {
-      const querySnapshot = await getDocs(collection(db, 'users'));
-      const sellerList = querySnapshot.docs
-        .map(doc => ({ id: doc.id, ...doc.data() } as Seller))
-        .filter(seller => seller.role === 'seller');
-      setSellers(sellerList);
+      try {
+        const token = await getAuthToken();
+        if (!token) {
+          throw new Error('No authentication token available');
+        }
+
+        const response = await fetch('/api/admin/sellers', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch sellers: ${response.status} ${response.statusText}`);
+        }
+
+        const sellerList = await response.json();
+        setSellers(sellerList);
+      } catch (error) {
+        console.error('Error fetching sellers:', error);
+        toast.error(t('messages.failedToFetchSellers') || 'Failed to fetch sellers.');
+      }
     };
 
     if (user?.role === 'admin') {
       fetchSellers();
     }
-  }, [user]);
+  }, [user, getAuthToken, t]);
 
   const handleApproval = async (sellerId: string, status: 'approved' | 'rejected') => {
     const toastId = toast.loading(t('admin.updatingStatus'));
     try {
-      const sellerRef = doc(db, 'users', sellerId);
-      await updateDoc(sellerRef, { status });
+      const token = await getAuthToken();
+      if (!token) {
+        throw new Error('No authentication token available');
+      }
+
+      const response = await fetch('/api/admin/sellers', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ sellerId, status }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to update seller status: ${response.status} ${response.statusText}`);
+      }
+
+      const result = await response.json();
       setSellers(sellers.map(seller => seller.id === sellerId ? { ...seller, status } : seller));
       toast.success(t('admin.statusUpdated'), { id: toastId });
     } catch (error) {

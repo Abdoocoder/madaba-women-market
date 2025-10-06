@@ -1,8 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react';
-import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
 import { useAuth } from '@/lib/auth-context';
 import { useRouter } from 'next/navigation';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -12,7 +10,7 @@ import { useLocale } from '@/lib/locale-context';
 import { Order } from '@/lib/types';
 
 const OrderManagementPage = () => {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, getAuthToken } = useAuth();
   const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
   const { t } = useLocale();
@@ -25,26 +23,62 @@ const OrderManagementPage = () => {
 
   useEffect(() => {
     const fetchOrders = async () => {
-      const querySnapshot = await getDocs(collection(db, 'orders'));
-      const orderList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
-      setOrders(orderList);
+      try {
+        const token = await getAuthToken();
+        if (!token) {
+          throw new Error('No authentication token available');
+        }
+
+        const response = await fetch('/api/admin/orders', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch orders: ${response.status} ${response.statusText}`);
+        }
+
+        const orderList = await response.json();
+        setOrders(orderList);
+      } catch (error) {
+        console.error('Error fetching orders:', error);
+        toast.error(t('messages.failedToFetchOrders'));
+      }
     };
 
     if (user?.role === 'admin') {
       fetchOrders();
     }
-  }, [user]);
+  }, [user, getAuthToken, t]);
 
   const handleStatusChange = async (orderId: string, status: 'pending' | 'processing' | 'shipped' | 'delivered') => {
-    const toastId = toast.loading('Updating order status...');
+    const toastId = toast.loading(t('order.updatingStatus'));
     try {
-      const orderRef = doc(db, 'orders', orderId);
-      await updateDoc(orderRef, { status });
+      const token = await getAuthToken();
+      if (!token) {
+        throw new Error('No authentication token available');
+      }
+
+      const response = await fetch('/api/admin/orders', {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ orderId, status }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to update order status: ${response.status} ${response.statusText}`);
+      }
+
+      const result = await response.json();
       setOrders(orders.map(o => o.id === orderId ? { ...o, status } : o));
-      toast.success('Order status updated successfully!', { id: toastId });
+      toast.success(t('order.statusUpdated'), { id: toastId });
     } catch (error) {
       console.error('Error updating order status:', error);
-      toast.error('Failed to update order status.', { id: toastId });
+      toast.error(t('order.statusUpdateFailed'), { id: toastId });
     }
   };
 
@@ -54,15 +88,15 @@ const OrderManagementPage = () => {
 
   return (
     <div className="container mx-auto py-10">
-      <h1 className="text-3xl font-bold mb-6">Order Management</h1>
+      <h1 className="text-3xl font-bold mb-6">{t('admin.manageOrders')}</h1>
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Order ID</TableHead>
-            <TableHead>User ID</TableHead>
-            <TableHead>Total</TableHead>
-            <TableHead>{t('admin.status')}</TableHead>
-            <TableHead>{t('admin.actions')}</TableHead>
+            <TableHead>{t('order.id')}</TableHead>
+            <TableHead>{t('order.customer')}</TableHead>
+            <TableHead>{t('order.total')}</TableHead>
+            <TableHead>{t('order.status')}</TableHead>
+            <TableHead>{t('order.actions')}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -77,10 +111,10 @@ const OrderManagementPage = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="processing">Processing</SelectItem>
-                    <SelectItem value="shipped">Shipped</SelectItem>
-                    <SelectItem value="delivered">Delivered</SelectItem>
+                    <SelectItem value="pending">{t('order.pending')}</SelectItem>
+                    <SelectItem value="processing">{t('order.processing')}</SelectItem>
+                    <SelectItem value="shipped">{t('order.shipped')}</SelectItem>
+                    <SelectItem value="delivered">{t('order.delivered')}</SelectItem>
                   </SelectContent>
                 </Select>
               </TableCell>

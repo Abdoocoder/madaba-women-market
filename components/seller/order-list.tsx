@@ -53,10 +53,10 @@ export function OrderList() {
           setOrders(data)
         } else {
           console.error('Orders API error:', response.status, response.statusText)
-          setError('Failed to fetch orders')
+          setError(t('messages.failedToFetchOrders') || 'Failed to fetch orders')
         }
       } catch (err) {
-        setError('Network error')
+        setError(t('messages.networkError') || 'Network error')
         console.error('Error fetching orders:', err)
       } finally {
         setIsLoading(false)
@@ -64,7 +64,7 @@ export function OrderList() {
     }
 
     fetchOrders()
-  }, [getAuthToken]) // Re-run effect if getAuthToken changes
+  }, [getAuthToken, t]) // Re-run effect if getAuthToken changes
 
   const handleStatusUpdate = async (orderId: string, newStatus: OrderStatus) => {
     const token = await getAuthToken()
@@ -83,20 +83,20 @@ export function OrderList() {
           order.id === orderId ? { ...order, status: newStatus } : order
         ))
       } else {
-        setError('Failed to update order')
+        setError(t('messages.failedToUpdateOrder') || 'Failed to update order')
       }
     } catch (err) {
-      setError('Network error')
+      setError(t('messages.networkError') || 'Network error')
       console.error('Error updating order:', err)
     }
   }
 
   // Status translations
   const statusTranslations: Record<OrderStatus, string> = {
-    pending: t('order.pending') || 'Pending',
-    processing: t('order.processing') || 'Processing', 
-    shipped: t('order.shipped') || 'Shipped',
-    delivered: t('order.delivered') || 'Delivered'
+    pending: t('order.pending'),
+    processing: t('order.processing'), 
+    shipped: t('order.shipped'),
+    delivered: t('order.delivered')
   }
 
   // Status badge variants
@@ -116,7 +116,7 @@ export function OrderList() {
   }
 
   if (isLoading) {
-    return <div className="text-center py-4">{t('common.loading') || 'Loading...'}</div>
+    return <div className="text-center py-4">{t('common.loading')}</div>
   }
 
   if (error) {
@@ -128,25 +128,20 @@ export function OrderList() {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>{t('order.id') || 'Order ID'}</TableHead>
-            <TableHead>{t('order.customer') || 'Customer'}</TableHead>
-            <TableHead>{t('order.date') || 'Date'}</TableHead>
-            <TableHead>{t('order.total') || 'Total'}</TableHead>
-            <TableHead>{t('order.status') || 'Status'}</TableHead>
-            <TableHead>{t('order.actions') || 'Actions'}</TableHead>
+            <TableHead>{t('order.id')}</TableHead>
+            <TableHead>{t('order.customer')}</TableHead>
+            <TableHead>{t('order.date')}</TableHead>
+            <TableHead>{t('order.total')}</TableHead>
+            <TableHead>{t('order.status')}</TableHead>
+            <TableHead>{t('order.actions')}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {orders.length === 0 ? (
             <TableRow>
-              <TableCell className="text-center">
-                {t('messages.noOrders') || 'No orders found.'}
-              </TableCell>
-              <TableCell></TableCell>
-              <TableCell></TableCell>
-              <TableCell></TableCell>
-              <TableCell></TableCell>
-              <TableCell></TableCell>
+              <td colSpan={6} className="text-center p-4">
+                {t('messages.noOrders')}
+              </td>
             </TableRow>
           ) : (
             orders.map((order) => (
@@ -167,10 +162,10 @@ export function OrderList() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="pending">Pending</SelectItem>
-                      <SelectItem value="processing">Processing</SelectItem>
-                      <SelectItem value="shipped">Shipped</SelectItem>
-                      <SelectItem value="delivered">Delivered</SelectItem>
+                      <SelectItem value="pending">{t('order.pending')}</SelectItem>
+                      <SelectItem value="processing">{t('order.processing')}</SelectItem>
+                      <SelectItem value="shipped">{t('order.shipped')}</SelectItem>
+                      <SelectItem value="delivered">{t('order.delivered')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </TableCell>

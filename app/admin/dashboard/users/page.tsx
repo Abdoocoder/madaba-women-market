@@ -1,8 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react';
-import { collection, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
 import { useAuth } from '@/lib/auth-context';
 import { useRouter } from 'next/navigation';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -19,7 +17,7 @@ interface User {
 }
 
 const UserManagementPage = () => {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, getAuthToken } = useAuth();
   const router = useRouter();
   const [users, setUsers] = useState<User[]>([]);
   const { t } = useLocale();
@@ -32,39 +30,90 @@ const UserManagementPage = () => {
 
   useEffect(() => {
     const fetchUsers = async () => {
-      const querySnapshot = await getDocs(collection(db, 'users'));
-      const userList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as User));
-      setUsers(userList);
+      try {
+        const token = await getAuthToken();
+        if (!token) {
+          throw new Error('No authentication token available');
+        }
+
+        const response = await fetch('/api/admin/users', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch users: ${response.status} ${response.statusText}`);
+        }
+
+        const userList = await response.json();
+        setUsers(userList);
+      } catch (error) {
+        console.error('Error fetching users:', error);
+        toast.error(t('messages.failedToFetchUsers'));
+      }
     };
 
     if (user?.role === 'admin') {
       fetchUsers();
     }
-  }, [user]);
+  }, [user, getAuthToken, t]);
 
   const handleRoleChange = async (userId: string, role: 'customer' | 'seller' | 'admin') => {
-    const toastId = toast.loading('Updating user role...');
+    const toastId = toast.loading(t('admin.updatingUserRole'));
     try {
-      const userRef = doc(db, 'users', userId);
-      await updateDoc(userRef, { role });
+      const token = await getAuthToken();
+      if (!token) {
+        throw new Error('No authentication token available');
+      }
+
+      const response = await fetch('/api/admin/users', {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId, role }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to update user role: ${response.status} ${response.statusText}`);
+      }
+
+      const result = await response.json();
       setUsers(users.map(u => u.id === userId ? { ...u, role } : u));
-      toast.success('User role updated successfully!', { id: toastId });
+      toast.success(t('admin.userRoleUpdated'), { id: toastId });
     } catch (error) {
       console.error('Error updating user role:', error);
-      toast.error('Failed to update user role.', { id: toastId });
+      toast.error(t('admin.userRoleUpdateFailed'), { id: toastId });
     }
   };
 
   const handleDeleteUser = async (userId: string) => {
-    const toastId = toast.loading('Deleting user...');
+    const toastId = toast.loading(t('admin.deletingUser'));
     try {
-      const userRef = doc(db, 'users', userId);
-      await deleteDoc(userRef);
+      const token = await getAuthToken();
+      if (!token) {
+        throw new Error('No authentication token available');
+      }
+
+      const response = await fetch(`/api/admin/users?id=${userId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to delete user: ${response.status} ${response.statusText}`);
+      }
+
+      const result = await response.json();
       setUsers(users.filter(u => u.id !== userId));
-      toast.success('User deleted successfully!', { id: toastId });
+      toast.success(t('admin.userDeleted'), { id: toastId });
     } catch (error) {
       console.error('Error deleting user:', error);
-      toast.error('Failed to delete user.', { id: toastId });
+      toast.error(t('admin.userDeleteFailed'), { id: toastId });
     }
   };
 
@@ -74,13 +123,13 @@ const UserManagementPage = () => {
 
   return (
     <div className="container mx-auto py-10">
-      <h1 className="text-3xl font-bold mb-6">User Management</h1>
+      <h1 className="text-3xl font-bold mb-6">{t('admin.manageUsers')}</h1>
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead>{t('admin.name')}</TableHead>
             <TableHead>{t('admin.email')}</TableHead>
-            <TableHead>Role</TableHead>
+            <TableHead>{t('admin.role')}</TableHead>
             <TableHead>{t('admin.actions')}</TableHead>
           </TableRow>
         </TableHeader>
@@ -95,14 +144,14 @@ const UserManagementPage = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="customer">Customer</SelectItem>
-                    <SelectItem value="seller">Seller</SelectItem>
-                    <SelectItem value="admin">Admin</SelectItem>
+                    <SelectItem value="customer">{t('admin.customer')}</SelectItem>
+                    <SelectItem value="seller">{t('admin.seller')}</SelectItem>
+                    <SelectItem value="admin">{t('admin.admin')}</SelectItem>
                   </SelectContent>
                 </Select>
               </TableCell>
               <TableCell>
-                <Button onClick={() => handleDeleteUser(u.id)} variant="destructive">Delete</Button>
+                <Button onClick={() => handleDeleteUser(u.id)} variant="destructive">{t('common.delete')}</Button>
               </TableCell>
             </TableRow>
           ))}

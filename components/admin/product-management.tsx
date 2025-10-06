@@ -9,6 +9,7 @@ import type { Product } from "@/lib/types"
 import { formatCurrency } from "@/lib/utils"
 import { useAuth } from "@/lib/auth-context"
 import toast from "react-hot-toast"
+import { useLocale } from "@/lib/locale-context"
 
 interface ProductManagementProps {
   products: Product[]
@@ -17,6 +18,7 @@ interface ProductManagementProps {
 
 export function ProductManagement({ products, onProductsUpdate }: ProductManagementProps) {
   const { getAuthToken } = useAuth()
+  const { t } = useLocale()
 
   const handleApiAction = async (productId: string, action: string, value?: any) => {
     try {
@@ -81,7 +83,7 @@ export function ProductManagement({ products, onProductsUpdate }: ProductManagem
     <div className="space-y-6">
       {pendingProducts.length > 0 && (
         <div>
-          <h3 className="text-lg font-semibold mb-4">المنتجات قيد المراجعة ({pendingProducts.length})</h3>
+          <h3 className="text-lg font-semibold mb-4">{t("admin.reviewPending")} ({pendingProducts.length})</h3>
           <div className="space-y-4">
             {pendingProducts.map((product) => (
               <Card key={product.id}>
@@ -101,22 +103,22 @@ export function ProductManagement({ products, onProductsUpdate }: ProductManagem
                         <div>
                           <h4 className="font-semibold">{product.nameAr}</h4>
                           <p className="text-sm text-muted-foreground line-clamp-2">{product.descriptionAr}</p>
-                          <p className="text-xs text-muted-foreground mt-1">البائع: {product.sellerName}</p>
+                          <p className="text-xs text-muted-foreground mt-1">{t("product.seller")}: {product.sellerName}</p>
                         </div>
                       </div>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4 text-sm">
                           <span className="font-bold text-primary">{formatCurrency(product.price)}</span>
-                          <span className="text-muted-foreground">الكمية: {product.stock}</span>
+                          <span className="text-muted-foreground">{t("product.stock")}: {product.stock}</span>
                         </div>
                         <div className="flex gap-2">
                           <Button size="sm" onClick={() => handleApiAction(product.id, 'approve')}>
                             <Check className="ml-1 h-4 w-4" />
-                            قبول
+                            {t("admin.accept")}
                           </Button>
                           <Button size="sm" variant="destructive" onClick={() => handleApiAction(product.id, 'reject')}>
                             <X className="ml-1 h-4 w-4" />
-                            رفض
+                            {t("admin.decline")}
                           </Button>
                         </div>
                       </div>
@@ -130,7 +132,7 @@ export function ProductManagement({ products, onProductsUpdate }: ProductManagem
       )}
 
       <div>
-        <h3 className="text-lg font-semibold mb-4">المنتجات المعتمدة ({approvedProducts.length})</h3>
+        <h3 className="text-lg font-semibold mb-4">{t("admin.reviewApproved")} ({approvedProducts.length})</h3>
         <div className="space-y-4">
           {approvedProducts.map((product) => (
             <Card key={product.id}>
@@ -151,22 +153,22 @@ export function ProductManagement({ products, onProductsUpdate }: ProductManagem
                         <div className="flex items-center gap-2">
                           <h4 className="font-semibold">{product.nameAr}</h4>
                           {product.suspended ? (
-                            <Badge variant="destructive">معلق</Badge>
+                            <Badge variant="destructive">{t("admin.suspended")}</Badge>
                           ) : (
-                            <Badge>معتمد</Badge>
+                            <Badge>{t("admin.approved")}</Badge>
                           )}
                           {product.featured && (
-                            <Badge className="bg-gradient-to-r from-purple-600 to-pink-600">مميز</Badge>
+                            <Badge className="bg-gradient-to-r from-purple-600 to-pink-600">{t("admin.featured")}</Badge>
                           )}
                         </div>
                         <p className="text-sm text-muted-foreground line-clamp-1">{product.descriptionAr}</p>
-                        <p className="text-xs text-muted-foreground mt-1">البائع: {product.sellerName}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{t("product.seller")}: {product.sellerName}</p>
                       </div>
                     </div>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4 text-sm">
                         <span className="font-bold text-primary">{formatCurrency(product.price)}</span>
-                        <span className="text-muted-foreground">الكمية: {product.stock}</span>
+                        <span className="text-muted-foreground">{t("product.stock")}: {product.stock}</span>
                       </div>
                       <div className="flex gap-2">
                         <Button
@@ -175,7 +177,7 @@ export function ProductManagement({ products, onProductsUpdate }: ProductManagem
                           onClick={() => handleApiAction(product.id, 'feature', !product.featured)}
                         >
                           <Star className={`ml-1 h-4 w-4 ${product.featured ? "fill-current" : ""}`} />
-                          {product.featured ? "إلغاء التمييز" : "تمييز"}
+                          {product.featured ? t("admin.unfeatureProduct") : t("admin.featureProduct")}
                         </Button>
                          <Button 
                           size="sm" 
@@ -183,11 +185,11 @@ export function ProductManagement({ products, onProductsUpdate }: ProductManagem
                           onClick={() => handleApiAction(product.id, 'suspend', !product.suspended)}
                         >
                           <ShieldAlert className="ml-1 h-4 w-4" />
-                          {product.suspended ? "رفع التعليق" : "تعليق"}
+                          {product.suspended ? t("admin.unsuspendProduct") : t("admin.suspendProduct")}
                         </Button>
                         <Button size="sm" variant="destructive" onClick={() => handleDelete(product.id)}>
                           <Trash2 className="ml-1 h-4 w-4" />
-                          حذف
+                          {t("admin.deleteProduct")}
                         </Button>
                       </div>
                     </div>

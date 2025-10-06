@@ -5,11 +5,11 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
 const dashboardSections = [
-  { href: '/admin/dashboard/users', title: 'Users', description: 'Manage all user accounts.' },
-  { href: '/admin/dashboard/sellers', title: 'Sellers', description: 'Manage seller accounts and approvals.' },
-  { href: '/admin/dashboard/products', title: 'Products', description: 'Manage all products.' },
-  { href: '/admin/dashboard/orders', title: 'Orders', description: 'Manage all orders.' },
-  { href: '/admin/dashboard/stats', title: 'Statistics', description: 'View summary statistics.' },
+  { href: '/admin/dashboard/users', title: 'admin.users', description: 'admin.manageUsers' },
+  { href: '/admin/dashboard/sellers', title: 'admin.sellers', description: 'admin.manageSellers' },
+  { href: '/admin/dashboard/products', title: 'admin.products', description: 'admin.manageProducts' },
+  { href: '/admin/dashboard/orders', title: 'admin.orders', description: 'admin.manageOrders' },
+  { href: '/admin/dashboard/stats', title: 'admin.statistics', description: 'admin.viewStatistics' },
 ];
 
 export default function AdminDashboardClient() {
@@ -22,8 +22,8 @@ export default function AdminDashboardClient() {
           <Link key={section.href} href={section.href} passHref>
             <Button asChild className="w-full h-full text-left flex flex-col items-start p-4 border rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
               <div>
-                <h2 className="text-xl font-bold">{t(section.title.toLowerCase())}</h2>
-                <p>{t(section.description.toLowerCase())}</p>
+                <h2 className="text-xl font-bold">{t(section.title)}</h2>
+                <p>{t(section.description)}</p>
               </div>
             </Button>
           </Link>

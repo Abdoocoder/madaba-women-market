@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { CATEGORIES } from "@/lib/mock-data"
 import { CldUploadWidget } from 'next-cloudinary'
 import type { Product } from "@/lib/types"
+import { useLocale } from "@/lib/locale-context"
 
 interface ProductFormProps {
   product?: Product
@@ -20,6 +21,7 @@ interface ProductFormProps {
 }
 
 export function ProductForm({ product, onSubmit, onCancel }: ProductFormProps) {
+  const { t } = useLocale()
   const [formData, setFormData] = useState({
     nameAr: product?.nameAr || "",
     descriptionAr: product?.descriptionAr || "",
@@ -48,12 +50,12 @@ export function ProductForm({ product, onSubmit, onCancel }: ProductFormProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{product ? "تعديل المنتج" : "إضافة منتج جديد"}</CardTitle>
+        <CardTitle>{product ? t("seller.editProduct") : t("seller.addProduct")}</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label>صورة المنتج</Label>
+            <Label>{t("product.image")}</Label>
             {process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ? (
               <CldUploadWidget
                 uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "unsigned_uploads"}
@@ -72,11 +74,11 @@ export function ProductForm({ product, onSubmit, onCancel }: ProductFormProps) {
                     onClick={() => open()}
                   >
                     {imagePreview ? (
-                      <Image src={imagePreview} alt="معاينة المنتج" fill className="object-cover rounded-lg" />
+                      <Image src={imagePreview} alt={t("product.image")} fill className="object-cover rounded-lg" />
                     ) : (
                       <div className="text-center text-muted-foreground">
-                        <p>اسحب وأفلت الصورة هنا، أو انقر للتحديد</p>
-                        <p className="text-xs">(الحجم الموصى به: 800x800 بكسل)</p>
+                        <p>{t("product.uploadImage")}</p>
+                        <p className="text-xs">{t("product.recommendedSize")}</p>
                       </div>
                     )}
                   </div>
@@ -85,15 +87,15 @@ export function ProductForm({ product, onSubmit, onCancel }: ProductFormProps) {
             ) : (
               <div className="w-full h-48 border-2 border-dashed rounded-lg flex items-center justify-center bg-gray-100">
                 <div className="text-center text-muted-foreground">
-                  <p>Image upload disabled</p>
-                  <p className="text-xs">(Cloudinary not configured)</p>
+                  <p>{t("product.uploadDisabled")}</p>
+                  <p className="text-xs">{t("product.cloudinaryNotConfigured")}</p>
                 </div>
               </div>
             )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="nameAr">اسم المنتج</Label>
+            <Label htmlFor="nameAr">{t("product.name")}</Label>
             <Input
               id="nameAr"
               value={formData.nameAr}
@@ -103,7 +105,7 @@ export function ProductForm({ product, onSubmit, onCancel }: ProductFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="descriptionAr">الوصف</Label>
+            <Label htmlFor="descriptionAr">{t("product.description")}</Label>
             <Textarea
               id="descriptionAr"
               value={formData.descriptionAr}
@@ -115,7 +117,7 @@ export function ProductForm({ product, onSubmit, onCancel }: ProductFormProps) {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="price">السعر (د.أ)</Label>
+              <Label htmlFor="price">{t("product.price")} (د.أ)</Label>
               <Input
                 id="price"
                 type="number"
@@ -128,7 +130,7 @@ export function ProductForm({ product, onSubmit, onCancel }: ProductFormProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="stock">الكمية المتوفرة</Label>
+              <Label htmlFor="stock">{t("product.stock")}</Label>
               <Input
                 id="stock"
                 type="number"
@@ -141,10 +143,10 @@ export function ProductForm({ product, onSubmit, onCancel }: ProductFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="category">الفئة</Label>
+            <Label htmlFor="category">{t("product.category")}</Label>
             <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
               <SelectTrigger>
-                <SelectValue placeholder="اختر الفئة" />
+                <SelectValue placeholder={t("filters.allCategories")} />
               </SelectTrigger>
               <SelectContent>
                 {CATEGORIES.map((cat) => (
@@ -158,10 +160,10 @@ export function ProductForm({ product, onSubmit, onCancel }: ProductFormProps) {
 
           <div className="flex gap-2 pt-4">
             <Button type="submit" className="flex-1">
-              {product ? "حفظ التعديلات" : "إضافة المنتج"}
+              {product ? t("seller.saveChanges") : t("seller.addProductButton")}
             </Button>
             <Button type="button" variant="outline" onClick={onCancel} className="flex-1 bg-transparent">
-              إلغاء
+              {t("common.cancel")}
             </Button>
           </div>
         </form>
