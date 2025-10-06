@@ -94,6 +94,14 @@ export function Header({ cartItemCount = 0, user: initialUser }: HeaderProps) {
                     {t("header.profile")}
                   </Link>
                 </DropdownMenuItem>
+                {user.role === "customer" && (
+                  <DropdownMenuItem asChild>
+                    <Link href="/buyer/dashboard" className="cursor-pointer">
+                      <LayoutDashboard className="mr-2 h-4 w-4" />
+                      {t("dashboard.title")}
+                    </Link>
+                  </DropdownMenuItem>
+                )}
                 {user.role === "seller" && (
                   <DropdownMenuItem asChild>
                     <Link href="/seller/dashboard" className="cursor-pointer">
@@ -175,6 +183,14 @@ export function Header({ cartItemCount = 0, user: initialUser }: HeaderProps) {
                         {t("header.profile")}
                     </Button>
                 </Link>
+                {user.role === "customer" && (
+                    <Link href="/buyer/dashboard" onClick={() => setMobileMenuOpen(false)}>
+                        <Button variant="ghost" className="w-full justify-start">
+                            <LayoutDashboard className="mr-2 h-4 w-4" />
+                            {t("dashboard.title")}
+                        </Button>
+                    </Link>
+                )}
                 {user.role === "seller" && (
                     <Link href="/seller/dashboard" onClick={() => setMobileMenuOpen(false)}>
                         <Button variant="ghost" className="w-full justify-start">

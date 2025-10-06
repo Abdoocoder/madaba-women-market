@@ -164,9 +164,11 @@ export default function ProfileForm() {
                                     onUpload={handleUpload}
                                     uploadPreset="madaba-women-market-presets"
                                 >
-                                    <Button asChild className="w-full">
-                                        <span>{t('product.uploadPicture')}</span>
-                                    </Button>
+                                    <div className="w-full">
+                                        <Button asChild className="w-full">
+                                            <span>{t('product.uploadPicture')}</span>
+                                        </Button>
+                                    </div>
                                 </CldUploadButton>
                             ) : (
                                 <Button disabled className="w-full">
