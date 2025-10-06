@@ -144,11 +144,20 @@ export default function SellerDashboardPage() {
     if (!editingProduct || !token) return
 
     try {
+      console.log('Editing product:', editingProduct);
+      console.log('Editing product ID:', editingProduct?.id);
+      
       const updateData = { 
         ...data 
       }
       if (imageUrl) {
         updateData.image = imageUrl
+      }
+
+      // Check if we have a valid product ID
+      if (!editingProduct?.id) {
+        console.error('Product ID is missing');
+        return;
       }
 
       const response = await fetch(`/api/products/${editingProduct.id}`, {
