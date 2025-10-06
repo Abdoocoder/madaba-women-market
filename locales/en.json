@@ -286,5 +286,21 @@
   "auth.passwordTooShort": "Password must be at least 6 characters",
   "auth.wrongPassword": "Incorrect password",
   "auth.tooManyRequests": "Too many requests. Please try again later",
-  "auth.requiresRecentLogin": "Please log out and log back in before deleting your account"
+  "auth.requiresRecentLogin": "Please log out and log back in before deleting your account",
+  "footer.home": "Home",
+  "footer.products": "Products",
+  "footer.about": "About Us",
+  "footer.contact": "Contact",
+  "footer.help": "Help Center",
+  "footer.privacy": "Privacy Policy",
+  "footer.terms": "Terms of Service",
+  "footer.faq": "FAQ",
+  "footer.cookies": "Cookie Policy",
+  "footer.description": "Leading e-commerce platform for women in Madaba, providing high-quality products and an exceptional shopping experience.",
+  "footer.quickLinks": "Quick Links",
+  "footer.support": "Support",
+  "footer.contactUs": "Contact Us",
+  "footer.address": "Madaba, Jordan - King Abdullah II Street",
+  "footer.copyright": "© {year} Copyright reserved for",
+  "footer.allRightsReserved": "All rights reserved"
 }

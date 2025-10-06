@@ -145,4 +145,23 @@
       overflow-y: auto;
     }
   }
+
+  /* Footer hover effects */
+  .footer-link {
+    transition: color 0.2s ease-in-out;
+  }
+
+  .footer-link:hover {
+    color: hsl(var(--primary));
+  }
+
+  /* Social icons hover effect */
+  .social-icon {
+    transition: all 0.2s ease-in-out;
+  }
+
+  .social-icon:hover {
+    color: hsl(var(--primary));
+    transform: translateY(-2px);
+  }
 }

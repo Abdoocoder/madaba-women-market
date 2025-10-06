@@ -6,6 +6,7 @@ import { CartProvider } from "@/lib/cart-context";
 import { LocaleProvider } from "@/lib/locale-context";
 import { ThemeProvider } from "@/components/theme-provider";
 import { HeaderWrapper } from "@/components/layout/header-wrapper";
+import { Footer } from "@/components/layout/footer";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 
@@ -41,6 +42,7 @@ export default function RootLayout({
                 </div>
                 <HeaderWrapper />
                 <div className="flex-grow pt-16">{children}</div>
+                <Footer />
               </LocaleProvider>
             </CartProvider>
           </AuthProvider>

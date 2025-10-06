@@ -10,7 +10,7 @@ type Language = "ar" | "en"
 interface LocaleContextType {
   language: Language
   setLanguage: (lang: Language) => void
-  t: (key: string) => string
+  t: (key: string, params?: Record<string, string | number>) => string
   dir: "rtl" | "ltr"
 }
 
@@ -41,8 +41,16 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem("language", lang)
   }
 
-  const t = (key: string): string => {
-    return (translations[language] as { [key: string]: string })[key] || key
+  const t = (key: string, params?: Record<string, string | number>): string => {
+    let translation = (translations[language] as { [key: string]: string })[key] || key
+    
+    if (params) {
+      Object.entries(params).forEach(([paramKey, value]) => {
+        translation = translation.replace(`{${paramKey}}`, String(value))
+      })
+    }
+    
+    return translation
   }
 
   const dir = language === "ar" ? "rtl" : "ltr"

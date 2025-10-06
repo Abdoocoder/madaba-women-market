@@ -286,5 +286,21 @@
   "auth.passwordTooShort": "يجب أن تكون كلمة المرور مكونة من 6 أحرف على الأقل",
   "auth.wrongPassword": "كلمة المرور غير صحيحة",
   "auth.tooManyRequests": "طلبات كثيرة جداً. يرجى المحاولة لاحقاً",
-  "auth.requiresRecentLogin": "يرجى تسجيل الخروج وإعادة تسجيل الدخول قبل حذف حسابك"
+  "auth.requiresRecentLogin": "يرجى تسجيل الخروج وإعادة تسجيل الدخول قبل حذف حسابك",
+  "footer.home": "الرئيسية",
+  "footer.products": "المنتجات",
+  "footer.about": "عن المشروع",
+  "footer.contact": "اتصل بنا",
+  "footer.help": "المساعدة",
+  "footer.privacy": "سياسة الخصوصية",
+  "footer.terms": "الشروط والأحكام",
+  "footer.faq": "الأسئلة الشائعة",
+  "footer.cookies": "ملفات تعريف الارتباط",
+  "footer.description": "منصة التجارة الإلكترونية الرائدة للنساء في مأدبا، نوفر منتجات عالية الجودة وتجربة تسوق ممتازة.",
+  "footer.quickLinks": "روابط سريعة",
+  "footer.support": "الدعم",
+  "footer.contactUs": "اتصل بنا",
+  "footer.address": "مأدبا، الأردن - شارع الملك عبدالله الثاني",
+  "footer.copyright": "© {year} حقوق النشر محفوظة لـ",
+  "footer.allRightsReserved": "جميع الحقوق محفوظة"
 }
