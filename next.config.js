@@ -5,41 +5,37 @@ const nextConfig = {
   poweredByHeader: false,
   
   // Image optimization
-  images: {
-    formats: ['image/webp', 'image/avif'],
-    minimumCacheTTL: 60,
-    localPatterns: [
-      {
-        pathname: '/placeholder.svg',
-        search: '**',
-      },
-      {
-        pathname: '/placeholder-user.jpg',
-        search: '**',
-      },
-      {
-        pathname: '/placeholder.jpg',
-        search: '**',
-      },
-      {
-        pathname: '/placeholder-logo.png',
-        search: '**',
-      },
-      {
-        pathname: '/placeholder-logo.svg',
-        search: '**',
-      },
-    ],
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'res.cloudinary.com',
-        port: '',
-        pathname: '/**',
-      },
-    ],
-  },
   
+images: {
+  formats: ['image/webp', 'image/avif'],
+  minimumCacheTTL: 60,
+
+  // ✅ ملاحظة: يجب أن تستخدم pattern يبدأ بـ "/" وينتهي بـ "**"
+  localPatterns: [
+    {
+      pathname: '/**', // هذا يسمح بجميع الصور داخل public/
+      search: '',
+    },
+  ],
+
+  remotePatterns: [
+    {
+      protocol: 'https',
+      hostname: 'res.cloudinary.com',
+      pathname: '/**',
+    },
+    {
+      protocol: 'https',
+      hostname: 'firebasestorage.googleapis.com',
+      pathname: '/**',
+    },
+  ],
+},
+
+
+
+
+
   // Security headers
   async headers() {
     return [
