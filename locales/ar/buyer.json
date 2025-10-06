@@ -1,0 +1,18 @@
+{
+  "title": "لوحة تحكم المشتري",
+  "subtitle": "إدارة إعدادات حسابك وتفضيلاتك",
+  "profile": "الملف الشخصي",
+  "profileDescription": "عرض وتعديل معلوماتك الشخصية",
+  "orders": "الطلبات",
+  "ordersDescription": "عرض سجل طلباتك وتتبع الشحنات",
+  "wishlist": "قائمة الرغبات",
+  "wishlistDescription": "إدارة منتجاتك المفضلة",
+  "addresses": "العناوين",
+  "addressesDescription": "إدارة عناوين الشحن الخاصة بك",
+  "settings": "الإعدادات",
+  "settingsDescription": "إعدادات الحساب والتفضيلات",
+  "password": "كلمة المرور",
+  "passwordDescription": "تغيير كلمة المرور الخاصة بك",
+  "logout": "تسجيل الخروج",
+  "logoutDescription": "تسجيل الخروج من حسابك"
+}

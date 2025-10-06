@@ -2,8 +2,29 @@
 
 import type React from "react"
 import { createContext, useContext, useState, useEffect } from "react"
-import arTranslations from "@/locales/ar.json"
-import enTranslations from "@/locales/en.json"
+
+// Import modular translation files
+import arCommon from "@/locales/ar/common.json"
+import arHome from "@/locales/ar/home.json"
+import arProduct from "@/locales/ar/product.json"
+import arSeller from "@/locales/ar/seller.json"
+import arAdmin from "@/locales/ar/admin.json"
+import arBuyer from "@/locales/ar/buyer.json"
+import arOrders from "@/locales/ar/orders.json"
+import arPrivacy from "@/locales/ar/privacy.json"
+import arTerms from "@/locales/ar/terms.json"
+import arFaq from "@/locales/ar/faq.json"
+import arHelp from "@/locales/ar/help.json"
+import arFooter from "@/locales/ar/footer.json"
+
+import enCommon from "@/locales/en/common.json"
+import enHome from "@/locales/en/home.json"
+import enProduct from "@/locales/en/product.json"
+import enSeller from "@/locales/en/seller.json"
+
+// Legacy imports for compatibility (will be removed after migration)
+import arLegacy from "@/locales/ar.json"
+import enLegacy from "@/locales/en.json"
 
 type Language = "ar" | "en"
 
@@ -15,6 +36,32 @@ interface LocaleContextType {
 }
 
 const LocaleContext = createContext<LocaleContextType | undefined>(undefined)
+
+// Combine modular translations
+const arTranslations = {
+  ...arLegacy, // Keep legacy translations for backward compatibility
+  common: arCommon,
+  home: arHome,
+  product: arProduct,
+  seller: arSeller,
+  admin: arAdmin,
+  buyer: arBuyer,
+  orders: arOrders,
+  privacy: arPrivacy,
+  terms: arTerms,
+  faq: arFaq,
+  help: arHelp,
+  footer: arFooter
+}
+
+const enTranslations = {
+  ...enLegacy, // Keep legacy translations for backward compatibility
+  common: enCommon,
+  home: enHome,
+  product: enProduct,
+  seller: enSeller
+  // Note: Other English modules will be added gradually
+}
 
 const translations = {
   ar: arTranslations,
@@ -42,7 +89,29 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
   }
 
   const t = (key: string, params?: Record<string, string | number>): string => {
-    let translation = (translations[language] as { [key: string]: string })[key] || key
+    const translationSet = translations[language] as any
+    
+    // Handle nested keys (e.g., "common.backToHome")
+    if (key.includes('.')) {
+      const [namespace, ...keyParts] = key.split('.')
+      const nestedKey = keyParts.join('.')
+      
+      // Try to find in modular structure first
+      if (translationSet[namespace] && translationSet[namespace][nestedKey]) {
+        let translation = translationSet[namespace][nestedKey]
+        
+        if (params) {
+          Object.entries(params).forEach(([paramKey, value]) => {
+            translation = translation.replace(`{${paramKey}}`, String(value))
+          })
+        }
+        
+        return translation
+      }
+    }
+    
+    // Fallback to flat structure for legacy keys
+    let translation = translationSet[key] || key
     
     if (params) {
       Object.entries(params).forEach(([paramKey, value]) => {

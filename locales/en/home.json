@@ -1,0 +1,9 @@
+{
+  "welcome": "Welcome to Seydaty Market",
+  "subtitle": "Your one-stop shop for everything you need.",
+  "noProducts": "No products found matching your criteria.",
+  "featuredProducts": "Featured Products",
+  "allProducts": "All Products",
+  "successStories": "Success Stories",
+  "productsCount": "{count} products found"
+}

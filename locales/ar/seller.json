@@ -1,0 +1,22 @@
+{
+  "dashboard": "لوحة تحكم البائع",
+  "overview": "نظرة عامة",
+  "products": "المنتجات",
+  "orders": "الطلبات",
+  "analytics": "التحليلات",
+  "totalRevenue": "إجمالي الإيرادات",
+  "thisMonth": "هذا الشهر",
+  "totalOrders": "إجمالي الطلبات",
+  "completed": "مكتملة",
+  "totalProducts": "إجمالي المنتجات",
+  "active": "نشطة",
+  "pendingOrders": "الطلبات المعلقة",
+  "needsAttention": "تحتاج إلى اهتمام",
+  "recentProducts": "المنتجات الأخيرة",
+  "lastAdded": "آخر إضافة",
+  "addProduct": "إضافة منتج",
+  "topProducts": "أهم المنتجات",
+  "analyticsComingSoon": "التحليلات قادمة قريباً",
+  "chartsAvailableSoon": "الرسوم البيانية ستكون متاحة قريباً",
+  "confirmDelete": "هل أنت متأكد من رغبتك في حذف هذا المنتج؟"
+}

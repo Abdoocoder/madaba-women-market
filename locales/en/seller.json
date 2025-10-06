@@ -1,0 +1,22 @@
+{
+  "dashboard": "Seller Dashboard",
+  "overview": "Overview",
+  "products": "Products",
+  "orders": "Orders",
+  "analytics": "Analytics",
+  "totalRevenue": "Total Revenue",
+  "thisMonth": "This Month",
+  "totalOrders": "Total Orders",
+  "completed": "Completed",
+  "totalProducts": "Total Products",
+  "active": "Active",
+  "pendingOrders": "Pending Orders",
+  "needsAttention": "Needs Attention",
+  "recentProducts": "Recent Products",
+  "lastAdded": "Last Added",
+  "addProduct": "Add Product",
+  "topProducts": "Top Products",
+  "analyticsComingSoon": "Analytics Coming Soon",
+  "chartsAvailableSoon": "Charts will be available soon",
+  "confirmDelete": "Are you sure you want to delete this product?"
+}

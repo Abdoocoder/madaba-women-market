@@ -370,5 +370,21 @@
   "cookies.manage": "إدارة ملفات تعريف الارتباط",
   "cookies.manageContent": "يمكنك إدارة تفضيلات ملفات تعريف الارتباط أو قبولها جميعاً.",
   "cookies.acceptAll": "قبول الكل",
-  "cookies.managePreferences": "إدارة التفضيلات"
+  "cookies.managePreferences": "إدارة التفضيلات",
+  "cart.emptyCart": "السلة فارغة",
+  "cart.addItemsFirst": "الرجاء إضافة منتجات إلى السلة أولاً",
+  "cart.orderSuccess": "تم إنشاء الطلب بنجاح",
+  "cart.orderSuccessDesc": "تم إرسال طلبك بنجاح وقيد المعالجة",
+  "cart.orderError": "خطأ في إنشاء الطلب",
+  "cart.orderErrorDesc": "حدث خطأ أثناء إنشاء الطلب، الرجاء المحاولة مرة أخرى",
+  "cart.processing": "جارٍ المعالجة...",
+  "cart.checkout": "إتمام الطلب",
+  "cart.addToCart": "أضف إلى السلة",
+  "cart.quantity": "الكمية",
+  "cart.subtotal": "المجموع الفرعي",
+  "cart.shipping": "الشحن",
+  "cart.total": "المجموع الكلي",
+  "cart.continueShopping": "العودة للتسوق",
+  "cart.emptyCartMessage": "سلة التسوق فارغة",
+  "cart.startShopping": "ابدأي بإضافة منتجات إلى سلتك"
 }

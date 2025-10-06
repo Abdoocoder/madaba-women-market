@@ -8,13 +8,18 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Separator } from "@/components/ui/separator"
 import { useCart } from "@/lib/cart-context"
 import { useAuth } from "@/lib/auth-context"
+import { useLocale } from "@/lib/locale-context"
 import { formatCurrency } from "@/lib/utils"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
+import { useToast } from "@/components/ui/use-toast"
 
 export default function CartPage() {
   const { items, totalItems, totalPrice, clearCart } = useCart()
   const { user } = useAuth()
+  const { t } = useLocale()
   const router = useRouter()
+  const { toast } = useToast()
+  const [isProcessing, setIsProcessing] = useState(false)
 
   useEffect(() => {
     if (!user || user.role !== "customer") {
@@ -22,10 +27,57 @@ export default function CartPage() {
     }
   }, [user, router])
 
-  const handleCheckout = () => {
-    alert("تم إرسال طلبك بنجاح!")
-    clearCart()
-    router.push("/")
+  const handleCheckout = async () => {
+    if (items.length === 0) {
+      toast({
+        title: t("cart.emptyCart"),
+        description: t("cart.addItemsFirst"),
+        variant: "destructive"
+      })
+      return
+    }
+
+    setIsProcessing(true)
+    
+    try {
+      const response = await fetch('/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          items: items,
+          shippingAddress: {
+            // This could be enhanced to get actual address from user profile
+            city: "Madaba",
+            country: "Jordan"
+          }
+        }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        toast({
+          title: t("cart.orderSuccess"),
+          description: t("cart.orderSuccessDesc"),
+          variant: "default"
+        })
+        clearCart()
+        router.push("/buyer/dashboard?tab=orders")
+      } else {
+        throw new Error(data.message || 'Failed to create order')
+      }
+    } catch (error) {
+      console.error('Checkout error:', error)
+      toast({
+        title: t("cart.orderError"),
+        description: t("cart.orderErrorDesc"),
+        variant: "destructive"
+      })
+    } finally {
+      setIsProcessing(false)
+    }
   }
 
   if (!user || user.role !== "customer") {
@@ -85,8 +137,13 @@ export default function CartPage() {
                   </div>
                 </CardContent>
                 <CardFooter>
-                  <Button onClick={handleCheckout} className="w-full" size="lg">
-                    إتمام الطلب
+                  <Button 
+                    onClick={handleCheckout} 
+                    className="w-full" 
+                    size="lg"
+                    disabled={isProcessing || items.length === 0}
+                  >
+                    {isProcessing ? t("cart.processing") : t("cart.checkout")}
                   </Button>
                 </CardFooter>
               </Card>
