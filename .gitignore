@@ -8,16 +8,42 @@
 # Testing
 /coverage
 
-# Next.js
+# Next.js build output
 /.next/
 /out/
 
-# Production
+# Production build files
 /build
+/dist
 
-# Misc
+# Miscellaneous
 .DS_Store
 *.pem
 
-# Local secrets
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Local environment variables
 .env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+#-vercel-outputs
+.vercel
+
+#-next-auth
+# Since next-auth.session-token contains sensitive data, it should not be included in version control.
+# See https://next-auth.js.org/configuration/options#session
+next-auth.session-token
+
+# IDE + Editor files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
