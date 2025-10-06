@@ -54,16 +54,16 @@ export function ProductCard({ product }: ProductCardProps) {
           />
           {product.featured && (
             <Badge className="absolute top-2 right-2 bg-gradient-to-r from-purple-600 to-pink-600">
-              {language === "ar" ? "مميز" : "Featured"}
+              {t("product.featured")}
             </Badge>
           )}
         </div>
         <CardContent className="p-4 flex-grow">
           <h3 className="font-semibold text-lg mb-1 text-balance">
-            {language === "ar" ? product.nameAr : product.nameAr}
+            {language === "ar" ? product.nameAr : product.name}
           </h3>
           <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
-            {language === "ar" ? product.descriptionAr : product.descriptionAr}
+            {language === "ar" ? product.descriptionAr : product.description}
           </p>
           <div className="flex items-center justify-between">
             <span className="text-xl font-bold text-primary">{formatCurrency(product.price)}</span>

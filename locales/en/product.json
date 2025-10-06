@@ -21,5 +21,14 @@
   "recommendedSize": "(Recommended size: 800x800 pixels)",
   "uploadDisabled": "Image upload disabled",
   "cloudinaryNotConfigured": "(Cloudinary not configured)",
-  "uploadPicture": "Upload Picture"
+  "uploadPicture": "Upload Picture",
+  "featured": "Featured",
+  "loginRequired": "Login Required",
+  "loginRequiredDescription": "Please log in to manage your wishlist.",
+  "removed": "Removed",
+  "removedFromWishlist": "Product removed from your wishlist.",
+  "added": "Added",
+  "addedToWishlist": "Product added to your wishlist.",
+  "error": "Error",
+  "failedToUpdateWishlist": "Failed to update your wishlist."
 }

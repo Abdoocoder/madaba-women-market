@@ -80,7 +80,7 @@ export default function ProductDetailPage() {
 
     const handleWishlist = async () => {
         if (!user) {
-            toast({ title: "Login Required", description: "Please log in to manage your wishlist.", variant: "destructive" });
+            toast({ title: t("product.loginRequired"), description: t("product.loginRequiredDescription"), variant: "destructive" });
             return;
         }
 
@@ -89,15 +89,15 @@ export default function ProductDetailPage() {
         try {
             if (wishlisted) {
                 await updateDoc(wishlistRef, { products: arrayRemove(product.id) });
-                toast({ title: "Removed", description: "Product removed from your wishlist.", variant: "success" });
+                toast({ title: t("product.removed"), description: t("product.removedFromWishlist"), variant: "success" });
             } else {
                 await setDoc(wishlistRef, { products: arrayUnion(product.id) }, { merge: true });
-                toast({ title: "Added", description: "Product added to your wishlist.", variant: "success" });
+                toast({ title: t("product.added"), description: t("product.addedToWishlist"), variant: "success" });
             }
             setWishlisted(!wishlisted);
         } catch (error) {
             console.error("Error updating wishlist: ", error);
-            toast({ title: "Error", description: "Failed to update your wishlist.", variant: "destructive" });
+            toast({ title: t("product.error"), description: t("product.failedToUpdateWishlist"), variant: "destructive" });
         }
     };
 
@@ -131,14 +131,14 @@ export default function ProductDetailPage() {
                             <Image src={product.image || "/placeholder.svg"} alt={product.nameAr} fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
                             {product.featured && (
                                 <Badge className="absolute top-4 right-4 bg-gradient-to-r from-purple-600 to-pink-600">
-                                    {language === "ar" ? "مميز" : "Featured"}
+                                    {t("product.featured")}
                                 </Badge>
                             )}
                         </div>
                     </div>
                     <div>
                         <h1 className="text-3xl lg:text-4xl font-bold mb-2 text-balance">
-                            {language === "ar" ? product.nameAr : product.nameAr}
+                            {language === "ar" ? product.nameAr : product.name}
                         </h1>
                         <div className="flex items-center gap-4 mb-4">
                             <div className="flex items-center gap-1">
@@ -154,7 +154,7 @@ export default function ProductDetailPage() {
                             <span className="text-muted-foreground">({reviews.length} {t("product.reviews")})</span>
                         </div>
                         <p className="text-lg text-muted-foreground mb-4">
-                            {language === "ar" ? product.descriptionAr : product.descriptionAr}
+                            {language === "ar" ? product.descriptionAr : product.description}
                         </p>
                         <div className="flex items-baseline gap-4 mb-6">
                             <span className="text-4xl font-bold text-primary">{formatCurrency(product.price)}</span>

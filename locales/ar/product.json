@@ -21,5 +21,14 @@
   "recommendedSize": "(الحجم الموصى به: 800x800 بكسل)",
   "uploadDisabled": "تحميل الصور معطل",
   "cloudinaryNotConfigured": "(Cloudinary غير مكون)",
-  "uploadPicture": "تحميل الصورة"
+  "uploadPicture": "تحميل الصورة",
+  "featured": "مميز",
+  "loginRequired": "تسجيل الدخول مطلوب",
+  "loginRequiredDescription": "يرجى تسجيل الدخول لإدارة قائمة الأمنيات الخاصة بك.",
+  "removed": "تمت الإزالة",
+  "removedFromWishlist": "تمت إزالة المنتج من قائمة الأمنيات الخاصة بك.",
+  "added": "تمت الإضافة",
+  "addedToWishlist": "تمت إضافة المنتج إلى قائمة الأمنيات الخاصة بك.",
+  "error": "خطأ",
+  "failedToUpdateWishlist": "فشل في تحديث قائمة الأمنيات الخاصة بك."
 }
