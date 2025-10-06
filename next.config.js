@@ -13,6 +13,22 @@ const nextConfig = {
         pathname: '/placeholder.svg',
         search: '**',
       },
+      {
+        pathname: '/placeholder-user.jpg',
+        search: '**',
+      },
+      {
+        pathname: '/placeholder.jpg',
+        search: '**',
+      },
+      {
+        pathname: '/placeholder-logo.png',
+        search: '**',
+      },
+      {
+        pathname: '/placeholder-logo.svg',
+        search: '**',
+      },
     ],
     remotePatterns: [
       {
