@@ -164,7 +164,7 @@ export default function ProductDetailPage() {
                             <span className="font-semibold">{t("product.seller")}:</span>
                             <div className="flex items-center gap-2">
                                 <Image src="/placeholder-user.jpg" alt="Seller" width={32} height={32} className="rounded-full" />
-                                <span className="font-medium">{product.sellerId}</span>
+                                <span className="font-medium">{product.sellerName || product.sellerId}</span>
                                 <Button variant="outline" size="sm">
                                     <MessageSquare className="ml-2 h-4 w-4" />
                                     {t("product.contactSeller")}
