@@ -7,17 +7,73 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import type { Product } from "@/lib/types"
 import { formatCurrency } from "@/lib/utils"
+import { useAuth } from "@/lib/auth-context"
+import toast from "react-hot-toast"
 
 interface ProductManagementProps {
   products: Product[]
-  onApprove: (productId: string) => void
-  onReject: (productId: string) => void
-  onSuspend: (productId: string) => void
-  onDelete: (productId: string) => void
-  onToggleFeatured: (productId: string) => void
+  onProductsUpdate: () => void
 }
 
-export function ProductManagement({ products, onApprove, onReject, onSuspend, onDelete, onToggleFeatured }: ProductManagementProps) {
+export function ProductManagement({ products, onProductsUpdate }: ProductManagementProps) {
+  const { getAuthToken } = useAuth()
+
+  const handleApiAction = async (productId: string, action: string, value?: any) => {
+    try {
+      const token = await getAuthToken()
+      if (!token) {
+        throw new Error('No authentication token available')
+      }
+
+      const response = await fetch('/api/admin/products', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ productId, action, value }),
+      })
+
+      if (!response.ok) {
+        throw new Error(`Failed to ${action} product: ${response.status} ${response.statusText}`)
+      }
+
+      const result = await response.json()
+      toast.success(result.message)
+      onProductsUpdate() // Refresh the product list
+    } catch (error) {
+      console.error(`Error ${action}ing product:`, error)
+      toast.error(`Failed to ${action} product.`)
+    }
+  }
+
+  const handleDelete = async (productId: string) => {
+    try {
+      const token = await getAuthToken()
+      if (!token) {
+        throw new Error('No authentication token available')
+      }
+
+      const response = await fetch(`/api/admin/products?id=${productId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error(`Failed to delete product: ${response.status} ${response.statusText}`)
+      }
+
+      const result = await response.json()
+      toast.success(result.message)
+      onProductsUpdate() // Refresh the product list
+    } catch (error) {
+      console.error('Error deleting product:', error)
+      toast.error('Failed to delete product.')
+    }
+  }
+
   const pendingProducts = products.filter((p) => !p.approved)
   const approvedProducts = products.filter((p) => p.approved)
 
@@ -54,11 +110,11 @@ export function ProductManagement({ products, onApprove, onReject, onSuspend, on
                           <span className="text-muted-foreground">الكمية: {product.stock}</span>
                         </div>
                         <div className="flex gap-2">
-                          <Button size="sm" onClick={() => onApprove(product.id)}>
+                          <Button size="sm" onClick={() => handleApiAction(product.id, 'approve')}>
                             <Check className="ml-1 h-4 w-4" />
                             قبول
                           </Button>
-                          <Button size="sm" variant="destructive" onClick={() => onReject(product.id)}>
+                          <Button size="sm" variant="destructive" onClick={() => handleApiAction(product.id, 'reject')}>
                             <X className="ml-1 h-4 w-4" />
                             رفض
                           </Button>
@@ -116,16 +172,20 @@ export function ProductManagement({ products, onApprove, onReject, onSuspend, on
                         <Button
                           size="sm"
                           variant={product.featured ? "default" : "outline"}
-                          onClick={() => onToggleFeatured(product.id)}
+                          onClick={() => handleApiAction(product.id, 'feature', !product.featured)}
                         >
                           <Star className={`ml-1 h-4 w-4 ${product.featured ? "fill-current" : ""}`} />
                           {product.featured ? "إلغاء التمييز" : "تمييز"}
                         </Button>
-                         <Button size="sm" variant="outline" onClick={() => onSuspend(product.id)}>
+                         <Button 
+                          size="sm" 
+                          variant="outline" 
+                          onClick={() => handleApiAction(product.id, 'suspend', !product.suspended)}
+                        >
                           <ShieldAlert className="ml-1 h-4 w-4" />
                           {product.suspended ? "رفع التعليق" : "تعليق"}
                         </Button>
-                        <Button size="sm" variant="destructive" onClick={() => onDelete(product.id)}>
+                        <Button size="sm" variant="destructive" onClick={() => handleDelete(product.id)}>
                           <Trash2 className="ml-1 h-4 w-4" />
                           حذف
                         </Button>
