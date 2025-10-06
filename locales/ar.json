@@ -18,6 +18,8 @@
   "sort.priceAsc": "السعر: من الأقل إلى الأعلى",
   "sort.priceDesc": "السعر: من الأعلى إلى الأقل",
   "sort.nameAsc": "الاسم: من أ إلى ي",
+  "home.productsCount": "تم العثور على {count} منتج",
+  "common.backToHome": "العودة إلى الصفحة الرئيسية",
   "header.login": "تسجيل الدخول",
   "header.logout": "تسجيل الخروج",
   "header.profile": "ملفي الشخصي",

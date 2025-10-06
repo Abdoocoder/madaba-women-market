@@ -18,6 +18,8 @@
   "sort.priceAsc": "Price: Low to High",
   "sort.priceDesc": "Price: High to Low",
   "sort.nameAsc": "Name: A to Z",
+  "home.productsCount": "{count} products found",
+  "common.backToHome": "Back to Home",
   "header.login": "Login",
   "header.logout": "Logout",
   "header.profile": "Profile",
