@@ -420,6 +420,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Built with ❤️ for women entrepreneurs**
 
-[🌐 Live Demo](https://your-deployed-url.vercel.app) | [📚 Documentation](DEPLOYMENT.md) | [🐛 Report Bug](https://github.com/your-repo/issues)
+[🌐 Live Demo](https://madaba-women-market.vercel.app/) | [📚 Documentation](DEPLOYMENT.md) | [🐛 Report Bug](https://github.com/Abdoocoder/madaba-women-market/issues)
 
 </div>
