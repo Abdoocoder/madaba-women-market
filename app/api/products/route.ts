@@ -18,8 +18,12 @@ import { getAuthenticatedUser } from '@/lib/server-auth'
  */
 export async function GET(request: NextRequest) {
     try {
+        console.log('=== GET /api/products ===');
         const user = await getAuthenticatedUser(request);
+        console.log('User from auth:', user);
+        
         if (!user) {
+            console.log('❌ Authentication failed - no user found');
             return NextResponse.json({ 
                 message: 'Authentication required',
                 hint: 'Please check server logs for configuration issues'
@@ -27,6 +31,7 @@ export async function GET(request: NextRequest) {
         }
         
         if (user.role !== 'seller') {
+            console.log('❌ Access denied - user is not a seller');
             return NextResponse.json({ 
                 message: 'Access denied - seller role required',
                 userRole: user.role 
@@ -42,10 +47,12 @@ export async function GET(request: NextRequest) {
         snapshot.forEach((doc: any) => {
             products.push({ id: doc.id, ...doc.data() } as Product);
         });
+        
+        console.log(`✅ Found ${products.length} products for seller ${user.id}`);
 
         return NextResponse.json(products);
     } catch (error) {
-        console.error('Error fetching products:', error);
+        console.error('❌ Error fetching products:', error);
         return NextResponse.json({ 
             message: 'Internal Server Error',
             error: error instanceof Error ? error.message : 'Unknown error'
@@ -67,8 +74,12 @@ export async function GET(request: NextRequest) {
  *         description: Unauthorized.
  */
 export async function POST(request: NextRequest) {
+    console.log('=== POST /api/products ===');
     const user = await getAuthenticatedUser(request);
+    console.log('User from auth:', user);
+    
     if (!user || user.role !== 'seller') {
+        console.log('❌ Authentication failed for POST request');
         return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
@@ -86,6 +97,7 @@ export async function POST(request: NextRequest) {
         const sellerName = user.name;
 
         if (!nameAr || !descriptionAr || !price || !category || !stock) {
+            console.log('❌ Missing required fields');
             return NextResponse.json({ message: 'Missing required fields' }, { status: 400 });
         }
         
@@ -119,10 +131,12 @@ export async function POST(request: NextRequest) {
         const adminDb = getAdminDb();
         const docRef = await adminDb.collection('products').add(newProduct);
         const createdProduct = { ...newProduct, id: docRef.id };
+        
+        console.log('✅ Product created successfully:', createdProduct.id);
 
         return NextResponse.json(createdProduct, { status: 201 });
     } catch (error) {
-        console.error('Error creating product:', error);
+        console.error('❌ Error creating product:', error);
         return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
     }
 }
@@ -143,8 +157,12 @@ export async function POST(request: NextRequest) {
  *         description: Product not found.
  */
 export async function PUT(request: NextRequest) {
+    console.log('=== PUT /api/products ===');
     const user = await getAuthenticatedUser(request);
+    console.log('User from auth:', user);
+    
     if (!user || user.role !== 'seller') {
+        console.log('❌ Authentication failed for PUT request');
         return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
@@ -153,10 +171,12 @@ export async function PUT(request: NextRequest) {
         const { id, nameAr, descriptionAr, price, category, stock, image } = body;
 
         if (!id) {
+            console.log('❌ Product ID is required');
             return NextResponse.json({ message: 'Product ID is required' }, { status: 400 });
         }
 
         if (!nameAr || !descriptionAr || !price || !category || stock === undefined) {
+            console.log('❌ Missing required fields');
             return NextResponse.json({ message: 'Missing required fields' }, { status: 400 });
         }
 
@@ -165,6 +185,7 @@ export async function PUT(request: NextRequest) {
         const productDoc = await productRef.get();
         
         if (!productDoc.exists) {
+            console.log('❌ Product not found');
             return NextResponse.json({ message: 'Product not found' }, { status: 404 });
         }
 
@@ -172,6 +193,7 @@ export async function PUT(request: NextRequest) {
         
         // Verify that the product belongs to the authenticated seller
         if (productData.sellerId !== user.id) {
+            console.log('❌ Access denied - product does not belong to user');
             return NextResponse.json({ message: 'Access denied - you can only update your own products' }, { status: 403 });
         }
 
@@ -192,10 +214,12 @@ export async function PUT(request: NextRequest) {
         // Get the updated product
         const updatedDoc = await productRef.get();
         const finalProduct = { id: updatedDoc.id, ...updatedDoc.data() } as Product;
+        
+        console.log('✅ Product updated successfully:', finalProduct.id);
 
         return NextResponse.json(finalProduct, { status: 200 });
     } catch (error) {
-        console.error('Error updating product:', error);
+        console.error('❌ Error updating product:', error);
         return NextResponse.json({ 
             message: 'Internal Server Error',
             error: error instanceof Error ? error.message : 'Unknown error'
