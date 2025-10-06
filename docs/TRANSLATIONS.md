@@ -6,7 +6,7 @@ This project uses a modular translation structure to improve maintainability and
 
 ## Directory Structure
 
-```
+\`\`\`
 /locales/
 ├── ar/                    # Arabic translations
 │   ├── common.json       # Common UI elements (buttons, actions, etc.)
@@ -29,7 +29,7 @@ This project uses a modular translation structure to improve maintainability and
 │   └── footer.json       # Footer content
 ├── ar.json               # Legacy Arabic file (for backward compatibility)
 └── en.json               # Legacy English file (for backward compatibility)
-```
+\`\`\`
 
 ## Usage
 
@@ -37,7 +37,7 @@ This project uses a modular translation structure to improve maintainability and
 
 Use dot notation to access nested translations:
 
-```tsx
+\`\`\`tsx
 import { useLocale } from "@/lib/locale-context"
 
 function MyComponent() {
@@ -51,17 +51,17 @@ function MyComponent() {
     </div>
   )
 }
-```
+\`\`\`
 
 ### Backward Compatibility
 
 Legacy flat keys still work for existing code:
 
-```tsx
+\`\`\`tsx
 // This still works
 <p>{t("home.welcome")}</p>   // Legacy flat key
 <p>{t("common.save")}</p>    // Legacy flat key
-```
+\`\`\`
 
 ### Adding New Translations
 
@@ -72,26 +72,26 @@ Legacy flat keys still work for existing code:
 Example - Adding a new product feature:
 
 **locales/ar/product.json:**
-```json
+\`\`\`json
 {
   "newFeature": "ميزة جديدة",
   "newFeatureDescription": "وصف للميزة الجديدة"
 }
-```
+\`\`\`
 
 **locales/en/product.json:**
-```json
+\`\`\`json
 {
   "newFeature": "New Feature",
   "newFeatureDescription": "Description for the new feature"
 }
-```
+\`\`\`
 
 **Usage in component:**
-```tsx
+\`\`\`tsx
 <h2>{t("product.newFeature")}</h2>
 <p>{t("product.newFeatureDescription")}</p>
-```
+\`\`\`
 
 ## Migration Strategy
 
@@ -143,7 +143,7 @@ Example - Adding a new product feature:
 
 ## Example Implementation
 
-```tsx
+\`\`\`tsx
 // Before (flat structure)
 {t("product.addToCart")}
 {t("seller.dashboard")}
@@ -153,6 +153,6 @@ Example - Adding a new product feature:
 {t("product.addToCart")}     // From product.json
 {t("seller.dashboard")}      // From seller.json  
 {t("admin.users")}           // From admin.json
-```
+\`\`\`
 
 This modular approach scales better for large applications and makes translation management much more efficient.
