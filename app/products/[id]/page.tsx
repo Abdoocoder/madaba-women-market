@@ -115,7 +115,7 @@ export default function ProductDetailPage() {
                 <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
                     <div>
                         <div className="relative aspect-square rounded-lg overflow-hidden mb-4">
-                            <Image src={product.image || "/placeholder.svg"} alt={product.nameAr} fill className="object-cover" />
+                            <Image src={product.image || "/placeholder.svg"} alt={product.nameAr} fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
                             {product.featured && (
                                 <Badge className="absolute top-4 right-4 bg-gradient-to-r from-purple-600 to-pink-600">
                                     {language === "ar" ? "مميز" : "Featured"}

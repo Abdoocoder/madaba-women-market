@@ -74,7 +74,7 @@ export function ProductForm({ product, onSubmit, onCancel }: ProductFormProps) {
                     onClick={() => open()}
                   >
                     {imagePreview ? (
-                      <Image src={imagePreview} alt={t("product.image")} fill className="object-cover rounded-lg" />
+                      <Image src={imagePreview} alt={t("product.image")} fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover rounded-lg" />
                     ) : (
                       <div className="text-center text-muted-foreground">
                         <p>{t("product.uploadImage")}</p>

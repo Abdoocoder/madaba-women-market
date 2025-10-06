@@ -24,6 +24,7 @@ export function CartItem({ item }: CartItemProps) {
               src={item.product.image || "/placeholder.svg"}
               alt={item.product.nameAr}
               fill
+              sizes="(max-width: 768px) 96px, 96px"
               className="object-cover rounded-md"
             />
           </div>
