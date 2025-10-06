@@ -6,12 +6,6 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
 
-// ✅ بيانات الميتا للصفحة (SEO)
-export const metadata = {
-  title: "سياسة الخصوصية | Madaba Women Market",
-  description: "تعرف على كيفية حماية بياناتك في منصة مادبا وومن ماركت.",
-}
-
 export default function PrivacyPage() {
   const { t } = useLocale()
 
