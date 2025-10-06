@@ -5,8 +5,8 @@
 ### 1. Environment Variables
 Ensure these are set in your production environment (NOT in your repository):
 
-\`\`\`env
-# Firebase Configuration (Production)
+```env
+# Firebase Client Configuration (Production)
 NEXT_PUBLIC_FIREBASE_API_KEY=your_production_api_key
 NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_production_auth_domain
 NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_production_project_id
@@ -14,14 +14,24 @@ NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_production_storage_bucket
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_production_messaging_sender_id
 NEXT_PUBLIC_FIREBASE_APP_ID=your_production_app_id
 
+# Firebase Admin SDK (Server-side - Production)
+FIREBASE_PROJECT_ID=your_production_project_id
+FIREBASE_CLIENT_EMAIL=your_production_service_account_email
+FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nyour_production_private_key\n-----END PRIVATE KEY-----\n"
+
+# Cloudinary Configuration (Production)
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=your_production_cloud_name
+CLOUDINARY_API_KEY=your_production_api_key
+CLOUDINARY_API_SECRET=your_production_api_secret
+
 # Additional Security
 NODE_ENV=production
-\`\`\`
+```
 
 ### 2. Firebase Security Rules
 Update your Firestore security rules for production:
 
-\`\`\`javascript
+```javascript
 // Firestore Security Rules (Production)
 rules_version = '2';
 service cloud.firestore {
@@ -45,7 +55,7 @@ service cloud.firestore {
     }
   }
 }
-\`\`\`
+```
 
 ### 3. Firebase Authentication Settings
 - Enable only required sign-in methods
@@ -58,12 +68,26 @@ service cloud.firestore {
 ### 1. Next.js Configuration
 Create/update `next.config.js`:
 
-\`\`\`javascript
+```javascript
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Production optimizations
   compress: true,
   poweredByHeader: false,
+  
+  // Image optimization
+  images: {
+    formats: ['image/webp', 'image/avif'],
+    minimumCacheTTL: 60,
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        port: '',
+        pathname: '/**',
+      },
+    ],
+  },
   
   // Security headers
   async headers() {
@@ -82,6 +106,14 @@ const nextConfig = {
           {
             key: 'X-XSS-Protection',
             value: '1; mode=block'
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin'
+          },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=()'
           }
         ]
       }
@@ -90,7 +122,7 @@ const nextConfig = {
 }
 
 module.exports = nextConfig
-\`\`\`
+```
 
 ### 2. Remove Development Dependencies
 Remove all console.logs, debug components, and development tools before deployment.
@@ -108,6 +140,7 @@ Create proper indexes in Firestore for production queries:
 - ✅ Strong password requirements
 - ✅ Account lockout after failed attempts
 - ✅ Secure session management
+- ✅ Firebase Admin SDK properly configured with service account
 
 ### 2. Data Protection
 - ✅ Input validation and sanitization
@@ -126,9 +159,9 @@ Create proper indexes in Firestore for production queries:
 ### 1. Error Tracking
 Consider adding error tracking service like Sentry:
 
-\`\`\`bash
+```bash
 npm install @sentry/nextjs
-\`\`\`
+```
 
 ### 2. Performance Monitoring
 - Use Vercel Analytics if deploying on Vercel
@@ -148,11 +181,15 @@ npm install @sentry/nextjs
 4. **Monitor Firebase usage** to avoid unexpected costs
 5. **Backup your Firestore data** regularly
 6. **Keep dependencies updated** for security patches
+7. **Verify Firebase Admin SDK configuration** to prevent 401 errors
+8. **Test API routes thoroughly** after deployment
 
 ## ✅ Pre-Deployment Checklist
 
 - [ ] All environment variables set in production
 - [ ] Firebase security rules updated
+- [ ] Firebase Admin SDK properly configured
+- [ ] Cloudinary credentials configured
 - [ ] Console logs removed or environment-gated
 - [ ] Error handling tested
 - [ ] Email verification flow tested
@@ -162,3 +199,5 @@ npm install @sentry/nextjs
 - [ ] Security headers configured
 - [ ] Database indexes created
 - [ ] Monitoring/analytics set up
+- [ ] API routes tested for authentication
+- [ ] Seller dashboard functionality verified
