@@ -2,7 +2,6 @@
 
 import { useRouter } from "next/navigation"
 import { ShoppingBag, ArrowRight } from "lucide-react"
-import { Header } from "@/components/layout/header"
 import { CartItem } from "@/components/cart/cart-item"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -35,7 +34,6 @@ export default function CartPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header cartItemCount={totalItems} user={user} />
       <main className="container py-8">
         <div className="mb-8">
           <Button variant="ghost" onClick={() => router.push("/")} className="mb-4">

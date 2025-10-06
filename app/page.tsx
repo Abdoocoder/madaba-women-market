@@ -1,13 +1,10 @@
 "use client"
-"use client"
 
 import { useState, useMemo, useEffect } from "react"
-import { Header } from "@/components/layout/header"
 import { ProductCard } from "@/components/products/product-card"
 import { ProductFilters } from "@/components/products/product-filters"
 import { FeaturedProducts } from "@/components/products/featured-products"
 import { SuccessStories } from "@/components/success-stories"
-import { useCart } from "@/lib/cart-context"
 import { useAuth } from "@/lib/auth-context"
 import { useLocale } from "@/lib/locale-context"
 import { collection, getDocs, query, where } from "firebase/firestore"
@@ -29,7 +26,6 @@ function interpolateTranslation(translation: string, params: Record<string, stri
 }
 
 export default function Home() {
-  const { totalItems } = useCart()
   const { user } = useAuth()
   const { t, language } = useLocale()
   const [searchQuery, setSearchQuery] = useState("")
@@ -118,8 +114,6 @@ export default function Home() {
       </div>
     }>
       <div className="min-h-screen bg-background">
-        <Header cartItemCount={isMounted ? totalItems : 0} user={isMounted ? user : null} />
-
         {/* Hero Section */}
         <section className="relative overflow-hidden bg-gradient-to-r from-purple-600 to-pink-600 text-white">
           <div className="absolute inset-0 bg-black/20"></div>

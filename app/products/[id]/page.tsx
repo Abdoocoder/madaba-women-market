@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { notFound, useParams } from "next/navigation";
 import { Star, MessageSquare, ShoppingCart, Heart, Send } from "lucide-react";
-import { Header } from "@/components/layout/header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -112,7 +111,6 @@ export default function ProductDetailPage() {
 
     return (
         <div className="min-h-screen bg-background">
-            <Header cartItemCount={totalItems} user={user} />
             <main className="container py-8">
                 <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
                     <div>

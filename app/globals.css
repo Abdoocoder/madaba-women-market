@@ -123,4 +123,26 @@
   body {
     @apply bg-background text-foreground;
   }
+  
+  /* Ensure smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Custom RTL support for header */
+  [dir="rtl"] .header-nav {
+    direction: rtl;
+  }
+
+  [dir="ltr"] .header-nav {
+    direction: ltr;
+  }
+
+  /* Mobile menu improvements */
+  @media (max-width: 768px) {
+    .mobile-menu {
+      max-height: calc(100vh - 4rem);
+      overflow-y: auto;
+    }
+  }
 }

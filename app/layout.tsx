@@ -5,6 +5,7 @@ import { AuthProvider } from "@/lib/auth-context";
 import { CartProvider } from "@/lib/cart-context";
 import { LocaleProvider } from "@/lib/locale-context";
 import { ThemeProvider } from "@/components/theme-provider";
+import { HeaderWrapper } from "@/components/layout/header-wrapper";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 
@@ -38,7 +39,8 @@ export default function RootLayout({
                 <div suppressHydrationWarning>
                   <Toaster position="bottom-center" />
                 </div>
-                <div className="flex-grow">{children}</div>
+                <HeaderWrapper />
+                <div className="flex-grow pt-16">{children}</div>
               </LocaleProvider>
             </CartProvider>
           </AuthProvider>

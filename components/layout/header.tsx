@@ -3,7 +3,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { ShoppingCart, User, LogOut, LayoutDashboard, Heart, Menu } from "lucide-react"
+import { ShoppingCart, User, LogOut, LayoutDashboard, Heart, Menu, Search, Package } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -40,28 +40,40 @@ export function Header({ cartItemCount = 0, user: initialUser }: HeaderProps) {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="fixed top-0 left-0 right-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
+        {/* Logo Section */}
+        <Link href="/" className="flex items-center gap-2 shrink-0">
           <Image src="/placeholder-logo.svg" alt={t("app.name")} width={32} height={32} className="h-8 w-8" />
-          <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+          <span className="text-xl md:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
             {t("app.name")}
           </span>
         </Link>
 
-        <div className="hidden md:flex items-center gap-4">
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex items-center gap-1">
+          <Link href="/products">
+            <Button variant="ghost" className="flex items-center gap-2">
+              <Package className="h-4 w-4" />
+              {t("header.products")}
+            </Button>
+          </Link>
+        </nav>
+
+        {/* Desktop Actions */}
+        <div className="hidden md:flex items-center gap-3">
           <ThemeToggle />
           <LanguageSwitcher />
 
           {user && user.role === "customer" && (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               <Link href="/wishlist">
-                <Button variant="ghost" size="icon">
+                <Button variant="ghost" size="icon" title={t("header.wishlist")}>
                   <Heart className="h-5 w-5" />
                 </Button>
               </Link>
               <Link href="/cart">
-                <Button variant="ghost" size="icon" className="relative">
+                <Button variant="ghost" size="icon" className="relative" title={t("header.cart")}>
                   <ShoppingCart className="h-5 w-5" />
                   {cartItemCount > 0 && (
                     <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs">
@@ -132,92 +144,112 @@ export function Header({ cartItemCount = 0, user: initialUser }: HeaderProps) {
           )}
         </div>
         
+        {/* Mobile Menu Button */}
         <div className="md:hidden">
             <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
                 <Menu className="h-6 w-6" />
             </Button>
         </div>
       </div>
+      
+      {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden container pb-4">
-            <nav className="flex flex-col gap-4">
-            <div className='flex justify-between items-center'>
-              <LanguageSwitcher />
-              <ThemeToggle />
-            </div>
+        <div className="md:hidden border-t bg-background/95 backdrop-blur">
+          <div className="container py-4">
+            <nav className="flex flex-col gap-3">
+              {/* Mobile Theme and Language Controls */}
+              <div className='flex justify-between items-center pb-2'>
+                <LanguageSwitcher />
+                <ThemeToggle />
+              </div>
+              
+              <Separator />
+              
+              {/* Mobile Navigation Links */}
+              <Link href="/products" onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start">
+                  <Package className="mr-2 h-5 w-5" />
+                  {t("header.products")}
+                </Button>
+              </Link>
 
-            {user && user.role === "customer" && (
-                <div className="flex items-center gap-2">
-                <Link href="/wishlist" onClick={() => setMobileMenuOpen(false)}>
-                    <Button variant="ghost" className="w-full justify-start">
-                    <Heart className="mr-2 h-5 w-5" />
-                    {t("header.wishlist")}
-                    </Button>
-                </Link>
-                <Link href="/cart" onClick={() => setMobileMenuOpen(false)}>
-                    <Button variant="ghost" className="w-full justify-start relative">
-                    <ShoppingCart className="mr-2 h-5 w-5" />
-                    {t("header.cart")}
-                    {cartItemCount > 0 && (
-                        <Badge className="absolute top-1 right-1 h-5 w-5 flex items-center justify-center p-0 text-xs">
-                        {cartItemCount}
-                        </Badge>
-                    )}
-                    </Button>
-                </Link>
-                </div>
-            )}
-
-            {isLoading ? (
-                <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-            ) : user ? (
+              {/* Mobile Customer Actions */}
+              {user && user.role === "customer" && (
                 <>
-                <div className="px-2 py-1.5">
+                  <Link href="/wishlist" onClick={() => setMobileMenuOpen(false)}>
+                    <Button variant="ghost" className="w-full justify-start">
+                      <Heart className="mr-2 h-5 w-5" />
+                      {t("header.wishlist")}
+                    </Button>
+                  </Link>
+                  <Link href="/cart" onClick={() => setMobileMenuOpen(false)}>
+                    <Button variant="ghost" className="w-full justify-start relative">
+                      <ShoppingCart className="mr-2 h-5 w-5" />
+                      {t("header.cart")}
+                      {cartItemCount > 0 && (
+                        <Badge className="absolute top-1 right-1 h-5 w-5 flex items-center justify-center p-0 text-xs">
+                          {cartItemCount}
+                        </Badge>
+                      )}
+                    </Button>
+                  </Link>
+                </>
+              )}
+
+              <Separator />
+
+              {/* Mobile User Section */}
+              {isLoading ? (
+                <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+              ) : user ? (
+                <>
+                  <div className="px-2 py-1.5">
                     <p className="text-sm font-medium">{user.name}</p>
                     <p className="text-xs text-muted-foreground">{user.email}</p>
-                </div>
-                <Separator />
-                <Link href="/profile" onClick={() => setMobileMenuOpen(false)}>
+                  </div>
+                  <Separator />
+                  <Link href="/profile" onClick={() => setMobileMenuOpen(false)}>
                     <Button variant="ghost" className="w-full justify-start">
-                        <User className="mr-2 h-4 w-4" />
-                        {t("header.profile")}
+                      <User className="mr-2 h-4 w-4" />
+                      {t("header.profile")}
                     </Button>
-                </Link>
-                {user.role === "customer" && (
+                  </Link>
+                  {user.role === "customer" && (
                     <Link href="/buyer/dashboard" onClick={() => setMobileMenuOpen(false)}>
-                        <Button variant="ghost" className="w-full justify-start">
-                            <LayoutDashboard className="mr-2 h-4 w-4" />
-                            {t("dashboard.title")}
-                        </Button>
+                      <Button variant="ghost" className="w-full justify-start">
+                        <LayoutDashboard className="mr-2 h-4 w-4" />
+                        {t("dashboard.title")}
+                      </Button>
                     </Link>
-                )}
-                {user.role === "seller" && (
+                  )}
+                  {user.role === "seller" && (
                     <Link href="/seller/dashboard" onClick={() => setMobileMenuOpen(false)}>
-                        <Button variant="ghost" className="w-full justify-start">
-                            <LayoutDashboard className="mr-2 h-4 w-4" />
-                            {t("header.sellerDashboard")}
-                        </Button>
+                      <Button variant="ghost" className="w-full justify-start">
+                        <LayoutDashboard className="mr-2 h-4 w-4" />
+                        {t("header.sellerDashboard")}
+                      </Button>
                     </Link>
-                )}
-                {user.role === "admin" && (
+                  )}
+                  {user.role === "admin" && (
                     <Link href="/admin/dashboard" onClick={() => setMobileMenuOpen(false)}>
-                        <Button variant="ghost" className="w-full justify-start">
-                            <LayoutDashboard className="mr-2 h-4 w-4" />
-                            {t("header.adminDashboard")}
-                        </Button>
+                      <Button variant="ghost" className="w-full justify-start">
+                        <LayoutDashboard className="mr-2 h-4 w-4" />
+                        {t("header.adminDashboard")}
+                      </Button>
                     </Link>
-                )}
-                <Button variant="ghost" onClick={() => { handleLogout(); setMobileMenuOpen(false); }} className="w-full justify-start">
+                  )}
+                  <Button variant="ghost" onClick={() => { handleLogout(); setMobileMenuOpen(false); }} className="w-full justify-start">
                     <LogOut className="mr-2 h-4 w-4" />
                     {t("header.logout")}
-                </Button>
+                  </Button>
                 </>
-            ) : (
+              ) : (
                 <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
-                    <Button className="w-full">{t("header.login")}</Button>
+                  <Button className="w-full">{t("header.login")}</Button>
                 </Link>
-            )}
+              )}
             </nav>
+          </div>
         </div>
       )}
     </header>
