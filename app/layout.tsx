@@ -15,6 +15,7 @@ export const metadata = {
   metadataBase: new URL("https://madaba-women-market.vercel.app"), // استبدل بالرابط الفعلي
   title: "سيدتي ماركت | منصة النساء في مادبا",
   description: "منصة لدعم وتمكين سيدات مادبا عبر التجارة الإلكترونية.",
+    generator: 'v0.app'
 };
 
 export default function RootLayout({
