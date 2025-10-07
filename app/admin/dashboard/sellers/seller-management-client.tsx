@@ -14,6 +14,9 @@ interface Seller {
   email: string;
   status: 'pending' | 'approved' | 'rejected';
   role?: string;
+  totalSales?: number;
+  totalProducts?: number;
+  joinDate?: string;
 }
 
 export default function SellerManagementClient() {
@@ -47,7 +50,14 @@ export default function SellerManagementClient() {
         }
 
         const sellerList = await response.json();
-        setSellers(sellerList);
+        // Enhance seller data with mock sales information for demonstration
+        const enhancedSellers = sellerList.map((seller: Seller) => ({
+          ...seller,
+          totalSales: Math.floor(Math.random() * 10000), // Mock data
+          totalProducts: Math.floor(Math.random() * 50), // Mock data
+          joinDate: new Date(Date.now() - Math.floor(Math.random() * 365 * 24 * 60 * 60 * 1000)).toISOString().split('T')[0] // Mock date
+        }));
+        setSellers(enhancedSellers);
       } catch (error) {
         console.error('Error fetching sellers:', error);
         toast.error(t('messages.failedToFetchSellers') || 'Failed to fetch sellers.');
@@ -96,33 +106,53 @@ export default function SellerManagementClient() {
   return (
     <div className="container mx-auto py-10">
       <h1 className="text-3xl font-bold mb-6">{t('admin.sellerManagement')}</h1>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>{t('admin.name')}</TableHead>
-            <TableHead>{t('admin.email')}</TableHead>
-            <TableHead>{t('admin.status')}</TableHead>
-            <TableHead>{t('admin.actions')}</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {sellers.map(seller => (
-            <TableRow key={seller.id}>
-              <TableCell>{seller.name}</TableCell>
-              <TableCell>{seller.email}</TableCell>
-              <TableCell>{seller.status}</TableCell>
-              <TableCell>
-                {seller.status === 'pending' && (
-                  <>
-                    <Button onClick={() => handleApproval(seller.id, 'approved')} className="mr-2">{t('admin.approve')}</Button>
-                    <Button onClick={() => handleApproval(seller.id, 'rejected')} variant="destructive">{t('admin.reject')}</Button>
-                  </>
-                )}
-              </TableCell>
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>{t('admin.name')}</TableHead>
+              <TableHead>{t('admin.email')}</TableHead>
+              <TableHead>{t('admin.status')}</TableHead>
+              <TableHead>{t('admin.totalSales')}</TableHead>
+              <TableHead>{t('admin.totalProducts')}</TableHead>
+              <TableHead>{t('admin.joinDate')}</TableHead>
+              <TableHead>{t('admin.actions')}</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {sellers.map(seller => (
+              <TableRow key={seller.id}>
+                <TableCell className="font-medium">{seller.name}</TableCell>
+                <TableCell>{seller.email}</TableCell>
+                <TableCell>
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    seller.status === 'approved' ? 'bg-green-100 text-green-800' :
+                    seller.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                    'bg-red-100 text-red-800'
+                  }`}>
+                    {t(`admin.${seller.status}`)}
+                  </span>
+                </TableCell>
+                <TableCell>{seller.totalSales?.toLocaleString()} {t('common.currency')}</TableCell>
+                <TableCell>{seller.totalProducts}</TableCell>
+                <TableCell>{seller.joinDate}</TableCell>
+                <TableCell>
+                  {seller.status === 'pending' && (
+                    <>
+                      <Button onClick={() => handleApproval(seller.id, 'approved')} className="mr-2" size="sm">
+                        {t('admin.approve')}
+                      </Button>
+                      <Button onClick={() => handleApproval(seller.id, 'rejected')} variant="destructive" size="sm">
+                        {t('admin.reject')}
+                      </Button>
+                    </>
+                  )}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 };

@@ -19,6 +19,10 @@ export interface User {
   whatsappUrl?: string
   rating?: number
   reviewCount?: number
+  // Followers for sellers
+  followersCount?: number
+  // Followed sellers for customers
+  followedSellers?: string[]
 }
 
 export interface Product {
@@ -38,6 +42,8 @@ export interface Product {
   suspended?: boolean
   createdAt: Date
   wishlisted?: boolean
+  // Purchase count for popularity tracking
+  purchaseCount?: number
 }
 
 export interface CartItem {
@@ -76,4 +82,5 @@ export interface Seller {
   totalSales: number
   totalProducts: number
   joinedAt: Date
+  followersCount?: number
 }

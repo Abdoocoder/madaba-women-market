@@ -11,6 +11,7 @@ const dashboardSections = [
   { href: '/admin/dashboard/orders', title: 'admin.orders', description: 'admin.manageOrders' },
   { href: '/admin/dashboard/stories', title: 'admin.stories.title', description: 'admin.stories.description' },
   { href: '/admin/dashboard/stats', title: 'admin.statistics', description: 'admin.viewStatistics' },
+  { href: '/admin/dashboard/reports', title: 'admin.reports', description: 'admin.detailedReports' },
 ];
 
 export default function AdminDashboardClient() {

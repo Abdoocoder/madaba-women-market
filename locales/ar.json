@@ -162,6 +162,9 @@
   "messages.failedToFetchUsers": "فشل في جلب المستخدمين",
   "messages.failedToFetchProducts": "فشل في جلب المنتجات",
   "messages.failedToFetchStories": "فشل في جلب قصص النجاح",
+  "messages.failedToFollowStore": "فشل في متابعة المتجر. يرجى المحاولة مرة أخرى.",
+  "messages.loginToFollow": "يرجى تسجيل الدخول لمتابعة المتاجر.",
+  "messages.customersOnly": "يمكن للعملاء فقط متابعة المتاجر.",
   "messages.failedToFetchData": "فشل في جلب البيانات",
   "messages.storeSettingsUpdated": "تم تحديث إعدادات المتجر بنجاح!",
   "messages.failedToUpdateStoreSettings": "فشل في تحديث إعدادات المتجر.",
@@ -393,8 +396,15 @@
   "cart.quantity": "الكمية",
   "cart.subtotal": "المجموع الفرعي",
   "cart.shipping": "الشحن",
+  "cart.tax": "الضريبة (16%)",
   "cart.total": "المجموع الكلي",
   "cart.continueShopping": "العودة للتسوق",
   "cart.emptyCartMessage": "سلة التسوق فارغة",
-  "cart.startShopping": "ابدأي بإضافة منتجات إلى سلتك"
+  "cart.startShopping": "ابدأي بإضافة منتجات إلى سلتك",
+  "cart.orderSummary": "ملخص الطلب",
+  "cart.free": "مجاني",
+  "cart.itemsInCart": "المنتجات في سلتك",
+  "cart.clearCart": "مسح السلة",
+  "cart.freeShipping": "شحن مجاني",
+  "cart.freeShippingDescription": "لجميع الطلبات فوق 50 دينار أردني داخل مأدبا"
 }

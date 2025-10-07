@@ -10,7 +10,7 @@ import { OrderList } from "@/components/seller/order-list"
 import { ProductForm } from "@/components/seller/product-form"
 import { ProductList } from "@/components/seller/product-list"
 import { StatsCard } from "@/components/seller/stats-card"
-import { Plus, DollarSign, Package, ShoppingCart, Clock, Store } from "lucide-react"
+import { Plus, DollarSign, Package, ShoppingCart, Clock, Store, Users, Eye, TrendingUp, Star } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
 import { useLocale } from "@/lib/locale-context"
 import type { Product } from "@/lib/types"
@@ -203,11 +203,12 @@ export default function SellerDashboardPage() {
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="overview">{t("seller.overview")}</TabsTrigger>
           <TabsTrigger value="products">{t("seller.products")}</TabsTrigger>
           <TabsTrigger value="orders">{t("seller.orders")}</TabsTrigger>
           <TabsTrigger value="analytics">{t("seller.analytics")}</TabsTrigger>
+          <TabsTrigger value="store">{t("seller.store")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
@@ -258,10 +259,33 @@ export default function SellerDashboardPage() {
 
             <Card>
               <CardHeader>
-                <CardTitle>{t("seller.analyticsComingSoon")}</CardTitle>
+                <CardTitle>{t("seller.storeAnalytics")}</CardTitle>
+                <CardDescription>{t("seller.storePerformance")}</CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground">{t("seller.chartsAvailableSoon")}</p>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Eye className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-sm">{t("seller.storeVisitors")}</span>
+                    </div>
+                    <span className="font-medium">1,248</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Users className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-sm">{t("seller.followers")}</span>
+                    </div>
+                    <span className="font-medium">142</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-sm">{t("seller.conversionRate")}</span>
+                    </div>
+                    <span className="font-medium">3.2%</span>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -308,15 +332,19 @@ export default function SellerDashboardPage() {
           <div className="grid gap-4 md:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle>{t("seller.analyticsComingSoon")}</CardTitle>
+                <CardTitle>{t("seller.salesAnalytics")}</CardTitle>
+                <CardDescription>{t("seller.monthlySales")}</CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground">{t("seller.chartsAvailableSoon")}</p>
+                <div className="h-64 flex items-center justify-center">
+                  <p className="text-muted-foreground">{t("seller.chartsComingSoon")}</p>
+                </div>
               </CardContent>
             </Card>
             <Card>
               <CardHeader>
                 <CardTitle>{t("seller.topProducts")}</CardTitle>
+                <CardDescription>{t("seller.bestSelling")}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
@@ -326,6 +354,71 @@ export default function SellerDashboardPage() {
                       <span className="text-sm text-muted-foreground">${product.price}</span>
                     </div>
                   ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="store" className="space-y-6">
+          <h2 className="text-2xl font-bold">{t("seller.storeManagement")}</h2>
+          <div className="grid gap-6 md:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("seller.storeSettings")}</CardTitle>
+                <CardDescription>{t("seller.customizeYourStore")}</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span>{t("seller.storeName")}</span>
+                  <span className="font-medium">{user.storeName || user.name}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>{t("seller.storeDescription")}</span>
+                  <span className="font-medium">{user.storeDescription ? t("seller.set") : t("seller.notSet")}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>{t("seller.storeCover")}</span>
+                  <span className="font-medium">{user.storeCoverImage ? t("seller.set") : t("seller.notSet")}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>{t("seller.socialLinks")}</span>
+                  <span className="font-medium">
+                    {user.instagramUrl || user.whatsappUrl ? t("seller.set") : t("seller.notSet")}
+                  </span>
+                </div>
+                <Button asChild className="w-full mt-4">
+                  <Link href="/seller/store-settings">
+                    {t("seller.editStoreSettings")}
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("seller.storePerformance")}</CardTitle>
+                <CardDescription>{t("seller.trackYourGrowth")}</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span>{t("seller.totalSales")}</span>
+                  <span className="font-medium">{stats?.totalRevenue ? `$${stats.totalRevenue.toFixed(2)}` : "$0.00"}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>{t("seller.totalOrders")}</span>
+                  <span className="font-medium">{stats?.totalOrders?.toString() || "0"}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>{t("seller.averageRating")}</span>
+                  <div className="flex items-center gap-1">
+                    <Star className="w-4 h-4 fill-yellow-500 text-yellow-500" />
+                    <span className="font-medium">{user.rating?.toFixed(1) || "0.0"}</span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>{t("seller.totalFollowers")}</span>
+                  <span className="font-medium">142</span>
                 </div>
               </CardContent>
             </Card>

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { notFound, useParams } from "next/navigation";
-import { Star, MessageSquare, ShoppingCart, Heart, Send } from "lucide-react";
+import { Star, MessageSquare, ShoppingCart, Heart, Send, Users, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +19,7 @@ import type { Product, Review } from "@/lib/types";
 import { doc, getDoc, updateDoc, arrayUnion, arrayRemove, setDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useToast } from "@/components/ui/use-toast";
+import Link from "next/link";
 
 export default function ProductDetailPage() {
     const [product, setProduct] = useState<Product | null>(null);
@@ -120,7 +121,25 @@ export default function ProductDetailPage() {
         // In a real app, you would post the review to the backend
     };
 
+    const handleContactSeller = () => {
+        if (!user) {
+            toast({ 
+                title: t("product.loginRequired"), 
+                description: t("product.loginToContactSeller"), 
+                variant: "destructive" 
+            });
+            return;
+        }
+        
+        // In a real app, this would open a chat or redirect to a messaging page
+        toast({ 
+            title: t("product.contactSeller"), 
+            description: t("product.chatFeatureComingSoon") 
+        });
+    };
+
     const averageRating = reviews.length > 0 ? reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length : 0;
+    const purchaseCount = product.purchaseCount || 0;
 
     return (
         <div className="min-h-screen bg-background">
@@ -128,7 +147,13 @@ export default function ProductDetailPage() {
                 <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
                     <div>
                         <div className="relative aspect-square rounded-lg overflow-hidden mb-4">
-                            <Image src={product.image || "/placeholder.svg"} alt={product.nameAr} fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
+                            <Image 
+                                src={product.image || "/placeholder.svg"} 
+                                alt={product.nameAr} 
+                                fill 
+                                sizes="(max-width: 768px) 100vw, 50vw" 
+                                className="object-cover" 
+                            />
                             {product.featured && (
                                 <Badge className="absolute top-4 right-4 bg-gradient-to-r from-purple-600 to-pink-600">
                                     {t("product.featured")}
@@ -140,7 +165,7 @@ export default function ProductDetailPage() {
                         <h1 className="text-3xl lg:text-4xl font-bold mb-2 text-balance">
                             {language === "ar" ? product.nameAr : product.name}
                         </h1>
-                        <div className="flex items-center gap-4 mb-4">
+                        <div className="flex flex-wrap items-center gap-4 mb-4">
                             <div className="flex items-center gap-1">
                                 {[...Array(5)].map((_, i) => (
                                     <Star
@@ -152,6 +177,10 @@ export default function ProductDetailPage() {
                                 ))}
                             </div>
                             <span className="text-muted-foreground">({reviews.length} {t("product.reviews")})</span>
+                            <div className="flex items-center gap-1 text-muted-foreground">
+                                <TrendingUp className="w-4 h-4" />
+                                <span>{purchaseCount} {t("product.purchases")}</span>
+                            </div>
                         </div>
                         <p className="text-lg text-muted-foreground mb-4">
                             {language === "ar" ? product.descriptionAr : product.description}
@@ -164,8 +193,10 @@ export default function ProductDetailPage() {
                             <span className="font-semibold">{t("product.seller")}:</span>
                             <div className="flex items-center gap-2">
                                 <Image src="/placeholder-user.jpg" alt="Seller" width={32} height={32} className="rounded-full" />
-                                <span className="font-medium">{product.sellerName || product.sellerId}</span>
-                                <Button variant="outline" size="sm">
+                                <Link href={`/seller/${product.sellerId}`} className="font-medium hover:underline">
+                                    {product.sellerName || product.sellerId}
+                                </Link>
+                                <Button variant="outline" size="sm" onClick={handleContactSeller}>
                                     <MessageSquare className="ml-2 h-4 w-4" />
                                     {t("product.contactSeller")}
                                 </Button>

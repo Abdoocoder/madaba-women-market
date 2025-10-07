@@ -2,6 +2,9 @@
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
 import type { CartItem, Product } from "./types"
+import { db } from "@/lib/firebase"
+import { doc, setDoc, getDoc, onSnapshot } from "firebase/firestore"
+import { useAuth } from "@/lib/auth-context"
 
 interface CartContextType {
   items: CartItem[]
@@ -36,7 +39,9 @@ const safeLocalStorage = {
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([])
+  const { user } = useAuth()
 
+  // Load cart from localStorage on initial load
   useEffect(() => {
     const storedCart = safeLocalStorage.getItem("seydaty_cart")
     if (storedCart) {
@@ -49,9 +54,51 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
+  // Sync cart with Firebase when user is authenticated
+  useEffect(() => {
+    if (!user) return
+
+    const cartRef = doc(db, "carts", user.id)
+    
+    // Set up real-time listener for cart updates
+    const unsubscribe = onSnapshot(cartRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const cartData = docSnap.data()
+        if (cartData.items) {
+          setItems(cartData.items)
+          // Also save to localStorage for offline access
+          safeLocalStorage.setItem("seydaty_cart", JSON.stringify(cartData.items))
+        }
+      }
+    }, (error) => {
+      console.error("Error listening to cart updates:", error)
+    })
+
+    return () => unsubscribe()
+  }, [user])
+
+  // Save cart to localStorage whenever items change
   useEffect(() => {
     safeLocalStorage.setItem("seydaty_cart", JSON.stringify(items))
   }, [items])
+
+  // Save cart to Firebase when user is authenticated and items change
+  useEffect(() => {
+    const saveCartToFirebase = async () => {
+      if (!user || items.length === 0) return
+
+      try {
+        const cartRef = doc(db, "carts", user.id)
+        await setDoc(cartRef, { items }, { merge: true })
+      } catch (error) {
+        console.error("Error saving cart to Firebase:", error)
+      }
+    }
+
+    // Debounce the save operation
+    const timeoutId = setTimeout(saveCartToFirebase, 1000)
+    return () => clearTimeout(timeoutId)
+  }, [items, user])
 
   const addToCart = (product: Product) => {
     setItems((prev) => {

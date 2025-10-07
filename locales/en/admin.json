@@ -37,6 +37,8 @@
     "selectSeller": "Select Seller (Optional)"
   },
   "statistics": "Statistics",
+  "reports": "Reports",
+  "detailedReports": "Detailed sales and performance reports",
   "pendingSellers": "Pending Sellers",
   "approvedSellers": "Approved Sellers",
   "suspendedSellers": "Suspended Sellers",
@@ -80,5 +82,18 @@
   "userDeleteFailed": "Failed to delete user.",
   "totalUsers": "Total Users",
   "totalSellers": "Total Sellers",
-  "totalOrders": "Total Orders"
+  "totalOrders": "Total Orders",
+  "sellerStatusDistribution": "Seller Status Distribution",
+  "productStatusDistribution": "Product Status Distribution",
+  "topSellers": "Top Sellers",
+  "sales": "Sales",
+  "recentOrders": "Recent Orders",
+  "orderId": "Order ID",
+  "date": "Date",
+  "amount": "Amount",
+  "delivered": "Delivered",
+  "processing": "Processing",
+  "shipped": "Shipped",
+  "failedToLoadData": "Failed to load data",
+  "joinDate": "Join Date"
 }

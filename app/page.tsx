@@ -13,6 +13,7 @@ import type { Product } from "@/lib/types"
 import ClientOnly from "@/components/client-only"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import type { Metadata } from "next";
 
 export type SortOption = "date-desc" | "price-asc" | "price-desc" | "name-asc"
 
@@ -24,6 +25,19 @@ function interpolateTranslation(translation: string, params: Record<string, stri
   }
   return result
 }
+
+export const metadata: Metadata = {
+  title: "Madaba Women Market | منصة التجارة الإلكترونية للنساء",
+  description: "اكتشفي أفضل المنتجات النسائية المصنوعة يدويًا من قبل نساء مبدعات في مدريد. تسوق الآن وادعم المشاريع النسائية.",
+  keywords: ["متجر نسائي", "منتجات يدوية", "نساء مبدعات", "مدريد", "المنتجات النسائية", "ال handmade", "ال Woman Market"],
+  openGraph: {
+    title: "Madaba Women Market | منصة التجارة الإلكترونية للنساء",
+    description: "اكتشفي أفضل المنتجات النسائية المصنوعة يدويًا من قبل نساء مبدعات في مدريد. تسوق الآن وادعم المشاريع النسائية.",
+    images: ["/og-image.jpg"],
+    locale: "ar_JO",
+    type: "website",
+  },
+};
 
 export default function Home() {
   const { user } = useAuth()
