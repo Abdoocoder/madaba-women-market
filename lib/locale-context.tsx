@@ -109,12 +109,21 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
     
     // Handle nested keys (e.g., "common.backToHome")
     if (key.includes('.')) {
-      const [namespace, ...keyParts] = key.split('.')
-      const nestedKey = keyParts.join('.')
+      const parts = key.split('.')
       
       // Try to find in modular structure first
-      if (translationSet[namespace] && translationSet[namespace][nestedKey]) {
-        let translation = translationSet[namespace][nestedKey] as string
+      let current: any = translationSet
+      for (let i = 0; i < parts.length; i++) {
+        if (current && current[parts[i]]) {
+          current = current[parts[i]]
+        } else {
+          current = null
+          break
+        }
+      }
+      
+      if (current && typeof current === 'string') {
+        let translation = current
       
         if (params) {
           Object.entries(params).forEach(([paramKey, value]: [string, string | number]) => {

@@ -222,6 +222,10 @@ export default function SuccessStoriesManagementClient() {
     return <div>{t('common.unauthorized')}</div>;
   }
 
+  // Test translation
+  const testTitle = t('admin.stories.title');
+  console.log('Test title:', testTitle);
+  
   if (isEditing && currentStory) {
     return (
       <div className="container mx-auto py-10">

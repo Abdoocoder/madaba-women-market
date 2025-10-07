@@ -3,18 +3,16 @@ const nextConfig = {
   reactStrictMode: true,
 
   eslint: {
-    // ❗ نوصي بإعادة التحقق من الأكواد محليًا فقط وليس في الإنتاج
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: true, // ✅ مؤقتًا فقط — يمكنك تفعيله لاحقًا
   },
 
   typescript: {
-    // ❗ نفس الشيء: يُفضل تصحيح الأخطاء لاحقًا بدل تجاهلها دائمًا
     ignoreBuildErrors: true,
   },
 
   images: {
     formats: ['image/webp', 'image/avif'],
-    unoptimized: false, // ✅ استخدم تحسين الصور الافتراضي من Next.js
+    unoptimized: false,
     remotePatterns: [
       {
         protocol: 'https',
@@ -32,7 +30,6 @@ const nextConfig = {
   },
 
   compiler: {
-    // 🧹 إزالة console.log من نسخة الإنتاج تلقائيًا
     removeConsole: process.env.NODE_ENV === 'production',
   },
 
@@ -60,5 +57,41 @@ const nextConfig = {
     ];
   },
 };
+
+// ✅ Configuration Status Checker
+const checkConfig = () => {
+  console.log('\n🔧 Configuration Status:\n========================\n');
+
+  // --- Firebase ---
+  const firebaseVars = [
+    'NEXT_PUBLIC_FIREBASE_API_KEY',
+    'NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN',
+    'NEXT_PUBLIC_FIREBASE_PROJECT_ID',
+    'NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET',
+    'NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID',
+    'NEXT_PUBLIC_FIREBASE_APP_ID',
+  ];
+  const missingFirebase = firebaseVars.filter((key) => !process.env[key]);
+
+  if (missingFirebase.length === 0) {
+    console.log('🔥 Firebase Admin:\n✅ Firebase configuration appears valid\n');
+  } else {
+    console.warn('🔥 Firebase Admin:\n❌ Missing Firebase environment variables:\n', missingFirebase.join(', '), '\n');
+  }
+
+  // --- Cloudinary ---
+  if (process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME) {
+    console.log('🎨 Cloudinary:\n✅ Cloudinary configuration appears valid');
+  } else {
+    console.warn('🎨 Cloudinary:\n❌ Missing Cloudinary configuration');
+  }
+
+  console.log('========================\n');
+};
+
+// ✅ Run the check only during build or dev
+if (process.env.NODE_ENV !== 'test') {
+  checkConfig();
+}
 
 export default nextConfig;
