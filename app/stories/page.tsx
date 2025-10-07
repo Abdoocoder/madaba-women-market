@@ -11,6 +11,7 @@ interface SuccessStory {
   story: string
   imageUrl?: string
   date: string
+  sellerId?: string
 }
 
 export default function SuccessStoriesPage() {
@@ -84,6 +85,16 @@ export default function SuccessStoriesPage() {
                 <p className="text-sm text-gray-500">
                   {new Date(story.date).toLocaleDateString()}
                 </p>
+                {story.sellerId && (
+                  <div className="mt-4">
+                    <a 
+                      href={`/seller/${story.sellerId}`} 
+                      className="inline-block px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+                    >
+                      {t("home.viewSellerStore")}
+                    </a>
+                  </div>
+                )}
               </CardContent>
             </Card>
           ))}

@@ -21,6 +21,14 @@ import enCommon from "@/locales/en/common.json"
 import enHome from "@/locales/en/home.json"
 import enProduct from "@/locales/en/product.json"
 import enSeller from "@/locales/en/seller.json"
+import enAdmin from "@/locales/en/admin.json"
+import enBuyer from "@/locales/en/buyer.json"
+import enOrders from "@/locales/en/orders.json"
+import enPrivacy from "@/locales/en/privacy.json"
+import enTerms from "@/locales/en/terms.json"
+import enFaq from "@/locales/en/faq.json"
+import enHelp from "@/locales/en/help.json"
+import enFooter from "@/locales/en/footer.json"
 
 // Legacy imports for compatibility (will be removed after migration)
 import arLegacy from "@/locales/ar.json"
@@ -59,8 +67,15 @@ const enTranslations = {
   common: enCommon,
   home: enHome,
   product: enProduct,
-  seller: enSeller
-  // Note: Other English modules will be added gradually
+  seller: enSeller,
+  admin: enAdmin,
+  buyer: enBuyer,
+  orders: enOrders,
+  privacy: enPrivacy,
+  terms: enTerms,
+  faq: enFaq,
+  help: enHelp,
+  footer: enFooter
 }
 
 const translations = {
@@ -89,7 +104,8 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
   }
 
   const t = (key: string, params?: Record<string, string | number>): string => {
-    const translationSet = translations[language] as any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const translationSet = translations[language] as Record<string, any>
     
     // Handle nested keys (e.g., "common.backToHome")
     if (key.includes('.')) {
@@ -98,23 +114,23 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
       
       // Try to find in modular structure first
       if (translationSet[namespace] && translationSet[namespace][nestedKey]) {
-        let translation = translationSet[namespace][nestedKey]
-        
+        let translation = translationSet[namespace][nestedKey] as string
+      
         if (params) {
-          Object.entries(params).forEach(([paramKey, value]) => {
+          Object.entries(params).forEach(([paramKey, value]: [string, string | number]) => {
             translation = translation.replace(`{${paramKey}}`, String(value))
           })
         }
-        
+      
         return translation
       }
     }
     
     // Fallback to flat structure for legacy keys
-    let translation = translationSet[key] || key
+    let translation = translationSet[key] as string || key
     
     if (params) {
-      Object.entries(params).forEach(([paramKey, value]) => {
+      Object.entries(params).forEach(([paramKey, value]: [string, string | number]) => {
         translation = translation.replace(`{${paramKey}}`, String(value))
       })
     }

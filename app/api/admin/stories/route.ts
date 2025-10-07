@@ -10,6 +10,7 @@ interface SuccessStory {
   story: string;
   imageUrl?: string;
   date: string;
+  sellerId?: string;
 }
 
 /**
@@ -53,6 +54,7 @@ export async function GET(request: NextRequest) {
                 story: storyData.story,
                 imageUrl: storyData.imageUrl,
                 date: storyData.date.toDate ? storyData.date.toDate() : new Date(storyData.date),
+                sellerId: storyData.sellerId,
             });
         });
         
@@ -97,7 +99,7 @@ export async function POST(request: NextRequest) {
         }
 
         const body = await request.json();
-        const { author, story, imageUrl } = body;
+        const { author, story, imageUrl, sellerId } = body;
 
         if (!author || !story) {
             return NextResponse.json({ message: 'Author and story are required' }, { status: 400 });
@@ -109,6 +111,7 @@ export async function POST(request: NextRequest) {
             story,
             imageUrl: imageUrl || null,
             date: new Date(),
+            sellerId: sellerId || null,
         };
 
         const docRef = await adminDb.collection('successStories').add(storyData);
@@ -166,7 +169,7 @@ export async function PUT(request: NextRequest) {
         }
 
         const body = await request.json();
-        const { author, story, imageUrl } = body;
+        const { author, story, imageUrl, sellerId } = body;
 
         if (!author || !story) {
             return NextResponse.json({ message: 'Author and story are required' }, { status: 400 });
@@ -184,6 +187,7 @@ export async function PUT(request: NextRequest) {
             author,
             story,
             ...(imageUrl !== undefined && { imageUrl }), // Only update imageUrl if provided
+            ...(sellerId !== undefined && { sellerId }), // Only update sellerId if provided
             updatedAt: new Date(),
         };
 

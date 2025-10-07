@@ -33,7 +33,8 @@
     "saveFailed": "Failed to save success story.",
     "deleteSuccess": "Success story deleted successfully!",
     "deleteFailed": "Failed to delete success story.",
-    "fetchFailed": "Failed to fetch success stories."
+    "fetchFailed": "Failed to fetch success stories.",
+    "selectSeller": "Select Seller (Optional)"
   },
   "statistics": "Statistics",
   "pendingSellers": "Pending Sellers",

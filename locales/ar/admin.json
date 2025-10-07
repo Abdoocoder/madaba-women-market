@@ -33,7 +33,8 @@
     "saveFailed": "فشل حفظ قصة النجاح.",
     "deleteSuccess": "تم حذف قصة النجاح بنجاح!",
     "deleteFailed": "فشل حذف قصة النجاح.",
-    "fetchFailed": "فشل جلب قصص النجاح."
+    "fetchFailed": "فشل جلب قصص النجاح.",
+    "selectSeller": "اختر البائع (اختياري)"
   },
   "statistics": "الإحصائيات",
   "pendingSellers": "البائعون المعلقون",

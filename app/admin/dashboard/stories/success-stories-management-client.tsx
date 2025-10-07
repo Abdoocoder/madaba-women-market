@@ -19,6 +19,7 @@ interface SuccessStory {
   story: string;
   imageUrl?: string;
   date: string;
+  sellerId?: string;
 }
 
 export default function SuccessStoriesManagementClient() {
@@ -26,11 +27,40 @@ export default function SuccessStoriesManagementClient() {
   const router = useRouter();
   const { t } = useLocale();
   const [stories, setStories] = useState<SuccessStory[]>([]);
+  const [sellers, setSellers] = useState<{id: string, name: string}[]>([]); // Add sellers state
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [currentStory, setCurrentStory] = useState<SuccessStory | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  const fetchSellers = useCallback(async () => {
+    try {
+      const token = await getAuthToken();
+      if (!token) {
+        throw new Error('No authentication token available');
+      }
+
+      const response = await fetch('/api/admin/sellers', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch sellers: ${response.status} ${response.statusText}`);
+      }
+
+      const sellersData = await response.json();
+      // Filter only approved sellers
+      const approvedSellers = sellersData
+        .filter((seller: any) => seller.status === 'approved')
+        .map((seller: any) => ({ id: seller.id, name: seller.name }));
+      setSellers(approvedSellers);
+    } catch (error) {
+      console.error('Error fetching sellers:', error);
+    }
+  }, [getAuthToken]);
 
   const fetchStories = useCallback(async () => {
     try {
@@ -66,7 +96,8 @@ export default function SuccessStoriesManagementClient() {
     }
     
     fetchStories();
-  }, [user, router, fetchStories]);
+    fetchSellers(); // Fetch sellers when component mounts
+  }, [user, router, fetchStories, fetchSellers]);
 
   const handleCreateNew = () => {
     setCurrentStory({
@@ -74,6 +105,7 @@ export default function SuccessStoriesManagementClient() {
       author: '',
       story: '',
       date: new Date().toISOString(),
+      sellerId: undefined,
     });
     setImageFile(null);
     setImagePreview(null);
@@ -135,6 +167,7 @@ export default function SuccessStoriesManagementClient() {
       const storyData = {
         ...currentStory,
         imageUrl,
+        sellerId: currentStory.sellerId,
       };
 
       const method = currentStory.id ? 'PUT' : 'POST';
@@ -218,6 +251,23 @@ export default function SuccessStoriesManagementClient() {
                 placeholder={t('admin.stories.storyPlaceholder')}
                 rows={6}
               />
+            </div>
+            
+            <div className="space-y-2">
+              <label htmlFor="seller">{t('admin.sellers')}</label>
+              <select
+                id="seller"
+                value={currentStory.sellerId || ''}
+                onChange={(e) => setCurrentStory({...currentStory, sellerId: e.target.value || undefined})}
+                className="w-full p-2 border rounded-md"
+              >
+                <option value="">{t('admin.stories.selectSeller')}</option>
+                {sellers.map((seller) => (
+                  <option key={seller.id} value={seller.id}>
+                    {seller.name}
+                  </option>
+                ))}
+              </select>
             </div>
             
             <div className="space-y-2">

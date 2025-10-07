@@ -6,5 +6,6 @@
   "allProducts": "كل المنتجات",
   "successStories": "قصص نجاح",
   "successStoriesDescription": "اقرأ قصص إلهام من عملائنا المرضيين",
-  "productsCount": "تم العثور على {count} منتج"
+  "productsCount": "تم العثور على {count} منتج",
+  "viewSellerStore": "عرض متجر البائع"
 }

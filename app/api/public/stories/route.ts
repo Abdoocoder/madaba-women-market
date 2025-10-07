@@ -9,6 +9,7 @@ interface SuccessStory {
   story: string;
   imageUrl?: string;
   date: string;
+  sellerId?: string; // Add seller ID reference
 }
 
 /**
@@ -35,6 +36,7 @@ export async function GET() {
                 story: storyData.story,
                 imageUrl: storyData.imageUrl,
                 date: storyData.date.toDate ? storyData.date.toDate() : new Date(storyData.date),
+                sellerId: storyData.sellerId,
             });
         });
         
