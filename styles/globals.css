@@ -114,7 +114,7 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
-}
+} /* Added closing brace for @theme inline */
 
 @layer base {
   * {
@@ -122,5 +122,46 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+  
+  /* Ensure smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Custom RTL support for header */
+  [dir="rtl"] .header-nav {
+    direction: rtl;
+  }
+
+  [dir="ltr"] .header-nav {
+    direction: ltr;
+  }
+
+  /* Mobile menu improvements */
+  @media (max-width: 768px) {
+    .mobile-menu {
+      max-height: calc(100vh - 4rem);
+      overflow-y: auto;
+    }
+  }
+
+  /* Footer hover effects */
+  .footer-link {
+    transition: color 0.2s ease-in-out;
+  }
+
+  .footer-link:hover {
+    color: hsl(var(--primary));
+  }
+
+  /* Social icons hover effect */
+  .social-icon {
+    transition: all 0.2s ease-in-out;
+  }
+
+  .social-icon:hover {
+    color: hsl(var(--primary));
+    transform: translateY(-2px);
   }
 }
