@@ -161,6 +161,7 @@
   "messages.failedToFetchSellers": "Failed to fetch sellers",
   "messages.failedToFetchUsers": "Failed to fetch users",
   "messages.failedToFetchProducts": "Failed to fetch products",
+  "messages.failedToFetchStories": "Failed to fetch success stories",
   "messages.failedToFetchData": "Failed to fetch data",
   "messages.storeSettingsUpdated": "Store settings updated successfully!",
   "messages.failedToUpdateStoreSettings": "Failed to update store settings.",

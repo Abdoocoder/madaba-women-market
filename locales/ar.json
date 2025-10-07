@@ -161,6 +161,7 @@
   "messages.failedToFetchSellers": "فشل في جلب البائعين",
   "messages.failedToFetchUsers": "فشل في جلب المستخدمين",
   "messages.failedToFetchProducts": "فشل في جلب المنتجات",
+  "messages.failedToFetchStories": "فشل في جلب قصص النجاح",
   "messages.failedToFetchData": "فشل في جلب البيانات",
   "messages.storeSettingsUpdated": "تم تحديث إعدادات المتجر بنجاح!",
   "messages.failedToUpdateStoreSettings": "فشل في تحديث إعدادات المتجر.",

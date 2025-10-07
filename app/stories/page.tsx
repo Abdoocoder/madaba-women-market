@@ -19,18 +19,21 @@ export default function SuccessStoriesPage() {
   const { t } = useLocale()
   const [stories, setStories] = useState<SuccessStory[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchStories = async () => {
       try {
+        setError(null)
         const response = await fetch('/api/public/stories')
         if (!response.ok) {
-          throw new Error('Failed to fetch stories')
+          throw new Error(`Failed to fetch stories: ${response.status} ${response.statusText}`)
         }
         const storiesData = await response.json()
         setStories(storiesData)
       } catch (error) {
         console.error('Error fetching stories:', error)
+        setError(error instanceof Error ? error.message : 'Failed to fetch stories')
       } finally {
         setLoading(false)
       }
@@ -44,6 +47,17 @@ export default function SuccessStoriesPage() {
       <div className="container mx-auto py-12">
         <div className="text-center">
           <p>{t('common.loading')}</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto py-12">
+        <div className="text-center">
+          <p className="text-red-500">{t('messages.failedToFetchStories')}</p>
+          <p className="text-sm text-muted-foreground mt-2">{error}</p>
         </div>
       </div>
     )

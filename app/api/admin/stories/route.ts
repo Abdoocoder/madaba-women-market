@@ -1,5 +1,3 @@
-'use server'
-
 import { NextResponse, NextRequest } from 'next/server'
 import { getAdminDb } from '@/lib/firebaseAdmin'
 import { getAuthenticatedUser } from '@/lib/server-auth'
