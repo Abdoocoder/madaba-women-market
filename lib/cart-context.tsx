@@ -56,7 +56,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   // Sync cart with Firebase when user is authenticated
   useEffect(() => {
-    if (!user) return
+    if (!user || !user.id) return
 
     const cartRef = doc(db, "carts", user.id)
     
@@ -71,7 +71,22 @@ export function CartProvider({ children }: { children: ReactNode }) {
         }
       }
     }, (error) => {
-      console.error("Error listening to cart updates:", error)
+      // Handle permission errors gracefully
+      if (error.code === 'permission-denied') {
+        console.warn("Insufficient permissions to read cart data. Using local storage only.");
+        // Try to load from localStorage as fallback
+        const storedCart = safeLocalStorage.getItem("seydaty_cart");
+        if (storedCart) {
+          try {
+            setItems(JSON.parse(storedCart));
+          } catch (parseError) {
+            console.error('Error parsing local cart data:', parseError);
+            safeLocalStorage.setItem("seydaty_cart", JSON.stringify([]));
+          }
+        }
+      } else {
+        console.error("Error listening to cart updates:", error);
+      }
     })
 
     return () => unsubscribe()
@@ -85,13 +100,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
   // Save cart to Firebase when user is authenticated and items change
   useEffect(() => {
     const saveCartToFirebase = async () => {
-      if (!user || items.length === 0) return
+      if (!user || !user.id || items.length === 0) return
 
       try {
         const cartRef = doc(db, "carts", user.id)
         await setDoc(cartRef, { items }, { merge: true })
-      } catch (error) {
-        console.error("Error saving cart to Firebase:", error)
+      } catch (error: any) {
+        // Handle permission errors gracefully
+        if (error.code === 'permission-denied') {
+          console.warn("Insufficient permissions to save cart data to Firebase. Data saved to local storage only.");
+        } else {
+          console.error("Error saving cart to Firebase:", error);
+        }
       }
     }
 

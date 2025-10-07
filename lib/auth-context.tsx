@@ -216,10 +216,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (process.env.NODE_ENV === 'development') {
             console.log("⚠️ Google sign-in popup closed by the user.");
           }
+        } else if (firebaseError.code === 'auth/cancelled-popup-request') {
+          // This is expected when the popup is closed quickly
+          if (process.env.NODE_ENV === 'development') {
+            console.log("⚠️ Google sign-in popup request cancelled.");
+          }
         } else {
           if (process.env.NODE_ENV === 'development') {
             console.error("❌ Error signing in with Google:", firebaseError.code);
           }
+        }
+      } else {
+        if (process.env.NODE_ENV === 'development') {
+          console.error("❌ Unexpected error during Google sign-in:", error);
         }
       }
       return false;

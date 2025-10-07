@@ -11,55 +11,10 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 
 const cairo = Cairo({ subsets: ["arabic", "latin"] });
-
-export const metadata: Metadata = {
-  title: {
-    template: "%s | Madaba Women Market",
-    default: "Madaba Women Market | منصة التجارة الإلكترونية للنساء"
-  },
-  description: "اكتشفي أفضل المنتجات النسائية المصنوعة يدويًا من قبل نساء مبدعات في مدريد. تسوق الآن وادعم المشاريع النسائية.",
-  keywords: ["متجر نسائي", "منتجات يدوية", "نساء مبدعات", "مدريد", "المنتجات النسائية", "ال handmade", "ال Woman Market"],
-  authors: [{ name: "Madaba Women Market Team" }],
-  creator: "Madaba Women Market",
-  publisher: "Madaba Women Market",
-  formatDetection: {
-    email: false,
-    address: false,
-    telephone: false,
-  },
-  openGraph: {
-    title: "Madaba Women Market | منصة التجارة الإلكترونية للنساء",
-    description: "اكتشفي أفضل المنتجات النسائية المصنوعة يدويًا من قبل نساء مبدعات في مدريد. تسوق الآن وادعم المشاريع النسائية.",
-    url: "https://your-domain.com",
-    siteName: "Madaba Women Market",
-    images: [
-      {
-        url: "/og-image.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Madaba Women Market",
-      },
-    ],
-    locale: "ar_JO",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Madaba Women Market | منصة التجارة الإلكترونية للنساء",
-    description: "اكتشفي أفضل المنتجات النسائية المصنوعة يدويًا من قبل نساء مبدعات في مدريد. تسوق الآن وادعم المشاريع النسائية.",
-    images: ["/og-image.jpg"],
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-    },
-  },
-  alternates: {
-    canonical: "https://your-domain.com",
-  },
+export const metadata = {
+  metadataBase: new URL("https://madaba-women-market.vercel.app"), // استبدل بالرابط الفعلي
+  title: "سيدتي ماركت | منصة النساء في مادبا",
+  description: "منصة لدعم وتمكين سيدات مادبا عبر التجارة الإلكترونية.",
 };
 
 export default function RootLayout({
