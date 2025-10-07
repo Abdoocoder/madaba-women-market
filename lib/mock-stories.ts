@@ -1,4 +1,3 @@
-
 export interface SuccessStory {
   id: string;
   author: string;
