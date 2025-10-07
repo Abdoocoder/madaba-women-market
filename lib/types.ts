@@ -11,6 +11,14 @@ export interface User {
   photoURL?: string
   phone?: string
   createdAt: Date
+  // Store information for sellers
+  storeName?: string
+  storeDescription?: string
+  storeCoverImage?: string
+  instagramUrl?: string
+  whatsappUrl?: string
+  rating?: number
+  reviewCount?: number
 }
 
 export interface Product {

@@ -133,6 +133,9 @@ Madaba Women Market is a comprehensive e-commerce platform designed to empower w
 - 📉 Sales analytics and charts
 - 📦 Order management
 - 📋 Inventory tracking
+- 🏪 Store customization (name, description, cover image)
+- 🔗 Social media integration (Instagram, WhatsApp)
+- ⭐ Store rating system
 
 ### 👑 **Admin Panel**
 - 👥 User management

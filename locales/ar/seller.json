@@ -18,5 +18,19 @@
   "topProducts": "أهم المنتجات",
   "analyticsComingSoon": "التحليلات قادمة قريباً",
   "chartsAvailableSoon": "الرسوم البيانية ستكون متاحة قريباً",
-  "confirmDelete": "هل أنت متأكد من رغبتك في حذف هذا المنتج؟"
+  "confirmDelete": "هل أنت متأكد من رغبتك في حذف هذا المنتج؟",
+  "storeSettings": "إعدادات المتجر",
+  "manageYourStore": "إدارة معلومات متجرك",
+  "storeName": "اسم المتجر",
+  "storeDescription": "وصف المتجر",
+  "storeCoverImage": "صورة غلاف المتجر",
+  "storeCoverPreview": "معاينة غلاف المتجر",
+  "instagramUrl": "رابط إنستغرام",
+  "whatsappUrl": "رابط واتساب",
+  "enterStoreName": "أدخل اسم متجرك",
+  "enterStoreDescription": "صف متجرك ومنتجاتك",
+  "enterCoverImageUrl": "أدخل رابط صورة الغلاف",
+  "enterInstagramUrl": "أدخل رابط ملفك على إنستغرام",
+  "enterWhatsappUrl": "أدخل رابط التواصل عبر واتساب",
+  "viewStore": "عرض المتجر"
 }

@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState, useEffect, useCallback } from "react"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -9,7 +10,7 @@ import { OrderList } from "@/components/seller/order-list"
 import { ProductForm } from "@/components/seller/product-form"
 import { ProductList } from "@/components/seller/product-list"
 import { StatsCard } from "@/components/seller/stats-card"
-import { Plus, DollarSign, Package, ShoppingCart, Clock } from "lucide-react"
+import { Plus, DollarSign, Package, ShoppingCart, Clock, Store } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
 import { useLocale } from "@/lib/locale-context"
 import type { Product } from "@/lib/types"
@@ -184,8 +185,21 @@ export default function SellerDashboardPage() {
 
   return (
     <div className="container mx-auto py-8 px-4 space-y-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <h1 className="text-3xl font-bold">{t("seller.dashboard")}</h1>
+        <div className="flex gap-2">
+          <Button asChild variant="outline">
+            <Link href="/seller/store-settings">
+              <Store className="w-4 h-4 me-2" />
+              {t("seller.storeSettings")}
+            </Link>
+          </Button>
+          <Button asChild>
+            <Link href={`/seller/${user?.id}`}>
+              {t("seller.viewStore")}
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">

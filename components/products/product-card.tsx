@@ -4,7 +4,7 @@ import type React from "react"
 
 import Image from "next/image"
 import Link from "next/link"
-import { ShoppingCart } from "lucide-react"
+import { ShoppingCart, Star } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -40,6 +40,9 @@ export function ProductCard({ product }: ProductCardProps) {
     addToCart(product)
   }
 
+  // Generate a random rating for demo purposes (in a real app, this would come from the database)
+  const randomRating = Math.floor(Math.random() * 2) + 4; // Between 4-5 stars
+
   return (
     <Link href={`/products/${product.id}`} className="block">
       <Card className="overflow-hidden hover:shadow-lg transition-shadow h-full flex flex-col">
@@ -65,6 +68,35 @@ export function ProductCard({ product }: ProductCardProps) {
           <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
             {language === "ar" ? product.descriptionAr : product.description}
           </p>
+          
+          {/* Seller Info */}
+          {product.sellerName && (
+            <div className="mb-2">
+              <Link 
+                href={`/seller/${product.sellerId}`} 
+                className="text-xs text-primary hover:underline"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {t("product.seller")}: {product.sellerName}
+              </Link>
+            </div>
+          )}
+          
+          {/* Rating */}
+          <div className="flex items-center gap-1 mb-2">
+            <div className="flex items-center">
+              {[...Array(5)].map((_, i) => (
+                <Star 
+                  key={i} 
+                  className={`w-3 h-3 ${i < randomRating ? 'fill-yellow-500 text-yellow-500' : 'text-gray-300'}`} 
+                />
+              ))}
+            </div>
+            <span className="text-xs text-muted-foreground ms-1">
+              ({randomRating}.0)
+            </span>
+          </div>
+          
           <div className="flex items-center justify-between">
             <span className="text-xl font-bold text-primary">{formatCurrency(product.price)}</span>
             <span className="text-xs text-muted-foreground">
