@@ -1,0 +1,16 @@
+{
+  "account": "Account and Profile",
+  "accountDesc": "Manage your account and update your personal information",
+  "orders": "Orders and Purchases",
+  "ordersDesc": "Track your orders and manage previous purchases",
+  "payments": "Payment and Billing",
+  "paymentsDesc": "Payment methods, billing and refunds",
+  "shipping": "Shipping and Delivery",
+  "shippingDesc": "Shipping information and delivery times",
+  "description": "Our Help Center provides comprehensive answers to all your inquiries",
+  "contactSupport": "Contact Technical Support",
+  "contactDescription": "If you didn't find the answer you're looking for, our support team is ready to help you",
+  "liveChat": "Live Chat",
+  "callUs": "Call Us",
+  "emailUs": "Email Us"
+}

@@ -1,0 +1,19 @@
+{
+  "lastUpdated": "Last Updated",
+  "introTitle": "Introduction",
+  "intro": "At Madaba Women Market, we value your privacy and are committed to protecting your personal information. This policy explains how we collect, use, and protect your personal data.",
+  "dataCollectedTitle": "Data We Collect",
+  "dataCollected": {
+    "name": "Full name and email address when creating an account",
+    "address": "Shipping address and payment information when placing orders",
+    "usage": "Usage data and shopping preferences to improve our service"
+  },
+  "usageTitle": "How We Use Data",
+  "usageText": "We use your personal information to process orders, improve our services, and communicate with you about your orders and new products. We will not share your information with third parties without your explicit consent.",
+  "securityTitle": "Data Security",
+  "securityText": "We implement the latest security technologies to protect your personal information from unauthorized access or inappropriate use. All transactions are protected with SSL encryption.",
+  "rightsTitle": "Your Rights",
+  "rightsText": "You have the right to access, correct, or delete your personal data. You can also withdraw your consent to process your data at any time by contacting us.",
+  "contactTitle": "Contact Us",
+  "contactText": "If you have any questions about this privacy policy, please contact us at: privacy@madabawomenmarket.com"
+}

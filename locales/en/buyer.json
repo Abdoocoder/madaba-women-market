@@ -1,0 +1,18 @@
+{
+  "title": "Buyer Dashboard",
+  "subtitle": "Manage your account settings and preferences",
+  "profile": "Profile",
+  "profileDescription": "View and edit your personal information",
+  "orders": "Orders",
+  "ordersDescription": "View your order history and track shipments",
+  "wishlist": "Wishlist",
+  "wishlistDescription": "Manage your favorite products",
+  "addresses": "Addresses",
+  "addressesDescription": "Manage your shipping addresses",
+  "settings": "Settings",
+  "settingsDescription": "Account settings and preferences",
+  "password": "Password",
+  "passwordDescription": "Change your password",
+  "logout": "Logout",
+  "logoutDescription": "Sign out of your account"
+}

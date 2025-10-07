@@ -9,6 +9,7 @@ const dashboardSections = [
   { href: '/admin/dashboard/sellers', title: 'admin.sellers', description: 'admin.manageSellers' },
   { href: '/admin/dashboard/products', title: 'admin.products', description: 'admin.manageProducts' },
   { href: '/admin/dashboard/orders', title: 'admin.orders', description: 'admin.manageOrders' },
+  { href: '/admin/dashboard/stories', title: 'admin.stories.title', description: 'admin.stories.description' },
   { href: '/admin/dashboard/stats', title: 'admin.statistics', description: 'admin.viewStatistics' },
 ];
 

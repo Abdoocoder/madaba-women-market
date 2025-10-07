@@ -1,0 +1,19 @@
+{
+  "id": "Order ID",
+  "customer": "Customer",
+  "date": "Date",
+  "total": "Total",
+  "status": "Status",
+  "actions": "Actions",
+  "pending": "Pending",
+  "processing": "Processing",
+  "shipped": "Shipped",
+  "delivered": "Delivered",
+  "cancelled": "Cancelled",
+  "updatingStatus": "Updating order status...",
+  "statusUpdated": "Order status updated successfully!",
+  "statusUpdateFailed": "Failed to update order status.",
+  "noOrders": "No orders found",
+  "details": "Order Details",
+  "items": "Order Items"
+}

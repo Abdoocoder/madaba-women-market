@@ -11,5 +11,6 @@
   "updateEmail": "Update Email",
   "hide": "Hide",
   "show": "Show",
-  "clear": "Clear"
+  "clear": "Clear",
+  "unauthorized": "Unauthorized access"
 }

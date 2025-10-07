@@ -1,0 +1,17 @@
+{
+  "description": "Frequently asked questions from our valued customers with detailed answers",
+  "q1": "How can I create a new account?",
+  "a1": "You can create a new account by clicking the 'Login' button at the top of the page, then selecting 'Create Account' and filling in the required information.",
+  "q2": "How can I track my order?",
+  "a2": "After logging in, you can visit the 'My Orders' page in the dashboard to track the status of all your orders.",
+  "q3": "What payment methods are available?",
+  "a3": "We accept cash on delivery, bank transfer, and major credit cards.",
+  "q4": "How long does delivery take?",
+  "a4": "Delivery within Madaba takes 1-2 business days, and outside Madaba takes 3-5 business days.",
+  "q5": "Can I return a product?",
+  "a5": "Yes, you can return a product within 14 days of receipt as long as it is in its original condition.",
+  "q6": "How can I contact a seller?",
+  "a6": "You can contact a seller directly through the 'Contact Seller' button on the product page.",
+  "stillNeedHelp": "Still need help?",
+  "contactMessage": "If you didn't find the answer to your question, feel free to contact us directly."
+}

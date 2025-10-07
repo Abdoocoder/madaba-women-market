@@ -1,0 +1,21 @@
+{
+  "error": "خطأ",
+  "success": "نجاح",
+  "uploadLoading": "جارٍ تحميل الصورة...",
+  "uploadDisabled": "تحميل الصور معطل",
+  "failedToFetchSellers": "فشل في جلب البائعين",
+  "failedToFetchProducts": "فشل في جلب المنتجات",
+  "failedToFetchOrders": "فشل في جلب الطلبات",
+  "failedToFetchUsers": "فشل في جلب المستخدمين",
+  "failedToFetchAddresses": "فشل في جلب العناوين",
+  "addressAdded": "تمت إضافة العنوان بنجاح",
+  "failedToAddAddress": "فشل في إضافة العنوان",
+  "defaultAddressUpdated": "تم تحديث العنوان الافتراضي",
+  "failedToUpdateDefaultAddress": "فشل في تحديث العنوان الافتراضي",
+  "failedToUploadImage": "فشل في تحميل الصورة",
+  "avatarUpdated": "تم تحديث الصورة الشخصية بنجاح",
+  "failedToUpdateAvatar": "فشل في تحديث الصورة الشخصية",
+  "profileUpdated": "تم تحديث الملف الشخصي بنجاح",
+  "failedToUpdateProfile": "فشل في تحديث الملف الشخصي",
+  "saving": "جارٍ الحفظ..."
+}

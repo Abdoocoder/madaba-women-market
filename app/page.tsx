@@ -33,7 +33,7 @@ export default function Home() {
   const [sortOption, setSortOption] = useState<SortOption>("date-desc")
   const [products, setProducts] = useState<Product[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [, setIsMounted] = useState(false)
+  const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => {
     setIsMounted(true)

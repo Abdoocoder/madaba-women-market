@@ -5,5 +5,6 @@
   "featuredProducts": "Featured Products",
   "allProducts": "All Products",
   "successStories": "Success Stories",
+  "successStoriesDescription": "Read inspiring stories from our satisfied customers",
   "productsCount": "{count} products found"
 }

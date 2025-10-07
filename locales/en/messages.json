@@ -1,0 +1,21 @@
+{
+  "error": "Error",
+  "success": "Success",
+  "uploadLoading": "Upload loading...",
+  "uploadDisabled": "Upload disabled",
+  "failedToFetchSellers": "Failed to fetch sellers",
+  "failedToFetchProducts": "Failed to fetch products",
+  "failedToFetchOrders": "Failed to fetch orders",
+  "failedToFetchUsers": "Failed to fetch users",
+  "failedToFetchAddresses": "Failed to fetch addresses",
+  "addressAdded": "Address added successfully",
+  "failedToAddAddress": "Failed to add address",
+  "defaultAddressUpdated": "Default address updated",
+  "failedToUpdateDefaultAddress": "Failed to update default address",
+  "failedToUploadImage": "Failed to upload image",
+  "avatarUpdated": "Avatar updated successfully",
+  "failedToUpdateAvatar": "Failed to update avatar",
+  "profileUpdated": "Profile updated successfully",
+  "failedToUpdateProfile": "Failed to update profile",
+  "saving": "Saving..."
+}
