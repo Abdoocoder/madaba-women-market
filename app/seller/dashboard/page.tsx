@@ -50,6 +50,21 @@ export default function SellerDashboardPage() {
         if (response.ok) {
           const data = await response.json()
           setProducts(data)
+        } else if (response.status === 401) {
+          console.error("Unauthorized access to products API - token may have expired")
+          // Try to refresh the token and retry
+          const newToken = await getAuthToken()
+          if (newToken && newToken !== token) {
+            const retryResponse = await fetch("/api/products", {
+              headers: createAuthHeaders(newToken),
+            })
+            if (retryResponse.ok) {
+              const data = await retryResponse.json()
+              setProducts(data)
+            } else {
+              console.error("Retry failed with status:", retryResponse.status)
+            }
+          }
         } else {
           console.error("Products API error:", response.status, response.statusText)
         }
@@ -75,6 +90,21 @@ export default function SellerDashboardPage() {
       if (response.ok) {
         const data = await response.json()
         setStats(data)
+      } else if (response.status === 401) {
+        console.error("Unauthorized access to stats API - token may have expired")
+        // Try to refresh the token and retry
+        const newToken = await getAuthToken()
+        if (newToken && newToken !== token) {
+          const retryResponse = await fetch("/api/stats", {
+            headers: createAuthHeaders(newToken),
+          })
+          if (retryResponse.ok) {
+            const data = await retryResponse.json()
+            setStats(data)
+          } else {
+            console.error("Retry failed with status:", retryResponse.status)
+          }
+        }
       } else {
         console.error("Stats API error:", response.status, response.statusText)
       }
@@ -116,6 +146,10 @@ export default function SellerDashboardPage() {
         const newProduct = await response.json()
         setProducts([...products, newProduct])
         setShowAddForm(false)
+      } else if (response.status === 401) {
+        console.error("Unauthorized access to create product API - token may have expired")
+      } else {
+        console.error("Error creating product. Status:", response.status)
       }
     } catch (error) {
       console.error("Error adding product:", error)
@@ -150,6 +184,8 @@ export default function SellerDashboardPage() {
         const updatedProduct = await response.json()
         setProducts(products.map((p) => (p.id === editingProduct.id ? updatedProduct : p)))
         setEditingProduct(null)
+      } else if (response.status === 401) {
+        console.error("Unauthorized access to update product API - token may have expired")
       } else {
         const errorData = await response.json()
         console.error('Error updating product:', errorData)
@@ -171,6 +207,8 @@ export default function SellerDashboardPage() {
 
       if (response.ok) {
         setProducts(products.filter((p) => p.id !== productId));
+      } else if (response.status === 401) {
+        console.error("Unauthorized access to delete product API - token may have expired")
       } else {
         console.error("Error deleting product. Status:", response.status);
       }
