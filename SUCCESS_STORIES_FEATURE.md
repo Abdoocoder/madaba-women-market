@@ -52,7 +52,7 @@ Translations available in both Arabic and English:
 ## Technical Implementation Details
 
 ### Data Structure
-```typescript
+\`\`\`typescript
 interface SuccessStory {
   id: string;
   author: string;
@@ -60,7 +60,7 @@ interface SuccessStory {
   imageUrl?: string;
   date: string; // ISO string format
 }
-```
+\`\`\`
 
 ### Cloudinary Integration
 - Uses multiple upload presets as fallbacks
