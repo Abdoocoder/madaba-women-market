@@ -1,32 +1,18 @@
 "use client"
 
-import type { Metadata } from "next";
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { ShoppingBag, ArrowRight, Package, Truck, CreditCard, Trash2 } from "lucide-react"
 import { CartItem } from "@/components/cart/cart-item"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
-import { useCart } from "@/lib/cart-context"
-import { useAuth } from "@/lib/auth-context"
-import { useLocale } from "@/lib/locale-context"
-import { formatCurrency } from "@/lib/utils"
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Separator } from '@/components/ui/separator'
+import { useCart } from '@/lib/cart-context'
+import { useAuth } from '@/lib/auth-context'
+import { useLocale } from '@/lib/locale-context'
+import { formatCurrency } from '@/lib/utils'
 import { useEffect, useState } from "react"
 import { useToast } from "@/components/ui/use-toast"
-
-export const metadata: Metadata = {
-  title: "سلة التسوق | Madaba Women Market",
-  description: "مراجعة وتأكيد طلبك في سلة التسوق. تسوق الآن وادعم المشاريع النسائية.",
-  keywords: ["سلة التسوق", "تأكيد الطلب", "الدفع", "Madaba Women Market"],
-  openGraph: {
-    title: "سلة التسوق | Madaba Women Market",
-    description: "مراجعة وتأكيد طلبك في سلة التسوق. تسوق الآن وادعم المشاريع النسائية.",
-    images: ["/og-image.jpg"],
-    locale: "ar_JO",
-    type: "website",
-  },
-};
 
 export default function CartPage() {
   const { items, totalItems, totalPrice, clearCart } = useCart()
