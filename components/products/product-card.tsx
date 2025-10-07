@@ -44,7 +44,7 @@ export function ProductCard({ product }: ProductCardProps) {
   const randomRating = Math.floor(Math.random() * 2) + 4; // Between 4-5 stars
 
   return (
-    <Link href={`/products/${product.id}`} className="block">
+    <div className="block">
       <Card className="overflow-hidden hover:shadow-lg transition-shadow h-full flex flex-col">
         <div className="relative aspect-square">
           <Image 
@@ -69,15 +69,20 @@ export function ProductCard({ product }: ProductCardProps) {
             {language === "ar" ? product.descriptionAr : product.description}
           </p>
           
-          {/* Seller Info */}
+          {/* Seller Info - Using div instead of Link to avoid nested anchor tags */}
           {product.sellerName && (
             <div className="mb-2">
+              <span className="text-xs text-muted-foreground me-1">
+                {t("product.seller")}:
+              </span>
               <Link 
                 href={`/seller/${product.sellerId}`} 
                 className="text-xs text-primary hover:underline"
-                onClick={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation()
+                }}
               >
-                {t("product.seller")}: {product.sellerName}
+                {product.sellerName}
               </Link>
             </div>
           )}
@@ -123,6 +128,6 @@ export function ProductCard({ product }: ProductCardProps) {
           )}
         </CardFooter>
       </Card>
-    </Link>
+    </div>
   )
 }

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useLocale } from "@/lib/locale-context"
 import Image from "next/image"
+import Link from "next/link"
 
 interface SuccessStory {
   id: string
@@ -87,12 +88,12 @@ export default function SuccessStoriesPage() {
                 </p>
                 {story.sellerId && (
                   <div className="mt-4">
-                    <a 
+                    <Link 
                       href={`/seller/${story.sellerId}`} 
                       className="inline-block px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
                     >
                       {t("home.viewSellerStore")}
-                    </a>
+                    </Link>
                   </div>
                 )}
               </CardContent>
