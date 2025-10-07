@@ -9,11 +9,10 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  // Add Cloudinary configuration
+  // Add Cloudinary configuration - only expose public variables to the client
   env: {
     NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
-    CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY,
-    CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET,
+    // Removed CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET as they should not be exposed to the client
   },
 };
 

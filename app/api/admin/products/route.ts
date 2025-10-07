@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
         const snapshot = await productsRef.get();
         
         const products: Product[] = [];
-        snapshot.forEach((doc: any) => {
+        snapshot.forEach((doc) => {
             products.push({ id: doc.id, ...doc.data() } as Product);
         });
         

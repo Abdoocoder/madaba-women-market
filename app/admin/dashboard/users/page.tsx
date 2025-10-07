@@ -80,7 +80,7 @@ const UserManagementPage = () => {
         throw new Error(`Failed to update user role: ${response.status} ${response.statusText}`);
       }
 
-      const result = await response.json();
+      await response.json();
       setUsers(users.map(u => u.id === userId ? { ...u, role } : u));
       toast.success(t('admin.userRoleUpdated'), { id: toastId });
     } catch (error) {
@@ -108,7 +108,7 @@ const UserManagementPage = () => {
         throw new Error(`Failed to delete user: ${response.status} ${response.statusText}`);
       }
 
-      const result = await response.json();
+      await response.json();
       setUsers(users.filter(u => u.id !== userId));
       toast.success(t('admin.userDeleted'), { id: toastId });
     } catch (error) {
@@ -139,7 +139,7 @@ const UserManagementPage = () => {
               <TableCell>{u.name}</TableCell>
               <TableCell>{u.email}</TableCell>
               <TableCell>
-                <Select value={u.role} onValueChange={(value) => handleRoleChange(u.id, value as any)}>
+                <Select value={u.role} onValueChange={(value) => handleRoleChange(u.id, value as 'customer' | 'seller' | 'admin')}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>

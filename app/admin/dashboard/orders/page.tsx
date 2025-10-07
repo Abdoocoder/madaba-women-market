@@ -73,7 +73,7 @@ const OrderManagementPage = () => {
         throw new Error(`Failed to update order status: ${response.status} ${response.statusText}`);
       }
 
-      const result = await response.json();
+      await response.json();
       setOrders(orders.map(o => o.id === orderId ? { ...o, status } : o));
       toast.success(t('order.statusUpdated'), { id: toastId });
     } catch (error) {
@@ -106,7 +106,7 @@ const OrderManagementPage = () => {
               <TableCell>{o.customerName || o.customerId}</TableCell>
               <TableCell>{o.total}</TableCell>
               <TableCell>
-                <Select value={o.status} onValueChange={(value) => handleStatusChange(o.id, value as any)}>
+                <Select value={o.status} onValueChange={(value) => handleStatusChange(o.id, value as 'pending' | 'processing' | 'shipped' | 'delivered')}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>

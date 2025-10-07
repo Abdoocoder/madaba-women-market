@@ -22,7 +22,7 @@ export function SellerManagement() {
     const { t } = useLocale();
     const [sellers, setSellers] = useState<Seller[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const { toast: useToastFn } = useToast();
+    const { toast: toastFn } = useToast();
 
     useEffect(() => {
         const fetchSellers = async () => {
@@ -47,14 +47,14 @@ export function SellerManagement() {
                 setSellers(sellersData);
             } catch (error) {
                 console.error("Error fetching sellers: ", error);
-                useToastFn({ title: "Error", description: "Failed to fetch sellers.", variant: "destructive" });
+                toastFn({ title: "Error", description: "Failed to fetch sellers.", variant: "destructive" });
             } finally {
                 setIsLoading(false);
             }
         };
 
         fetchSellers();
-    }, [getAuthToken, useToastFn]);
+    }, [getAuthToken, toastFn]);
 
     const handleStatusUpdate = async (sellerId: string, status: 'approved' | 'rejected') => {
         try {
@@ -76,7 +76,6 @@ export function SellerManagement() {
                 throw new Error(`Failed to update seller status: ${response.status} ${response.statusText}`);
             }
 
-            const result = await response.json();
             setSellers(sellers.map(seller => seller.id === sellerId ? { ...seller, status } : seller));
             toast.success(t("admin.statusUpdated"));
         } catch (error) {

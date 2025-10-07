@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { useRouter } from 'next/navigation';
 import { ProductManagement } from '@/components/admin/product-management';
@@ -20,7 +20,7 @@ const ProductManagementPageClient = () => {
     }
   }, [user, isLoading, router]);
 
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     try {
       const token = await getAuthToken();
       if (!token) {
@@ -43,13 +43,13 @@ const ProductManagementPageClient = () => {
       console.error('Error fetching products:', error);
       toast.error(t('messages.failedToFetchProducts'));
     }
-  };
+  }, [getAuthToken, t]);
 
   useEffect(() => {
     if (user?.role === 'admin') {
       fetchProducts();
     }
-  }, [user, getAuthToken, t]);
+  }, [user, fetchProducts]);
 
   if (isLoading || user?.role !== 'admin') {
     return <div>{t('admin.loading')}</div>;

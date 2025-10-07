@@ -1,108 +1,69 @@
-import { cookies, headers } from "next/headers";
+import { headers } from "next/headers";
 import { getAdminAuth, getAdminDb } from "./firebaseAdmin";
 import { User } from "./types";
 import { NextRequest } from "next/server";
 
-// Get user from Firebase ID token
+// Unified function to verify Firebase ID token and get user data
+async function verifyTokenAndGetUser(idToken: string): Promise<User | null> {
+    try {
+        // Ensure Firebase Admin is initialized
+        const adminAuth = getAdminAuth();
+        const adminDb = getAdminDb();
+        
+        const decodedToken = await adminAuth.verifyIdToken(idToken);
+        
+        // Get user data from Firestore
+        const userDoc = await adminDb.collection('users').doc(decodedToken.uid).get();
+        
+        if (!userDoc.exists) {
+            return null;
+        }
+
+        const userData = userDoc.data();
+        
+        return {
+            id: decodedToken.uid,
+            email: decodedToken.email || '',
+            name: userData?.name || decodedToken.name || 'Unknown User',
+            photoURL: userData?.photoURL || decodedToken.picture || '',
+            role: userData?.role || 'customer',
+            createdAt: userData?.createdAt || new Date(),
+        } as User;
+    } catch (error) {
+        console.error('Error verifying token:', error);
+        return null;
+    }
+}
+
+// Get user from Firebase ID token (for Server Components)
 export async function getServerUser(): Promise<User | null> {
     try {
         const headersList = await headers();
         const authHeader = headersList.get('authorization');
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            console.log('No valid auth header found in getServerUser');
             return null;
         }
 
         const idToken = authHeader.split('Bearer ')[1];
-        
-        // Ensure Firebase Admin is initialized
-        const adminAuth = getAdminAuth();
-        const adminDb = getAdminDb();
-        
-        const decodedToken = await adminAuth.verifyIdToken(idToken);
-        console.log('Token verified for user (getServerUser):', decodedToken.uid);
-        
-        // Get user data from Firestore
-        const userDoc = await adminDb.collection('users').doc(decodedToken.uid).get();
-        
-        if (!userDoc.exists) {
-            console.log('User document not found in Firestore (getServerUser):', decodedToken.uid);
-            return null;
-        }
-
-        const userData = userDoc.data();
-        console.log('User data retrieved (getServerUser):', {
-            id: decodedToken.uid,
-            email: decodedToken.email,
-            name: userData?.name,
-            role: userData?.role
-        });
-        
-        return {
-            id: decodedToken.uid,
-            email: decodedToken.email || '',
-            name: userData?.name || decodedToken.name || 'Unknown User',
-            photoURL: userData?.photoURL || decodedToken.picture || '',
-            role: userData?.role || 'customer',
-            createdAt: userData?.createdAt || new Date(),
-        } as User;
+        return await verifyTokenAndGetUser(idToken);
     } catch (error) {
-        console.error('Error verifying token in getServerUser:', error);
+        console.error('Error in getServerUser:', error);
         return null;
     }
 }
 
-// Alternative method for API routes that receive NextRequest
+// Get user from Firebase ID token (for API routes)
 export async function getAuthenticatedUser(request: NextRequest): Promise<User | null> {
     try {
         const authHeader = request.headers.get('authorization');
-        console.log('=== getAuthenticatedUser called ===');
-        console.log('Auth header present:', !!authHeader);
-        
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            console.log('No valid auth header found in getAuthenticatedUser');
             return null;
         }
 
         const idToken = authHeader.split('Bearer ')[1];
-        console.log('Attempting to verify token...');
-        
-        // Ensure Firebase Admin is initialized
-        const adminAuth = getAdminAuth();
-        const adminDb = getAdminDb();
-        
-        const decodedToken = await adminAuth.verifyIdToken(idToken);
-        console.log('Token verified for user:', decodedToken.uid);
-        
-        // Get user data from Firestore
-        const userDoc = await adminDb.collection('users').doc(decodedToken.uid).get();
-        
-        if (!userDoc.exists) {
-            console.log('User document not found in Firestore:', decodedToken.uid);
-            return null;
-        }
-
-        const userData = userDoc.data();
-        console.log('User data retrieved:', {
-            id: decodedToken.uid,
-            email: decodedToken.email,
-            name: userData?.name,
-            role: userData?.role
-        });
-        
-        return {
-            id: decodedToken.uid,
-            email: decodedToken.email || '',
-            name: userData?.name || decodedToken.name || 'Unknown User',
-            photoURL: userData?.photoURL || decodedToken.picture || '',
-            role: userData?.role || 'customer',
-            createdAt: userData?.createdAt || new Date(),
-        } as User;
+        return await verifyTokenAndGetUser(idToken);
     } catch (error) {
-        console.error('Error verifying token in getAuthenticatedUser:', error);
-        if (error instanceof Error) {
-            console.error('Error details:', error.message);
-        }
+        console.error('Error in getAuthenticatedUser:', error);
         return null;
     }
 }

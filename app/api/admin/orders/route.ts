@@ -43,11 +43,14 @@ export async function GET(request: NextRequest) {
         const ordersRef = adminDb.collection('orders');
         const snapshot = await ordersRef.get();
         
-        // Fetch all customer data in parallel for better performance
-        const customerPromises: Promise<any>[] = [];
-        const orderData: any[] = [];
+        // Import Firestore types
+        type DocumentSnapshot = FirebaseFirestore.DocumentSnapshot;
         
-        snapshot.forEach((doc: any) => {
+        // Fetch all customer data in parallel for better performance
+        const customerPromises: Promise<DocumentSnapshot>[] = [];
+        const orderData: Order[] = [];
+        
+        snapshot.forEach((doc) => {
             const order = { id: doc.id, ...doc.data() } as Order;
             orderData.push(order);
             // Push promise to fetch customer data
@@ -58,7 +61,7 @@ export async function GET(request: NextRequest) {
         const customerDocs = await Promise.all(customerPromises);
         
         // Combine order data with customer names
-        const orders: any[] = orderData.map((order, index) => {
+        const orders = orderData.map((order, index) => {
             const customerDoc = customerDocs[index];
             const customerData = customerDoc.exists ? customerDoc.data() : null;
             return {

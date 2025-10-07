@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { MOCK_PRODUCTS, MOCK_REVIEWS } from "@/lib/mock-data";
+import { MOCK_REVIEWS } from "@/lib/mock-data";
 import { useCart } from "@/lib/cart-context";
 import { useAuth } from "@/lib/auth-context";
 import { useLocale } from "@/lib/locale-context";
@@ -28,7 +28,7 @@ export default function ProductDetailPage() {
     const [newRating, setNewRating] = useState(5);
 
     const { id } = useParams();
-    const { addToCart, totalItems } = useCart();
+    const { addToCart } = useCart();
     const { user, isLoading: isAuthLoading } = useAuth();
     const { t, language } = useLocale();
     const { toast } = useToast();

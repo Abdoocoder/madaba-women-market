@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
         
         // Get sellers count
         let sellersCount = 0;
-        usersSnapshot.forEach((doc: any) => {
+        usersSnapshot.forEach((doc) => {
             const userData = doc.data();
             if (userData.role === 'seller') {
                 sellersCount++;

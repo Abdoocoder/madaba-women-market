@@ -29,7 +29,7 @@ export function SuccessStories() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground">"{story.story}"</p>
+                  <p className="text-muted-foreground">&quot;{story.story}&quot;</p>
                 </CardContent>
               </Card>
             </div>

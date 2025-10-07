@@ -1,4 +1,3 @@
-import { User } from "lucide-react";
 
 export interface SuccessStory {
   id: string;

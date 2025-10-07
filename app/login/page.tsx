@@ -82,8 +82,10 @@ export default function LoginPage() {
       if (success) {
         router.push("/")
       }
-    } catch (error: any) {
-      setError(error.message || t('login.failedLogin'))
+    } catch (error: unknown) {
+      // Type guard to safely access error message
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      setError(errorMessage || t('login.failedLogin'))
     } finally {
       setIsSubmitting(false)
     }
@@ -124,8 +126,10 @@ export default function LoginPage() {
       if (success) {
         router.push("/")
       }
-    } catch (error: any) {
-      setError(error.message || t('login.failedSignup'))
+    } catch (error: unknown) {
+      // Type guard to safely access error message
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      setError(errorMessage || t('login.failedSignup'))
     } finally {
       setIsSubmitting(false)
     }

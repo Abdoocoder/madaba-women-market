@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -8,7 +8,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { OrderList } from "@/components/seller/order-list"
 import { ProductForm } from "@/components/seller/product-form"
 import { ProductList } from "@/components/seller/product-list"
-import { SalesChart } from "@/components/seller/sales-chart"
 import { StatsCard } from "@/components/seller/stats-card"
 import { Plus, DollarSign, Package, ShoppingCart, Clock } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
@@ -36,23 +35,6 @@ export default function SellerDashboardPage() {
       return
     }
 
-    // Debug authentication
-    const debugAuth = async () => {
-      const token = await getAuthToken()
-      if (token) {
-        try {
-          const response = await fetch("/api/debug/auth", {
-            headers: createAuthHeaders(token),
-          })
-          const data = await response.json()
-          console.log('Auth debug:', data)
-        } catch (error) {
-          console.error('Auth debug error:', error)
-        }
-      }
-    }
-    debugAuth()
-
     const fetchProducts = async () => {
       const token = await getAuthToken()
       if (!token) {
@@ -78,7 +60,7 @@ export default function SellerDashboardPage() {
     fetchProducts()
   }, [user, router, getAuthToken])
 
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     const token = await getAuthToken()
     if (!token) {
       console.error("No auth token available for stats")
@@ -98,13 +80,13 @@ export default function SellerDashboardPage() {
     } catch (error) {
       console.error("Error fetching stats:", error)
     }
-  }
+  }, [getAuthToken])
 
   useEffect(() => {
     if (user?.role === "seller") {
       fetchStats()
     }
-  }, [user])
+  }, [user, fetchStats])
 
   const handleAddProduct = async (data: Partial<Product>, imageUrl?: string) => {
     const token = await getAuthToken()
@@ -144,9 +126,6 @@ export default function SellerDashboardPage() {
     if (!editingProduct || !token) return
 
     try {
-      console.log('Editing product:', editingProduct);
-      console.log('Editing product ID:', editingProduct?.id);
-      
       const updateData = { 
         ...data 
       }
@@ -180,12 +159,10 @@ export default function SellerDashboardPage() {
   }
 
   const handleDeleteProduct = async (productId: string) => {
-    console.log('Deleting product with ID:', productId);
     const token = await getAuthToken();
     if (!token || !confirm(t("seller.confirmDelete"))) return;
 
     try {
-      console.log('Calling DELETE API with URL:', `/api/products/${productId}`);
       const response = await fetch(`/api/products/${productId}`, {
         method: "DELETE",
         headers: createAuthHeaders(token),
@@ -265,7 +242,6 @@ export default function SellerDashboardPage() {
               </CardContent>
             </Card>
 
-            {/* Sales chart temporarily disabled */}
             <Card>
               <CardHeader>
                 <CardTitle>{t("seller.analyticsComingSoon")}</CardTitle>
@@ -316,7 +292,6 @@ export default function SellerDashboardPage() {
         <TabsContent value="analytics" className="space-y-6">
           <h2 className="text-2xl font-bold">{t("seller.analytics")}</h2>
           <div className="grid gap-4 md:grid-cols-2">
-            {/* Sales chart temporarily disabled */}
             <Card>
               <CardHeader>
                 <CardTitle>{t("seller.analyticsComingSoon")}</CardTitle>

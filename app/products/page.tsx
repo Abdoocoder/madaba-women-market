@@ -3,11 +3,7 @@
 import { useState, useMemo, useEffect } from "react"
 import { ProductCard } from "@/components/products/product-card"
 import { ProductFilters } from "@/components/products/product-filters"
-import { useCart } from "@/lib/cart-context"
-import { useAuth } from "@/lib/auth-context"
 import { useLocale } from "@/lib/locale-context"
-import { collection, getDocs, query, where } from "firebase/firestore"
-import { db } from "@/lib/firebase"
 import type { Product } from "@/lib/types"
 import ClientOnly from "@/components/client-only"
 import Link from "next/link"
@@ -15,14 +11,13 @@ import Link from "next/link"
 export type SortOption = "date-desc" | "price-asc" | "price-desc" | "name-asc"
 
 export default function ProductsPage() {
-  const { totalItems } = useCart()
-  const { user } = useAuth()
-  const { t, language } = useLocale()
-  const [searchQuery, setSearchQuery] = useState("")
-  const [selectedCategory, setSelectedCategory] = useState("all")
-  const [sortOption, setSortOption] = useState<SortOption>("date-desc")
-  const [products, setProducts] = useState<Product[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const { t, language } = useLocale();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [, setCategories] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [sortOption, setSortOption] = useState<SortOption>('date-desc');
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -38,11 +33,28 @@ export default function ProductsPage() {
       } catch (error) {
         console.error("Error fetching products:", error);
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     };
 
     fetchProducts();
+  }, []);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch('/api/public/categories');
+        if (!response.ok) {
+          throw new Error('Failed to fetch categories');
+        }
+        const fetchedCategories = await response.json();
+        setCategories(fetchedCategories);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+
+    fetchCategories();
   }, []);
 
   const filteredAndSortedProducts = useMemo(() => {
@@ -121,7 +133,7 @@ export default function ProductsPage() {
 
             {/* Products Grid */}
             <div className="lg:col-span-3">
-              {isLoading ? (
+              {loading ? (
                 <div className="text-center py-12">
                   <p className="text-muted-foreground">{t("common.loading")}</p>
                 </div>

@@ -81,27 +81,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       await signInWithEmailAndPassword(auth, email, password);
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (process.env.NODE_ENV === 'development') {
-        console.error("❌ Error logging in:", error.code);
+        console.error("❌ Error logging in:", error);
       }
       
       // Provide more specific error messages
       let errorMessage = "Failed to login. Please check your credentials.";
-      if (error.code === 'auth/invalid-credential') {
-        errorMessage = "Invalid email or password. Please check your credentials or create a new account.";
-      } else if (error.code === 'auth/user-not-found') {
-        errorMessage = "No account found with this email address.";
-      } else if (error.code === 'auth/wrong-password') {
-        errorMessage = "Incorrect password. Please try again.";
-      } else if (error.code === 'auth/too-many-requests') {
-        errorMessage = "Too many failed attempts. Please try again later or reset your password.";
-      } else if (error.code === 'auth/network-request-failed') {
-        errorMessage = "Network error. Please check your internet connection.";
-      } else if (error.code === 'auth/user-disabled') {
-        errorMessage = "This account has been disabled. Please contact support.";
-      } else if (error.message) {
-        errorMessage = error.message;
+      
+      // Type guard to check if error is Firebase error
+      if (typeof error === 'object' && error !== null && 'code' in error) {
+        const firebaseError = error as { code: string; message?: string };
+        
+        if (firebaseError.code === 'auth/invalid-credential') {
+          errorMessage = "Invalid email or password. Please check your credentials or create a new account.";
+        } else if (firebaseError.code === 'auth/user-not-found') {
+          errorMessage = "No account found with this email address.";
+        } else if (firebaseError.code === 'auth/wrong-password') {
+          errorMessage = "Incorrect password. Please try again.";
+        } else if (firebaseError.code === 'auth/too-many-requests') {
+          errorMessage = "Too many failed attempts. Please try again later or reset your password.";
+        } else if (firebaseError.code === 'auth/network-request-failed') {
+          errorMessage = "Network error. Please check your internet connection.";
+        } else if (firebaseError.code === 'auth/user-disabled') {
+          errorMessage = "This account has been disabled. Please contact support.";
+        } else if (firebaseError.message) {
+          errorMessage = firebaseError.message;
+        }
       }
       
       throw new Error(errorMessage);
@@ -142,24 +148,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(newUser);
       
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (process.env.NODE_ENV === 'development') {
-        console.error("❌ Error signing up:", error.code);
+        console.error("❌ Error signing up:", error);
       }
       
       // Provide user-friendly error messages
       let errorMessage = "Failed to create account. Please try again.";
       
-      if (error.code === 'auth/email-already-in-use') {
-        errorMessage = "An account with this email already exists. Please sign in instead.";
-      } else if (error.code === 'auth/weak-password') {
-        errorMessage = "Password is too weak. Please use at least 6 characters.";
-      } else if (error.code === 'auth/invalid-email') {
-        errorMessage = "Please enter a valid email address.";
-      } else if (error.code === 'auth/operation-not-allowed') {
-        errorMessage = "Email/password accounts are not enabled. Please contact support.";
-      } else if (error.message) {
-        errorMessage = error.message;
+      // Type guard to check if error is Firebase error
+      if (typeof error === 'object' && error !== null && 'code' in error) {
+        const firebaseError = error as { code: string; message?: string };
+        
+        if (firebaseError.code === 'auth/email-already-in-use') {
+          errorMessage = "An account with this email already exists. Please sign in instead.";
+        } else if (firebaseError.code === 'auth/weak-password') {
+          errorMessage = "Password is too weak. Please use at least 6 characters.";
+        } else if (firebaseError.code === 'auth/invalid-email') {
+          errorMessage = "Please enter a valid email address.";
+        } else if (firebaseError.code === 'auth/operation-not-allowed') {
+          errorMessage = "Email/password accounts are not enabled. Please contact support.";
+        } else if (firebaseError.message) {
+          errorMessage = firebaseError.message;
+        }
       }
       
       throw new Error(errorMessage);
@@ -196,14 +207,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(existingUser);
       }
       return true;
-    } catch (error: any) {
-      if (error.code === 'auth/popup-closed-by-user') {
-        if (process.env.NODE_ENV === 'development') {
-          console.log("⚠️ Google sign-in popup closed by the user.");
-        }
-      } else {
-        if (process.env.NODE_ENV === 'development') {
-          console.error("❌ Error signing in with Google:", error.code);
+    } catch (error: unknown) {
+      // Type guard to check if error is Firebase error
+      if (typeof error === 'object' && error !== null && 'code' in error) {
+        const firebaseError = error as { code: string };
+        
+        if (firebaseError.code === 'auth/popup-closed-by-user') {
+          if (process.env.NODE_ENV === 'development') {
+            console.log("⚠️ Google sign-in popup closed by the user.");
+          }
+        } else {
+          if (process.env.NODE_ENV === 'development') {
+            console.error("❌ Error signing in with Google:", firebaseError.code);
+          }
         }
       }
       return false;
@@ -272,14 +288,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (auth.currentUser) {
       try {
         const token = await auth.currentUser.getIdToken();
-        console.log('Auth token retrieved:', token.substring(0, 20) + '...');
         return token;
       } catch (error) {
         console.error("Error getting auth token:", error);
         return null;
       }
     }
-    console.log('No current user for auth token');
     return null;
   };
 

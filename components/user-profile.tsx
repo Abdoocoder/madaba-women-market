@@ -73,10 +73,15 @@ export default function UserProfile() {
         setSuccess("Profile updated successfully!")
         setIsEditing(false)
       }
-    } catch (error: any) {
-      setError(error.message || "Failed to update profile")
+    } catch (error: unknown) {
+      // Type guard to safely access error properties
+      if (error instanceof Error) {
+        setError(error.message || "Failed to update profile");
+      } else {
+        setError("Failed to update profile");
+      }
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
   }
 
@@ -109,14 +114,22 @@ export default function UserProfile() {
           confirmPassword: ""
         })
       }
-    } catch (error: any) {
-      if (error.code === 'auth/requires-recent-login') {
-        setError("Please log out and log back in before changing your password for security reasons.")
+    } catch (error: unknown) {
+      // Type guard to safely access error properties
+      if (error instanceof Error && 'code' in error) {
+        const firebaseError = error as { code: string; message?: string };
+        if (firebaseError.code === 'auth/requires-recent-login') {
+          setError("Please log out and log back in before changing your password for security reasons.");
+        } else {
+          setError(firebaseError.message || "Failed to update password");
+        }
+      } else if (error instanceof Error) {
+        setError(error.message || "Failed to update password");
       } else {
-        setError(error.message || "Failed to update password")
+        setError("Failed to update password");
       }
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
   }
 

@@ -4,6 +4,14 @@ import { NextResponse, NextRequest } from 'next/server'
 import cloudinary from '@/lib/cloudinary'
 import { getAuthenticatedUser } from '@/lib/server-auth'
 
+// Define the Cloudinary upload result interface
+interface CloudinaryUploadResult {
+  secure_url: string;
+  public_id: string;
+  // Remove the [key: string]: any; to avoid the any type
+  // We only need the properties we're actually using
+}
+
 export async function POST(request: NextRequest) {
     const user = await getAuthenticatedUser(request);
     if (!user) {
@@ -37,9 +45,12 @@ export async function POST(request: NextRequest) {
             ).end(buffer);
         });
 
+        // Type cast the result to our interface
+        const uploadResult = result as CloudinaryUploadResult;
+
         return NextResponse.json({ 
-            url: (result as any).secure_url,
-            public_id: (result as any).public_id
+            url: uploadResult.secure_url,
+            public_id: uploadResult.public_id
         });
     } catch (error) {
         console.error('Error uploading image:', error);

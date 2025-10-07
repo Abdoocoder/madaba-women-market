@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
         const snapshot = await usersRef.get();
         
         const users: User[] = [];
-        snapshot.forEach((doc: any) => {
+        snapshot.forEach((doc) => {
             users.push({ id: doc.id, ...doc.data() } as User);
         });
         

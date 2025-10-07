@@ -4,10 +4,8 @@ import { useState, useEffect } from 'react'
 import { useLocale } from '@/lib/locale-context'
 import { useAuth } from '@/lib/auth-context'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import type { Order as OrderType } from '@/lib/types'
 
 interface Order {
   id: string;

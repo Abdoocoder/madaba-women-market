@@ -1,8 +1,8 @@
 'use server'
 
-import { NextResponse, NextRequest } from 'next/server'
-import { getAdminDb } from '@/lib/firebaseAdmin'
-import type { Product } from '@/lib/types'
+import { NextResponse } from 'next/server'
+import { getAdminDb } from '@/lib/firebaseAdmin';
+import type { Product } from '@/lib/types';
 
 /**
  * @swagger
@@ -13,7 +13,7 @@ import type { Product } from '@/lib/types'
  *       200:
  *         description: A list of products.
  */
-export async function GET(request: NextRequest) {
+export async function GET() {
     try {
         const adminDb = getAdminDb();
         const productsRef = adminDb.collection('products');
@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
         const snapshot = await query.get();
         
         const products: Product[] = [];
-        snapshot.forEach((doc: any) => {
+        snapshot.forEach((doc) => {
             const productData = doc.data();
             // Only add products with valid data
             if (productData) {

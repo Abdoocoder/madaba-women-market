@@ -15,25 +15,51 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined)
 
+// Helper function to safely access localStorage
+const safeLocalStorage = {
+  getItem: (key: string): string | null => {
+    try {
+      return localStorage.getItem(key)
+    } catch (error) {
+      console.warn('localStorage not available:', error)
+      return null
+    }
+  },
+  setItem: (key: string, value: string): void => {
+    try {
+      localStorage.setItem(key, value)
+    } catch (error) {
+      console.warn('localStorage not available:', error)
+    }
+  }
+}
+
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([])
 
   useEffect(() => {
-    const storedCart = localStorage.getItem("seydaty_cart")
+    const storedCart = safeLocalStorage.getItem("seydaty_cart")
     if (storedCart) {
-      setItems(JSON.parse(storedCart))
+      try {
+        setItems(JSON.parse(storedCart))
+      } catch (error) {
+        console.error('Error parsing cart data:', error)
+        safeLocalStorage.setItem("seydaty_cart", JSON.stringify([]))
+      }
     }
   }, [])
 
   useEffect(() => {
-    localStorage.setItem("seydaty_cart", JSON.stringify(items))
+    safeLocalStorage.setItem("seydaty_cart", JSON.stringify(items))
   }, [items])
 
   const addToCart = (product: Product) => {
     setItems((prev) => {
       const existing = prev.find((item) => item.product.id === product.id)
       if (existing) {
-        return prev.map((item) => (item.product.id === product.id ? { ...item, quantity: item.quantity + 1 } : item))
+        return prev.map((item) => 
+          item.product.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+        )
       }
       return [...prev, { product, quantity: 1 }]
     })
@@ -48,7 +74,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
       removeFromCart(productId)
       return
     }
-    setItems((prev) => prev.map((item) => (item.product.id === productId ? { ...item, quantity } : item)))
+    setItems((prev) => 
+      prev.map((item) => 
+        item.product.id === productId ? { ...item, quantity } : item
+      )
+    )
   }
 
   const clearCart = () => {

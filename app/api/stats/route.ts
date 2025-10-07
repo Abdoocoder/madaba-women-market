@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
         const snapshot = await query.get();
         
         const orders: Order[] = [];
-        snapshot.forEach((doc: any) => {
+        snapshot.forEach((doc) => {
             orders.push({ id: doc.id, ...doc.data() } as Order);
         });
 

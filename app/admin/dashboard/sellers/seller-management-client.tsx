@@ -80,7 +80,7 @@ export default function SellerManagementClient() {
         throw new Error(`Failed to update seller status: ${response.status} ${response.statusText}`);
       }
 
-      const result = await response.json();
+      await response.json();
       setSellers(sellers.map(seller => seller.id === sellerId ? { ...seller, status } : seller));
       toast.success(t('admin.statusUpdated'), { id: toastId });
     } catch (error) {

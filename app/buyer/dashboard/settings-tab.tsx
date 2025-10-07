@@ -14,7 +14,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useLocale } from "@/lib/locale-context";
 
 export function SettingsTab() {
-  const { user, logout, refreshAuthUser } = useAuth();
+  const { user, logout } = useAuth();
   const { t } = useLocale();
   const router = useRouter();
   const { toast } = useToast();
@@ -267,7 +267,7 @@ export function SettingsTab() {
               
               <div className="space-y-2">
                 <Label htmlFor="delete-confirmation">
-                  {t('settings.typeConfirmation')} "{t('settings.deleteAccountConfirmation')}"
+                  {t('settings.typeConfirmation')} &quot;{t('settings.deleteAccountConfirmation')}&quot;
                 </Label>
                 <Input
                   id="delete-confirmation"

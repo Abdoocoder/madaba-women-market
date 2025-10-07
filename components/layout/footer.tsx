@@ -7,7 +7,7 @@ import { useLocale } from "@/lib/locale-context"
 import { Separator } from "@/components/ui/separator"
 
 export function Footer() {
-  const { t, language } = useLocale()
+  const { t } = useLocale()
 
   const socialLinks = [
     { icon: Facebook, href: "#", label: "Facebook" },

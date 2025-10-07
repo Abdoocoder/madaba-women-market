@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
         const snapshot = await usersRef.get();
         
         const sellers: User[] = [];
-        snapshot.forEach((doc: any) => {
+        snapshot.forEach((doc) => {
             const userData = doc.data();
             if (userData.role === 'seller') {
                 sellers.push({ id: doc.id, ...userData } as User);

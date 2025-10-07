@@ -3,7 +3,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { ShoppingCart, User, LogOut, LayoutDashboard, Heart, Menu, Search, Package } from "lucide-react"
+import { ShoppingCart, User, LogOut, LayoutDashboard, Heart, Menu, Package } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -26,6 +26,60 @@ interface HeaderProps {
   user: UserType | null
 }
 
+// Unified component for user dashboard links
+function UserDashboardLinks({ 
+  user, 
+  t, 
+  isMobile = false,
+  onCloseMobileMenu 
+}: { 
+  user: UserType | null; 
+  t: (key: string) => string; 
+  isMobile?: boolean;
+  onCloseMobileMenu?: () => void;
+}) {
+  if (!user) return null;
+
+  const linkClass = isMobile 
+    ? "w-full justify-start" 
+    : "cursor-pointer";
+
+  const handleClick = () => {
+    if (isMobile && onCloseMobileMenu) {
+      onCloseMobileMenu();
+    }
+  };
+
+  return (
+    <>
+      {user.role === "customer" && (
+        <Link href="/buyer/dashboard" onClick={handleClick}>
+          <Button variant="ghost" className={linkClass}>
+            <LayoutDashboard className={isMobile ? "mr-2 h-4 w-4" : "mr-2 h-4 w-4"} />
+            {t("dashboard.title")}
+          </Button>
+        </Link>
+      )}
+      {user.role === "seller" && (
+        <Link href="/seller/dashboard" onClick={handleClick}>
+          <Button variant="ghost" className={linkClass}>
+            <LayoutDashboard className={isMobile ? "mr-2 h-4 w-4" : "mr-2 h-4 w-4"} />
+            {t("header.sellerDashboard")}
+          </Button>
+        </Link>
+      )}
+      {user.role === "admin" && (
+        <Link href="/admin/dashboard" onClick={handleClick}>
+          <Button variant="ghost" className={linkClass}>
+            <LayoutDashboard className={isMobile ? "mr-2 h-4 w-4" : "mr-2 h-4 w-4"} />
+            {t("header.adminDashboard")}
+          </Button>
+        </Link>
+      )}
+    </>
+  );
+}
+
 export function Header({ cartItemCount = 0, user: initialUser }: HeaderProps) {
   const { user: authUser, logout, isLoading } = useAuth()
   const { t } = useLocale()
@@ -38,6 +92,10 @@ export function Header({ cartItemCount = 0, user: initialUser }: HeaderProps) {
     await logout()
     router.push("/")
   }
+
+  const handleCloseMobileMenu = () => {
+    setMobileMenuOpen(false);
+  };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -106,30 +164,7 @@ export function Header({ cartItemCount = 0, user: initialUser }: HeaderProps) {
                     {t("header.profile")}
                   </Link>
                 </DropdownMenuItem>
-                {user.role === "customer" && (
-                  <DropdownMenuItem asChild>
-                    <Link href="/buyer/dashboard" className="cursor-pointer">
-                      <LayoutDashboard className="mr-2 h-4 w-4" />
-                      {t("dashboard.title")}
-                    </Link>
-                  </DropdownMenuItem>
-                )}
-                {user.role === "seller" && (
-                  <DropdownMenuItem asChild>
-                    <Link href="/seller/dashboard" className="cursor-pointer">
-                      <LayoutDashboard className="mr-2 h-4 w-4" />
-                      {t("header.sellerDashboard")}
-                    </Link>
-                  </DropdownMenuItem>
-                )}
-                {user.role === "admin" && (
-                  <DropdownMenuItem asChild>
-                    <Link href="/admin/dashboard" className="cursor-pointer">
-                      <LayoutDashboard className="mr-2 h-4 w-4" />
-                      {t("header.adminDashboard")}
-                    </Link>
-                  </DropdownMenuItem>
-                )}
+                <UserDashboardLinks user={user} t={t} />
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
                   <LogOut className="mr-2 h-4 w-4" />
@@ -166,7 +201,7 @@ export function Header({ cartItemCount = 0, user: initialUser }: HeaderProps) {
               <Separator />
               
               {/* Mobile Navigation Links */}
-              <Link href="/products" onClick={() => setMobileMenuOpen(false)}>
+              <Link href="/products" onClick={handleCloseMobileMenu}>
                 <Button variant="ghost" className="w-full justify-start">
                   <Package className="mr-2 h-5 w-5" />
                   {t("header.products")}
@@ -176,13 +211,13 @@ export function Header({ cartItemCount = 0, user: initialUser }: HeaderProps) {
               {/* Mobile Customer Actions */}
               {user && user.role === "customer" && (
                 <>
-                  <Link href="/wishlist" onClick={() => setMobileMenuOpen(false)}>
+                  <Link href="/wishlist" onClick={handleCloseMobileMenu}>
                     <Button variant="ghost" className="w-full justify-start">
                       <Heart className="mr-2 h-5 w-5" />
                       {t("header.wishlist")}
                     </Button>
                   </Link>
-                  <Link href="/cart" onClick={() => setMobileMenuOpen(false)}>
+                  <Link href="/cart" onClick={handleCloseMobileMenu}>
                     <Button variant="ghost" className="w-full justify-start relative">
                       <ShoppingCart className="mr-2 h-5 w-5" />
                       {t("header.cart")}
@@ -208,43 +243,29 @@ export function Header({ cartItemCount = 0, user: initialUser }: HeaderProps) {
                     <p className="text-xs text-muted-foreground">{user.email}</p>
                   </div>
                   <Separator />
-                  <Link href="/profile" onClick={() => setMobileMenuOpen(false)}>
+                  <Link href="/profile" onClick={handleCloseMobileMenu}>
                     <Button variant="ghost" className="w-full justify-start">
                       <User className="mr-2 h-4 w-4" />
                       {t("header.profile")}
                     </Button>
                   </Link>
-                  {user.role === "customer" && (
-                    <Link href="/buyer/dashboard" onClick={() => setMobileMenuOpen(false)}>
-                      <Button variant="ghost" className="w-full justify-start">
-                        <LayoutDashboard className="mr-2 h-4 w-4" />
-                        {t("dashboard.title")}
-                      </Button>
-                    </Link>
-                  )}
-                  {user.role === "seller" && (
-                    <Link href="/seller/dashboard" onClick={() => setMobileMenuOpen(false)}>
-                      <Button variant="ghost" className="w-full justify-start">
-                        <LayoutDashboard className="mr-2 h-4 w-4" />
-                        {t("header.sellerDashboard")}
-                      </Button>
-                    </Link>
-                  )}
-                  {user.role === "admin" && (
-                    <Link href="/admin/dashboard" onClick={() => setMobileMenuOpen(false)}>
-                      <Button variant="ghost" className="w-full justify-start">
-                        <LayoutDashboard className="mr-2 h-4 w-4" />
-                        {t("header.adminDashboard")}
-                      </Button>
-                    </Link>
-                  )}
-                  <Button variant="ghost" onClick={() => { handleLogout(); setMobileMenuOpen(false); }} className="w-full justify-start">
+                  <UserDashboardLinks 
+                    user={user} 
+                    t={t} 
+                    isMobile={true} 
+                    onCloseMobileMenu={handleCloseMobileMenu} 
+                  />
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => { handleLogout(); handleCloseMobileMenu(); }} 
+                    className="w-full justify-start"
+                  >
                     <LogOut className="mr-2 h-4 w-4" />
                     {t("header.logout")}
                   </Button>
                 </>
               ) : (
-                <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
+                <Link href="/login" onClick={handleCloseMobileMenu}>
                   <Button className="w-full">{t("header.login")}</Button>
                 </Link>
               )}

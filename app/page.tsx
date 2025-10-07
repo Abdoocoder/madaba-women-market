@@ -27,13 +27,13 @@ function interpolateTranslation(translation: string, params: Record<string, stri
 
 export default function Home() {
   const { user } = useAuth()
-  const { t, language } = useLocale()
+  const { t } = useLocale()
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [sortOption, setSortOption] = useState<SortOption>("date-desc")
   const [products, setProducts] = useState<Product[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [isMounted, setIsMounted] = useState(false)
+  const [, setIsMounted] = useState(false)
 
   useEffect(() => {
     setIsMounted(true)

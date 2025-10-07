@@ -2,10 +2,10 @@
 
 import { NextResponse, NextRequest } from 'next/server'
 import { getAdminDb } from '@/lib/firebaseAdmin'
-import type { Product } from '@/lib/types'
+import type { Product, User } from '@/lib/types'
 import { getAuthenticatedUser } from '@/lib/server-auth'
 
-async function authorizeSeller(request: NextRequest, productId: string): Promise<{user: any, product: Product} | NextResponse> {
+async function authorizeSeller(request: NextRequest, productId: string): Promise<{user: User, product: Product} | NextResponse> {
     const user = await getAuthenticatedUser(request);
     if (!user || user.role !== 'seller') {
         return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
