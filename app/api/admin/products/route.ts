@@ -45,7 +45,10 @@ export async function GET(request: NextRequest) {
         
         const products: Product[] = [];
         snapshot.forEach((doc) => {
-            products.push({ id: doc.id, ...doc.data() } as Product);
+            // Only add products with valid IDs
+            if (doc.id && doc.id.trim() !== '') {
+                products.push({ id: doc.id, ...doc.data() } as Product);
+            }
         });
         
         console.log(`✅ Found ${products.length} products for admin`);

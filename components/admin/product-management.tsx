@@ -20,6 +20,9 @@ export function ProductManagement({ products, onProductsUpdate }: ProductManagem
   const { getAuthToken } = useAuth()
   const { t } = useLocale()
 
+  // Filter out products without valid IDs to prevent React key errors
+  const validProducts = products.filter(product => product.id && product.id.trim() !== '')
+
   const handleApiAction = async (productId: string, action: string, value?: any) => {
     try {
       const token = await getAuthToken()
@@ -76,8 +79,8 @@ export function ProductManagement({ products, onProductsUpdate }: ProductManagem
     }
   }
 
-  const pendingProducts = products.filter((p) => !p.approved)
-  const approvedProducts = products.filter((p) => p.approved)
+  const pendingProducts = validProducts.filter((p) => !p.approved)
+  const approvedProducts = validProducts.filter((p) => p.approved)
 
   return (
     <div className="space-y-6">
