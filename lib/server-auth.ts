@@ -64,6 +64,8 @@ export async function getAuthenticatedUser(request: NextRequest): Promise<User |
         return await verifyTokenAndGetUser(idToken);
     } catch (error) {
         console.error('Error in getAuthenticatedUser:', error);
+        console.error('This error typically occurs when Firebase Admin is not properly configured.');
+        console.error('Please check that your .env.local file contains valid Firebase Admin credentials.');
         return null;
     }
 }

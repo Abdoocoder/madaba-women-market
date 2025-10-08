@@ -20,13 +20,14 @@ const nextConfig = {
         port: '',
         pathname: '/**',
       },
-    ],
-    localPatterns: [
       {
-        pathname: '/placeholder*',
-        search: '**',
-      },
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+        port: '',
+        pathname: '/**',
+      }
     ],
+    // Local images are automatically handled
   },
 
   compiler: {

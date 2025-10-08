@@ -28,13 +28,32 @@ export async function GET() {
         const stories: SuccessStory[] = [];
         snapshot.forEach((doc) => {
             const storyData = doc.data();
+            // Handle date conversion more robustly
+            let dateValue: string;
+            try {
+                if (storyData.date && typeof storyData.date.toDate === 'function') {
+                    dateValue = storyData.date.toDate().toISOString();
+                } else if (storyData.date instanceof Date) {
+                    dateValue = storyData.date.toISOString();
+                } else if (typeof storyData.date === 'string') {
+                    // Try to parse the string as a date
+                    const parsedDate = new Date(storyData.date);
+                    dateValue = isNaN(parsedDate.getTime()) ? new Date().toISOString() : parsedDate.toISOString();
+                } else {
+                    dateValue = new Date().toISOString();
+                }
+            } catch (dateError) {
+                console.error('Error converting date for story:', doc.id, dateError);
+                dateValue = new Date().toISOString();
+            }
+            
             stories.push({
                 id: doc.id,
-                author: storyData.author,
-                story: storyData.story,
-                imageUrl: storyData.imageUrl,
-                date: storyData.date.toDate ? storyData.date.toDate() : new Date(storyData.date),
-                sellerId: storyData.sellerId,
+                author: storyData.author || 'Unknown Author',
+                story: storyData.story || '',
+                imageUrl: storyData.imageUrl || undefined,
+                date: dateValue,
+                sellerId: storyData.sellerId || undefined,
             });
         });
         

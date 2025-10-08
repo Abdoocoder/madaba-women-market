@@ -22,7 +22,8 @@ export async function GET(request: NextRequest) {
         
         if (!user) {
             return NextResponse.json({ 
-                message: 'Authentication required'
+                message: 'Authentication required',
+                solution: 'Make sure Firebase Admin is properly configured with valid credentials in your .env.local file'
             }, { status: 401 });
         }
         
