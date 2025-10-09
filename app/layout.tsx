@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { Cairo } from "next/font/google";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "@/lib/auth-context";

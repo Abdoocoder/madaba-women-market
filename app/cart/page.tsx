@@ -15,7 +15,7 @@ import { useEffect, useState } from "react"
 import { useToast } from "@/components/ui/use-toast"
 
 export default function CartPage() {
-  const { items, totalItems, totalPrice, clearCart } = useCart()
+  const { items, totalPrice, clearCart } = useCart()
   const { user, getAuthToken } = useAuth()
   const { t } = useLocale()
   const router = useRouter()

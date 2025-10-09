@@ -48,7 +48,7 @@ export interface AvatarImageProps extends Omit<ComponentProps<typeof Image>, "sr
 export const AvatarImage = forwardRef<HTMLImageElement, AvatarImageProps>(
   ({ className, src, alt = "User avatar", ...props }, ref) => (
     <Image
-      ref={ref as any}
+      ref={ref}
       src={src || "/placeholder-user.jpg"}
       alt={alt}
       className={cn("aspect-square h-full w-full object-cover", className)}

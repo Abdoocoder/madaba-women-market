@@ -3,7 +3,7 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
 import type { CartItem, Product } from "./types"
 import { db } from "@/lib/firebase"
-import { doc, setDoc, getDoc, onSnapshot } from "firebase/firestore"
+import { doc, setDoc, onSnapshot } from "firebase/firestore"
 import { useAuth } from "@/lib/auth-context"
 
 interface CartContextType {
@@ -105,9 +105,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
       try {
         const cartRef = doc(db, "carts", user.id)
         await setDoc(cartRef, { items }, { merge: true })
-      } catch (error: any) {
+      } catch (error: unknown) {
         // Handle permission errors gracefully
-        if (error.code === 'permission-denied') {
+        // Type assertion to access error properties
+        const firebaseError = error as { code?: string };
+        if (firebaseError.code === 'permission-denied') {
           console.warn("Insufficient permissions to save cart data to Firebase. Data saved to local storage only.");
         } else {
           console.error("Error saving cart to Firebase:", error);

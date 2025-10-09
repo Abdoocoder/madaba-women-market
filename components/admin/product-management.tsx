@@ -23,7 +23,7 @@ export function ProductManagement({ products, onProductsUpdate }: ProductManagem
   // Filter out products without valid IDs to prevent React key errors
   const validProducts = products.filter(product => product.id && product.id.trim() !== '')
 
-  const handleApiAction = async (productId: string, action: string, value?: any) => {
+  const handleApiAction = async (productId: string, action: string, value?: boolean) => {
     try {
       const token = await getAuthToken()
       if (!token) {

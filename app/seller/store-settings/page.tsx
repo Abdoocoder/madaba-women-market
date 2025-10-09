@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -150,9 +151,11 @@ export default function StoreSettingsPage() {
             />
             {storeData.storeCoverImage && (
               <div className="mt-2">
-                <img 
+                <Image 
                   src={storeData.storeCoverImage} 
                   alt={t('seller.storeCoverPreview')} 
+                  width={800}
+                  height={300}
                   className="w-full h-48 object-cover rounded-md"
                 />
               </div>

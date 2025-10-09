@@ -32,13 +32,15 @@ export function ProductForm({ product, onSubmit, onCancel }: ProductFormProps) {
   const [imagePreview, setImagePreview] = useState(product?.image || null)
   const [imageUrl, setImageUrl] = useState<string | undefined>(product?.image)
 
-  const handleImageUpload = (result: any) => {
+  const handleImageUpload = (result: unknown) => {
+    // Type assertion for Cloudinary result
+    const cloudinaryResult = result as { info?: { secure_url: string } };
     console.log('🎨 Cloudinary upload result:', result)
-    setImagePreview(result.info.secure_url)
-    setImageUrl(result.info.secure_url)
+    setImagePreview(cloudinaryResult.info!.secure_url)
+    setImageUrl(cloudinaryResult.info!.secure_url)
   }
 
-  const handleUploadError = (error: any) => {
+  const handleUploadError = (error: unknown) => {
     console.error('❌ Cloudinary upload error:', error)
   }
 

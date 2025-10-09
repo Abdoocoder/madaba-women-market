@@ -28,7 +28,7 @@ export default function ProductsPage() {
         }
         const fetchedProducts = await response.json();
         // Filter out products without valid IDs
-        const validProducts = fetchedProducts.filter((product: any) => product.id);
+        const validProducts = fetchedProducts.filter((product: { id: string }) => product.id);
         setProducts(validProducts);
       } catch (error) {
         console.error("Error fetching products:", error);

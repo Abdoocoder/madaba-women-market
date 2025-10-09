@@ -112,10 +112,10 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
       const parts = key.split('.')
       
       // Try to find in modular structure first
-      let current: any = translationSet
+      let current: Record<string, unknown> | string | null = translationSet
       for (let i = 0; i < parts.length; i++) {
-        if (current && current[parts[i]]) {
-          current = current[parts[i]]
+        if (current && typeof current === 'object' && current !== null && parts[i] in current) {
+          current = (current as Record<string, unknown>)[parts[i]] as Record<string, unknown> | string | null
         } else {
           current = null
           break

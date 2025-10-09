@@ -11,11 +11,10 @@ import { Star } from 'lucide-react'
 import { db } from '@/lib/firebase'
 import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore'
 import { Button } from '@/components/ui/button'
-import { StoreRating } from '@/components/seller/store-rating'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useAuth } from '@/lib/auth-context'
 import { useToast } from '@/components/ui/use-toast'
-import type { User } from '@/lib/types'
+import type { User, Product, Review } from '@/lib/types'
 
 export default function SellerProfilePage() {
   const params = useParams()
@@ -24,8 +23,8 @@ export default function SellerProfilePage() {
   const { user } = useAuth()
   const { toast } = useToast()
   const [seller, setSeller] = useState<User | null>(null)
-  const [products, setProducts] = useState<any[]>([])
-  const [reviews, setReviews] = useState<any[]>([])
+  const [products, setProducts] = useState<Product[]>([])
+  const [reviews, setReviews] = useState<Review[]>([])
   const [loading, setLoading] = useState(true)
   const [following, setFollowing] = useState(false)
   const [followersCount, setFollowersCount] = useState(0)
@@ -50,7 +49,7 @@ export default function SellerProfilePage() {
         const productsRef = collection(db, 'products')
         const q = query(productsRef, where('sellerId', '==', sellerId))
         const querySnap = await getDocs(q)
-        setProducts(querySnap.docs.map((doc) => ({ id: doc.id, ...doc.data() })))
+        setProducts(querySnap.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Product)))
         
         // Mock reviews for now - in a real app, these would come from a reviews collection
         setReviews([
@@ -59,21 +58,27 @@ export default function SellerProfilePage() {
             userName: 'أحمد محمد',
             rating: 5,
             comment: 'منتجات ممتازة وجودة عالية. التوصيل كان سريع جداً.',
-            date: new Date('2023-10-15')
+            createdAt: new Date('2023-10-15'),
+            productId: 'mock-product-id',
+            userId: 'mock-user-id'
           },
           {
             id: '2',
             userName: 'فاطمة علي',
             rating: 4,
             comment: 'متجر ممتاز مع خدمة عملاء رائعة. أنصح بالشراء.',
-            date: new Date('2023-11-20')
+            createdAt: new Date('2023-11-20'),
+            productId: 'mock-product-id',
+            userId: 'mock-user-id'
           },
           {
             id: '3',
             userName: 'سارة عبدالله',
             rating: 5,
             comment: 'جودة المنتجات مذهلة وخدمة التوصيل ممتازة.',
-            date: new Date('2023-12-05')
+            createdAt: new Date('2023-12-05'),
+            productId: 'mock-product-id',
+            userId: 'mock-user-id'
           }
         ])
       } catch (error) {
@@ -314,7 +319,7 @@ export default function SellerProfilePage() {
                         <div className="flex items-center justify-between">
                           <h3 className="font-semibold">{review.userName}</h3>
                           <span className="text-sm text-muted-foreground">
-                            {review.date.toLocaleDateString()}
+                            {review.createdAt.toLocaleDateString()}
                           </span>
                         </div>
                         <div className="flex items-center gap-1 mt-1">

@@ -71,13 +71,16 @@ export function SettingsTab() {
         description: t('messages.passwordUpdated'), 
         variant: "success" 
       });
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error changing password: ", error);
       let errorMessage = t('messages.failedToUpdatePassword');
       
-      if (error.code === 'auth/wrong-password') {
+      // Type assertion to access error properties
+      const authError = error as { code?: string };
+      
+      if (authError.code === 'auth/wrong-password') {
         errorMessage = t('auth.wrongPassword');
-      } else if (error.code === 'auth/too-many-requests') {
+      } else if (authError.code === 'auth/too-many-requests') {
         errorMessage = t('auth.tooManyRequests');
       }
       
@@ -127,13 +130,16 @@ export function SettingsTab() {
       });
       
       router.push("/");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error deleting account: ", error);
       let errorMessage = t('messages.failedToDeleteAccount');
       
-      if (error.code === 'auth/requires-recent-login') {
+      // Type assertion to access error properties
+      const authError = error as { code?: string };
+      
+      if (authError.code === 'auth/requires-recent-login') {
         errorMessage = t('auth.requiresRecentLogin');
-      } else if (error.code === 'auth/wrong-password') {
+      } else if (authError.code === 'auth/wrong-password') {
         errorMessage = t('auth.wrongPassword');
       }
       

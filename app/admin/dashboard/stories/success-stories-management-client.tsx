@@ -54,8 +54,8 @@ export default function SuccessStoriesManagementClient() {
       const sellersData = await response.json();
       // Filter only approved sellers
       const approvedSellers = sellersData
-        .filter((seller: any) => seller.status === 'approved')
-        .map((seller: any) => ({ id: seller.id, name: seller.name }));
+        .filter((seller: { status: string }) => seller.status === 'approved')
+        .map((seller: { id: string; name: string }) => ({ id: seller.id, name: seller.name }));
       setSellers(approvedSellers);
     } catch (error) {
       console.error('Error fetching sellers:', error);
@@ -80,7 +80,7 @@ export default function SuccessStoriesManagementClient() {
       }
 
       const storiesData = await response.json();
-      setStories(storiesData);
+      setStories(storiesData as SuccessStory[]);
     } catch (error) {
       console.error('Error fetching stories:', error);
       toast.error(t('admin.stories.fetchFailed'));

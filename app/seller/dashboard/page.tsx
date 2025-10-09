@@ -21,11 +21,19 @@ const createAuthHeaders = (token: string) => ({
   "Content-Type": "application/json",
 })
 
+interface SellerStats {
+  totalRevenue: number;
+  monthlyRevenue: number;
+  totalOrders: number;
+  pendingOrders: number;
+  monthlyData: { month: string; revenue: number }[];
+}
+
 export default function SellerDashboardPage() {
   const { user, getAuthToken } = useAuth()
   const router = useRouter()
   const [products, setProducts] = useState<Product[]>([])
-  const [stats, setStats] = useState<any>(null)
+  const [stats, setStats] = useState<SellerStats | null>(null)
   const [showAddForm, setShowAddForm] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const { t } = useLocale()

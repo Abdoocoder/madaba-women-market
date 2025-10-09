@@ -41,10 +41,12 @@ export function ProfileTab() {
     }
   }, [user]);
 
-  const handleUpload = async (result: any) => {
+  const handleUpload = async (result: unknown) => {
+    // Type assertion for Cloudinary result
+    const cloudinaryResult = result as { event?: string; info?: { secure_url: string } };
     if (!user || !user.id) return;
 
-    if (result.event !== "success" || !result.info?.secure_url) {
+    if (cloudinaryResult.event !== "success" || !cloudinaryResult.info?.secure_url) {
       toast({ 
         title: t('messages.error'), 
         description: t('messages.failedToUploadImage'), 
@@ -53,7 +55,7 @@ export function ProfileTab() {
       return;
     }
 
-    const newAvatar = result.info.secure_url;
+    const newAvatar = cloudinaryResult.info!.secure_url;
 
     try {
       const userDocRef = doc(db, "users", user.id);
@@ -111,10 +113,10 @@ export function ProfileTab() {
         
         setIsEditing(false);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({ 
         title: t('messages.error'), 
-        description: error.message || t('messages.failedToUpdateProfile'), 
+        description: (error as Error).message || t('messages.failedToUpdateProfile'), 
         variant: "destructive" 
       });
     } finally {

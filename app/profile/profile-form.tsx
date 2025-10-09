@@ -55,13 +55,15 @@ export default function ProfileForm() {
         return null;
     }
 
-    const handleUpload = async (result: any) => {
+    const handleUpload = async (result: unknown) => {
+        // Type assertion for Cloudinary result
+        const cloudinaryResult = result as { event?: string; info?: { secure_url: string } };
         console.log("Upload result:", result);
         
         if (!user || !user.id) return;
 
         // Check if upload was successful
-        if (result.event !== "success" || !result.info?.secure_url) {
+        if (cloudinaryResult.event !== "success" || !cloudinaryResult.info?.secure_url) {
             console.error("Upload failed:", result);
             toast({ 
                 title: "Error", 
@@ -71,7 +73,7 @@ export default function ProfileForm() {
             return;
         }
 
-        const newAvatar = result.info.secure_url;
+        const newAvatar = cloudinaryResult.info!.secure_url;
         console.log("New avatar URL:", newAvatar);
 
         try {

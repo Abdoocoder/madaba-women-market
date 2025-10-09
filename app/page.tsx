@@ -52,7 +52,7 @@ export default function Home() {
               ...productData,
             };
           })
-          .filter((product: any) => product.id) as Product[] // Filter out products without valid IDs
+          .filter((product: { id: string }) => product.id) as Product[] // Filter out products without valid IDs
         setProducts(fetchedProducts)
       } catch (error) {
         console.error("Error fetching products:", error)

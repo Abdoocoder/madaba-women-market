@@ -2,19 +2,15 @@
 
 import { useState } from 'react'
 import { Star } from 'lucide-react'
-import { db } from '@/lib/firebase'
-import { doc, updateDoc, arrayUnion, getDoc } from 'firebase/firestore'
 import { useLocale } from '@/lib/locale-context'
 import { useToast } from '@/components/ui/use-toast'
-import { Button } from '@/components/ui/button'
 
 interface StoreRatingProps {
-  sellerId: string
   currentRating: number
   reviewCount: number
 }
 
-export function StoreRating({ sellerId, currentRating, reviewCount }: StoreRatingProps) {
+export function StoreRating({ currentRating, reviewCount }: StoreRatingProps) {
   const { t } = useLocale()
   const { toast } = useToast()
   const [rating, setRating] = useState(0)

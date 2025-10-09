@@ -31,7 +31,7 @@ export function FeaturedProducts() {
               ...productData,
             };
           })
-          .filter((product: any) => product.id) as Product[] // Filter out products without valid IDs
+          .filter((product: { id: string }) => product.id) as Product[] // Filter out products without valid IDs
         setFeaturedProducts(products)
       } catch (error) {
         console.error("Error fetching featured products:", error)
