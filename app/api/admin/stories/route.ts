@@ -39,7 +39,18 @@ export async function GET(request: NextRequest) {
             }, { status: 403 });
         }
 
-        const adminDb = getAdminDb();
+        let adminDb;
+        try {
+            adminDb = getAdminDb();
+        } catch (error) {
+            console.error('Firebase Admin initialization error:', error);
+            return NextResponse.json({ 
+                message: 'Service Unavailable - Firebase configuration error',
+                hint: 'Check server logs for configuration issues',
+                solution: 'Make sure Firebase Admin is properly configured with valid credentials in your .env.local file'
+            }, { status: 503 });
+        }
+        
         const storiesRef = adminDb.collection('successStories');
         const snapshot = await storiesRef.orderBy('date', 'desc').get();
         
@@ -103,7 +114,18 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ message: 'Author and story are required' }, { status: 400 });
         }
 
-        const adminDb = getAdminDb();
+        let adminDb;
+        try {
+            adminDb = getAdminDb();
+        } catch (error) {
+            console.error('Firebase Admin initialization error:', error);
+            return NextResponse.json({ 
+                message: 'Service Unavailable - Firebase configuration error',
+                hint: 'Check server logs for configuration issues',
+                solution: 'Make sure Firebase Admin is properly configured with valid credentials in your .env.local file'
+            }, { status: 503 });
+        }
+        
         const storyData = {
             author,
             story,
@@ -173,7 +195,18 @@ export async function PUT(request: NextRequest) {
             return NextResponse.json({ message: 'Author and story are required' }, { status: 400 });
         }
 
-        const adminDb = getAdminDb();
+        let adminDb;
+        try {
+            adminDb = getAdminDb();
+        } catch (error) {
+            console.error('Firebase Admin initialization error:', error);
+            return NextResponse.json({ 
+                message: 'Service Unavailable - Firebase configuration error',
+                hint: 'Check server logs for configuration issues',
+                solution: 'Make sure Firebase Admin is properly configured with valid credentials in your .env.local file'
+            }, { status: 503 });
+        }
+        
         const storyRef = adminDb.collection('successStories').doc(id);
         const storyDoc = await storyRef.get();
 
@@ -243,7 +276,18 @@ export async function DELETE(request: NextRequest) {
             return NextResponse.json({ message: 'Story ID is required' }, { status: 400 });
         }
 
-        const adminDb = getAdminDb();
+        let adminDb;
+        try {
+            adminDb = getAdminDb();
+        } catch (error) {
+            console.error('Firebase Admin initialization error:', error);
+            return NextResponse.json({ 
+                message: 'Service Unavailable - Firebase configuration error',
+                hint: 'Check server logs for configuration issues',
+                solution: 'Make sure Firebase Admin is properly configured with valid credentials in your .env.local file'
+            }, { status: 503 });
+        }
+        
         const storyRef = adminDb.collection('successStories').doc(id);
         const storyDoc = await storyRef.get();
 

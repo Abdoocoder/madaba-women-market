@@ -59,6 +59,11 @@ export function validateCloudinaryConfig() {
 }
 
 export function logConfigurationStatus() {
+  // Only log detailed configuration status in development to avoid exposing sensitive info
+  if (process.env.NODE_ENV !== 'development') {
+    return;
+  }
+  
   console.log('\n🔧 Configuration Status:');
   console.log('========================');
   

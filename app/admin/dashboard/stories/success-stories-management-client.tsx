@@ -48,7 +48,9 @@ export default function SuccessStoriesManagementClient() {
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch sellers: ${response.status} ${response.statusText}`);
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.message || `Failed to fetch sellers: ${response.status} ${response.statusText}`;
+        throw new Error(errorMessage);
       }
 
       const sellersData = await response.json();
@@ -57,7 +59,7 @@ export default function SuccessStoriesManagementClient() {
         .filter((seller: { status: string }) => seller.status === 'approved')
         .map((seller: { id: string; name: string }) => ({ id: seller.id, name: seller.name }));
       setSellers(approvedSellers);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error fetching sellers:', error);
     }
   }, [getAuthToken]);
@@ -76,14 +78,18 @@ export default function SuccessStoriesManagementClient() {
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch stories: ${response.status} ${response.statusText}`);
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.message || `Failed to fetch stories: ${response.status} ${response.statusText}`;
+        throw new Error(errorMessage);
       }
 
       const storiesData = await response.json();
       setStories(storiesData as SuccessStory[]);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error fetching stories:', error);
-      toast.error(t('admin.stories.fetchFailed'));
+      // Provide a more specific error message to the user
+      const errorMessage = (error as Error).message || t('admin.stories.fetchFailed');
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -136,14 +142,17 @@ export default function SuccessStoriesManagementClient() {
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to delete story: ${response.status} ${response.statusText}`);
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.message || `Failed to delete story: ${response.status} ${response.statusText}`;
+        throw new Error(errorMessage);
       }
 
       toast.success(t('admin.stories.deleteSuccess'));
       fetchStories();
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error deleting story:', error);
-      toast.error(t('admin.stories.deleteFailed'));
+      const errorMessage = (error as Error).message || t('admin.stories.deleteFailed');
+      toast.error(errorMessage);
     }
   };
 
@@ -183,15 +192,18 @@ export default function SuccessStoriesManagementClient() {
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to save story: ${response.status} ${response.statusText}`);
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.message || `Failed to save story: ${response.status} ${response.statusText}`;
+        throw new Error(errorMessage);
       }
 
       toast.success(t('admin.stories.saveSuccess'));
       setIsEditing(false);
       fetchStories();
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error saving story:', error);
-      toast.error(t('admin.stories.saveFailed'));
+      const errorMessage = (error as Error).message || t('admin.stories.saveFailed');
+      toast.error(errorMessage);
     }
   };
 

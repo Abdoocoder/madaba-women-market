@@ -110,6 +110,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       }
       
+      // Don't expose NODE_ENV in client-side error messages
+      if (process.env.NODE_ENV !== 'development' && errorMessage.includes('NODE_ENV')) {
+        errorMessage = "Authentication failed. Please check your credentials.";
+      }
+      
       throw new Error(errorMessage);
     }
   }

@@ -12,7 +12,9 @@ if (typeof window === 'undefined') {
 }
 
 // Check if we have the required environment variables
+// Also check if we're in a server context (not client)
 const hasFirebaseConfig = 
+  typeof window === 'undefined' &&
   process.env.FIREBASE_PROJECT_ID && 
   process.env.FIREBASE_CLIENT_EMAIL && 
   process.env.FIREBASE_PRIVATE_KEY &&
@@ -29,9 +31,12 @@ function initializeFirebaseAdmin() {
   if (!hasFirebaseConfig || typeof window !== 'undefined') {
     if (!hasFirebaseConfig) {
       console.log('⚠️ Firebase Admin not initialized - missing or invalid configuration');
-      console.log('FIREBASE_PROJECT_ID exists:', !!process.env.FIREBASE_PROJECT_ID);
-      console.log('FIREBASE_CLIENT_EMAIL exists:', !!process.env.FIREBASE_CLIENT_EMAIL);
-      console.log('FIREBASE_PRIVATE_KEY exists and valid:', !!(process.env.FIREBASE_PRIVATE_KEY && process.env.FIREBASE_PRIVATE_KEY !== '-----BEGIN PRIVATE KEY-----\nYOUR_ACTUAL_PRIVATE_KEY\n-----END PRIVATE KEY-----\n'));
+      // Only log detailed info in development to avoid exposing env vars in production
+      if (process.env.NODE_ENV === 'development') {
+        console.log('FIREBASE_PROJECT_ID exists:', !!process.env.FIREBASE_PROJECT_ID);
+        console.log('FIREBASE_CLIENT_EMAIL exists:', !!process.env.FIREBASE_CLIENT_EMAIL);
+        console.log('FIREBASE_PRIVATE_KEY exists and valid:', !!(process.env.FIREBASE_PRIVATE_KEY && process.env.FIREBASE_PRIVATE_KEY !== '-----BEGIN PRIVATE KEY-----\nYOUR_ACTUAL_PRIVATE_KEY\n-----END PRIVATE KEY-----\n'));
+      }
     } else {
       console.log('⚠️ Firebase Admin not initialized - running in browser');
     }
