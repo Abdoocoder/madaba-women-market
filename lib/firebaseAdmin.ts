@@ -78,11 +78,6 @@ initializeFirebaseAdmin();
 
 // Safe getter functions that won't fail during build
 export function getAdminAuth() {
-  if (!hasFirebaseConfig) {
-    console.error('Firebase Admin not configured - check environment variables');
-    throw new Error('Firebase Admin not configured - check environment variables. Make sure FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, and FIREBASE_PRIVATE_KEY are set correctly in your .env.local file.');
-  }
-  
   // Ensure app is initialized
   if (!firebaseApp) {
     const initResult = initializeFirebaseAdmin();
@@ -106,11 +101,6 @@ export function getAdminAuth() {
 }
 
 export function getAdminDb() {
-  if (!hasFirebaseConfig) {
-    console.error('Firebase Admin not configured - check environment variables');
-    throw new Error('Firebase Admin not configured - check environment variables. Make sure FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, and FIREBASE_PRIVATE_KEY are set correctly in your .env.local file.');
-  }
-  
   // Ensure app is initialized
   if (!firebaseApp) {
     const initResult = initializeFirebaseAdmin();

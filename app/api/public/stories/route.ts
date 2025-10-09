@@ -21,9 +21,36 @@ interface SuccessStory {
  */
 export async function GET() {
     try {
-        const adminDb = getAdminDb();
-        const storiesRef = adminDb.collection('successStories');
-        const snapshot = await storiesRef.orderBy('date', 'desc').get();
+        let adminDb;
+        try {
+            adminDb = getAdminDb();
+        } catch (initError) {
+            console.error('Failed to initialize Firebase Admin:', initError);
+            return NextResponse.json({ 
+                message: 'Service Unavailable',
+                error: 'Failed to initialize Firebase Admin: ' + (initError instanceof Error ? initError.message : 'Unknown error')
+            }, { status: 503 });
+        }
+        
+        if (!adminDb) {
+            console.error('Firebase Admin DB not initialized');
+            return NextResponse.json({ 
+                message: 'Service Unavailable',
+                error: 'Firebase Admin DB not initialized'
+            }, { status: 503 });
+        }
+        
+        let snapshot;
+        try {
+            const storiesRef = adminDb.collection('successStories');
+            snapshot = await storiesRef.orderBy('date', 'desc').get();
+        } catch (firestoreError) {
+            console.error('Failed to fetch stories from Firestore:', firestoreError);
+            return NextResponse.json({ 
+                message: 'Database Error',
+                error: 'Failed to fetch stories from Firestore: ' + (firestoreError instanceof Error ? firestoreError.message : 'Unknown error')
+            }, { status: 500 });
+        }
         
         const stories: SuccessStory[] = [];
         snapshot.forEach((doc) => {
@@ -59,7 +86,7 @@ export async function GET() {
         
         return NextResponse.json(stories);
     } catch (error) {
-        console.error('Error fetching public success stories:', error);
+        console.error('Unexpected error in stories API:', error);
         return NextResponse.json({ 
             message: 'Internal Server Error',
             error: error instanceof Error ? error.message : 'Unknown error'
