@@ -56,7 +56,7 @@ const nextConfig = {
           // Content Security Policy to allow necessary scripts while maintaining security
           { 
             key: 'Content-Security-Policy', 
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.cloudinary.com https://*.vercel-insights.com; connect-src 'self' https://*.cloudinary.com https://*.googleapis.com https://*.firebaseio.com; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; font-src 'self' https: data:;"
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.cloudinary.com https://*.vercel-insights.com https://apis.google.com https://*.google.com; connect-src 'self' https://*.cloudinary.com https://*.googleapis.com https://*.firebaseio.com https://apis.google.com https://*.google.com; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; font-src 'self' https: data:;"
           },
         ],
       },
