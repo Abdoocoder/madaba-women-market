@@ -53,6 +53,11 @@ const nextConfig = {
           { key: 'X-Content-Type-Options', value: 'nosniff' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
           { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+          // Content Security Policy to allow necessary scripts while maintaining security
+          { 
+            key: 'Content-Security-Policy', 
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.cloudinary.com https://*.vercel-insights.com; connect-src 'self' https://*.cloudinary.com https://*.googleapis.com https://*.firebaseio.com; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; font-src 'self' https: data:;"
+          },
         ],
       },
     ];
