@@ -47,3 +47,4 @@ next-auth.session-token
 *.njsproj
 *.sln
 *.sw?
+.env
