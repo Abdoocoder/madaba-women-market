@@ -83,6 +83,7 @@ export default function SellerProfilePage() {
         ])
       } catch (error) {
         console.error('Error fetching seller:', error)
+        notFound() // Ensure we show 404 for any errors
       } finally {
         setLoading(false)
       }
@@ -94,7 +95,8 @@ export default function SellerProfilePage() {
   useEffect(() => {
     // Check if current user is following this seller
     const checkFollowingStatus = async () => {
-      if (!user || user.role !== 'customer') return
+      // Only check following status if we have a valid seller
+      if (!user || user.role !== 'customer' || !seller) return
       
       try {
         const response = await fetch(`/api/sellers/${sellerId}/follow`, {
@@ -114,10 +116,11 @@ export default function SellerProfilePage() {
       }
     }
 
-    if (user && sellerId) {
+    // Only run this effect if we have a user and a valid seller
+    if (user && seller && sellerId) {
       checkFollowingStatus()
     }
-  }, [user, sellerId])
+  }, [user, seller, sellerId]) // Add seller to dependency array
 
   const handleFollowStore = async () => {
     if (!user) {

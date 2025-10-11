@@ -70,7 +70,7 @@ export function ProductCard({ product }: ProductCardProps) {
           </p>
           
           {/* Seller Info - Using div instead of Link to avoid nested anchor tags */}
-          {product.sellerName && (
+          {product.sellerName && product.sellerId && (
             <div className="mb-2">
               <span className="text-xs text-muted-foreground me-1">
                 {t("product.seller")}:
