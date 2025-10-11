@@ -25,9 +25,9 @@ export function ProductForm({ product, onSubmit, onCancel }: ProductFormProps) {
   const [formData, setFormData] = useState({
     nameAr: product?.nameAr || "",
     descriptionAr: product?.descriptionAr || "",
-    price: product?.price || 0,
+    price: product?.price ?? 0,
     category: product?.category || "",
-    stock: product?.stock || 0,
+    stock: product?.stock ?? 0,
   })
   const [imagePreview, setImagePreview] = useState(product?.image || null)
   const [imageUrl, setImageUrl] = useState<string | undefined>(product?.image)
@@ -48,6 +48,10 @@ export function ProductForm({ product, onSubmit, onCancel }: ProductFormProps) {
     e.preventDefault()
     onSubmit(formData, imageUrl)
   }
+
+  // Ensure numeric values are valid numbers before passing to inputs
+  const validPrice = isNaN(formData.price) ? 0 : formData.price;
+  const validStock = isNaN(formData.stock) ? 0 : formData.stock;
 
   return (
     <Card>
@@ -125,8 +129,8 @@ export function ProductForm({ product, onSubmit, onCancel }: ProductFormProps) {
                 type="number"
                 min="0"
                 step="0.01"
-                value={formData.price}
-                onChange={(e) => setFormData({ ...formData, price: Number.parseFloat(e.target.value) })}
+                value={validPrice}
+                onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })}
                 required
               />
             </div>
@@ -137,8 +141,8 @@ export function ProductForm({ product, onSubmit, onCancel }: ProductFormProps) {
                 id="stock"
                 type="number"
                 min="0"
-                value={formData.stock}
-                onChange={(e) => setFormData({ ...formData, stock: Number.parseInt(e.target.value) })}
+                value={validStock}
+                onChange={(e) => setFormData({ ...formData, stock: parseInt(e.target.value) || 0 })}
                 required
               />
             </div>
