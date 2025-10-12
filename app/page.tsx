@@ -151,6 +151,25 @@ export default function Home() {
           {/* Success Stories Section */}
           <SuccessStories />
 
+          {/* Seller Registration CTA Section */}
+          {!user || user.role !== "seller" ? (
+            <section className="mt-10 md:mt-12 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-6 md:p-8">
+              <div className="text-center max-w-3xl mx-auto">
+                <h2 className="text-2xl md:text-3xl font-bold mb-3 text-purple-900">
+                  {t("home.becomeSellerTitle")}
+                </h2>
+                <p className="text-muted-foreground mb-6 md:mb-8">
+                  {t("home.becomeSellerDescription")}
+                </p>
+                <Button asChild size="lg" className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
+                  <Link href="/seller/register">
+                    {t("common.becomeSeller")}
+                  </Link>
+                </Button>
+              </div>
+            </section>
+          ) : null}
+
           {/* All Products Section */}
           <div className="mt-10 md:mt-12">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 md:mb-8">

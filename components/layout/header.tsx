@@ -173,9 +173,14 @@ export function Header({ cartItemCount = 0, user: initialUser }: HeaderProps) {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Button asChild>
-              <Link href="/login">{t("header.login")}</Link>
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button asChild variant="outline">
+                <Link href="/seller/register">{t("header.becomeSeller")}</Link>
+              </Button>
+              <Button asChild>
+                <Link href="/login">{t("header.login")}</Link>
+              </Button>
+            </div>
           )}
         </div>
         
@@ -265,9 +270,18 @@ export function Header({ cartItemCount = 0, user: initialUser }: HeaderProps) {
                   </Button>
                 </>
               ) : (
-                <Link href="/login" onClick={handleCloseMobileMenu}>
-                  <Button className="w-full">{t("header.login")}</Button>
-                </Link>
+                <div className="flex flex-col gap-2">
+                  <Button asChild>
+                    <Link href="/seller/register" onClick={handleCloseMobileMenu}>
+                      {t("header.becomeSeller")}
+                    </Link>
+                  </Button>
+                  <Button asChild variant="outline">
+                    <Link href="/login" onClick={handleCloseMobileMenu}>
+                      {t("header.login")}
+                    </Link>
+                  </Button>
+                </div>
               )}
             </nav>
           </div>
