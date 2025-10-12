@@ -185,20 +185,18 @@ export default function LoginPage() {
               {/* Account Type Selection */}
               <div className="space-y-4">
                 <Label className="text-base">{t('login.iAm')}</Label>
-                <div className="grid grid-cols-2 gap-4">
+                <RadioGroup defaultValue="customer" value={role} onValueChange={(value) => setRole(value as UserRole)} className="grid grid-cols-2 gap-4">
                   <div 
                     className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
                       role === "customer" 
                         ? "border-primary bg-primary/5" 
                         : "border-muted hover:border-primary/50"
                     }`}
-                    onClick={() => setRole("customer")}
                   >
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem 
                         value="customer" 
                         id="r-customer-login" 
-                        checked={role === "customer"}
                         className="peer"
                       />
                       <Label htmlFor="r-customer-login" className="font-medium cursor-pointer">
@@ -215,13 +213,11 @@ export default function LoginPage() {
                         ? "border-primary bg-primary/5" 
                         : "border-muted hover:border-primary/50"
                     }`}
-                    onClick={() => setRole("seller")}
                   >
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem 
                         value="seller" 
                         id="r-seller-login" 
-                        checked={role === "seller"}
                         className="peer"
                       />
                       <Label htmlFor="r-seller-login" className="font-medium cursor-pointer">
@@ -232,7 +228,7 @@ export default function LoginPage() {
                       {t('login.sellProducts')}
                     </p>
                   </div>
-                </div>
+                </RadioGroup>
               </div>
 
               <form onSubmit={handleLogin} className="space-y-4">
@@ -325,20 +321,18 @@ export default function LoginPage() {
               {/* Account Type Selection */}
               <div className="space-y-4">
                 <Label className="text-base">{t('login.iAm')}</Label>
-                <div className="grid grid-cols-2 gap-4">
+                <RadioGroup defaultValue="customer" value={role} onValueChange={(value) => setRole(value as UserRole)} className="grid grid-cols-2 gap-4">
                   <div 
                     className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
                       role === "customer" 
                         ? "border-primary bg-primary/5" 
                         : "border-muted hover:border-primary/50"
                     }`}
-                    onClick={() => setRole("customer")}
                   >
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem 
                         value="customer" 
                         id="r-customer-signup" 
-                        checked={role === "customer"}
                         className="peer"
                       />
                       <Label htmlFor="r-customer-signup" className="font-medium cursor-pointer">
@@ -366,13 +360,11 @@ export default function LoginPage() {
                         ? "border-primary bg-primary/5" 
                         : "border-muted hover:border-primary/50"
                     }`}
-                    onClick={() => setRole("seller")}
                   >
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem 
                         value="seller" 
                         id="r-seller-signup" 
-                        checked={role === "seller"}
                         className="peer"
                       />
                       <Label htmlFor="r-seller-signup" className="font-medium cursor-pointer">
@@ -394,7 +386,7 @@ export default function LoginPage() {
                       </li>
                     </ul>
                   </div>
-                </div>
+                </RadioGroup>
               </div>
 
               <form onSubmit={handleSignUp} className="space-y-4">
