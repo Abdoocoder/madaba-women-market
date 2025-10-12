@@ -162,7 +162,11 @@ export default function LoginPage() {
 
   return (
     <div className="container flex min-h-screen items-center justify-center py-12">
-      <div className="w-[450px]">
+      <div className="w-full max-w-md">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold">{t('login.loginTo')} {t("app.name")}</h1>
+          <p className="text-muted-foreground mt-2">{t('login.enterCredentials')}</p>
+        </div>
 
         <Tabs defaultValue="login" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
@@ -174,10 +178,63 @@ export default function LoginPage() {
         <TabsContent value="login">
           <Card>
             <CardHeader>
-              <CardTitle>{t('login.loginTo')} {t("app.name")}</CardTitle>
+              <CardTitle>{t('login.login')}</CardTitle>
               <CardDescription>{t('login.enterCredentials')}</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6">
+              {/* Account Type Selection */}
+              <div className="space-y-4">
+                <Label className="text-base">{t('login.iAm')}</Label>
+                <div className="grid grid-cols-2 gap-4">
+                  <div 
+                    className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
+                      role === "customer" 
+                        ? "border-primary bg-primary/5" 
+                        : "border-muted hover:border-primary/50"
+                    }`}
+                    onClick={() => setRole("customer")}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem 
+                        value="customer" 
+                        id="r-customer-login" 
+                        checked={role === "customer"}
+                        className="peer"
+                      />
+                      <Label htmlFor="r-customer-login" className="font-medium cursor-pointer">
+                        {t('admin.customer')}
+                      </Label>
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-2">
+                      {t('login.browseAndShop')}
+                    </p>
+                  </div>
+                  <div 
+                    className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
+                      role === "seller" 
+                        ? "border-primary bg-primary/5" 
+                        : "border-muted hover:border-primary/50"
+                    }`}
+                    onClick={() => setRole("seller")}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem 
+                        value="seller" 
+                        id="r-seller-login" 
+                        checked={role === "seller"}
+                        className="peer"
+                      />
+                      <Label htmlFor="r-seller-login" className="font-medium cursor-pointer">
+                        {t('admin.seller')}
+                      </Label>
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-2">
+                      {t('login.sellProducts')}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
               <form onSubmit={handleLogin} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="login-email">{t('admin.email')}</Label>
@@ -214,7 +271,9 @@ export default function LoginPage() {
                     </button>
                   </div>
                 </div>
-                <Button type="submit" className="w-full" disabled={isSubmitting}>{isSubmitting ? t('login.loggingIn') : t('login.login')}</Button>
+                <Button type="submit" className="w-full" disabled={isSubmitting}>
+                  {isSubmitting ? t('login.loggingIn') : t('login.login')}
+                </Button>
               </form>
               
               <div className="relative">
@@ -226,7 +285,11 @@ export default function LoginPage() {
                 </div>
               </div>
 
-              <Button variant="outline" className="w-full" onClick={() => handleGoogleSignIn('customer')}>
+              <Button 
+                variant="outline" 
+                className="w-full" 
+                onClick={() => handleGoogleSignIn(role)}
+              >
                 {t('login.googleSignIn')}
               </Button>
 
@@ -235,12 +298,18 @@ export default function LoginPage() {
               <div className="mt-4 text-center text-sm">
                 {t('login.forgotPassword')}
                 <div className="mt-2 space-y-2">
-                    <Input type="email" placeholder={t('login.enterEmail')} value={resetEmail} onChange={(e) => setResetEmail(e.target.value)} />
-                    <Button variant="link" onClick={handlePasswordReset}>{t('login.sendResetLink')}</Button>
+                    <Input 
+                      type="email" 
+                      placeholder={t('login.enterEmail')} 
+                      value={resetEmail} 
+                      onChange={(e) => setResetEmail(e.target.value)} 
+                    />
+                    <Button variant="link" onClick={handlePasswordReset}>
+                      {t('login.sendResetLink')}
+                    </Button>
                 </div>
                 {resetMessage && <p className="text-green-600 text-sm mt-2">{resetMessage}</p>}
               </div>
-
             </CardContent>
           </Card>
         </TabsContent>
@@ -252,7 +321,82 @@ export default function LoginPage() {
               <CardTitle>{t('login.createAccount')}</CardTitle>
               <CardDescription>{t('login.join')} {t("app.name")} {t('login.today')}!</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6">
+              {/* Account Type Selection */}
+              <div className="space-y-4">
+                <Label className="text-base">{t('login.iAm')}</Label>
+                <div className="grid grid-cols-2 gap-4">
+                  <div 
+                    className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
+                      role === "customer" 
+                        ? "border-primary bg-primary/5" 
+                        : "border-muted hover:border-primary/50"
+                    }`}
+                    onClick={() => setRole("customer")}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem 
+                        value="customer" 
+                        id="r-customer-signup" 
+                        checked={role === "customer"}
+                        className="peer"
+                      />
+                      <Label htmlFor="r-customer-signup" className="font-medium cursor-pointer">
+                        {t('admin.customer')}
+                      </Label>
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-2">
+                      {t('login.browseAndShop')}
+                    </p>
+                    <ul className="text-xs text-muted-foreground mt-2 space-y-1">
+                      <li className="flex items-center">
+                        <span className="mr-1">✓</span> {t('login.browseProducts')}
+                      </li>
+                      <li className="flex items-center">
+                        <span className="mr-1">✓</span> {t('login.addToCart')}
+                      </li>
+                      <li className="flex items-center">
+                        <span className="mr-1">✓</span> {t('login.trackOrders')}
+                      </li>
+                    </ul>
+                  </div>
+                  <div 
+                    className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
+                      role === "seller" 
+                        ? "border-primary bg-primary/5" 
+                        : "border-muted hover:border-primary/50"
+                    }`}
+                    onClick={() => setRole("seller")}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem 
+                        value="seller" 
+                        id="r-seller-signup" 
+                        checked={role === "seller"}
+                        className="peer"
+                      />
+                      <Label htmlFor="r-seller-signup" className="font-medium cursor-pointer">
+                        {t('admin.seller')}
+                      </Label>
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-2">
+                      {t('login.sellProducts')}
+                    </p>
+                    <ul className="text-xs text-muted-foreground mt-2 space-y-1">
+                      <li className="flex items-center">
+                        <span className="mr-1">✓</span> {t('login.listProducts')}
+                      </li>
+                      <li className="flex items-center">
+                        <span className="mr-1">✓</span> {t('login.manageOrders')}
+                      </li>
+                      <li className="flex items-center">
+                        <span className="mr-1">✓</span> {t('login.getNotified')}
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="signup-email">{t('admin.email')}</Label>
@@ -345,20 +489,9 @@ export default function LoginPage() {
                     <p className="text-green-500 text-xs">{t('login.passwordsMatch')} ✓</p>
                   )}
                 </div>
-                <div className="space-y-2">
-                  <Label>{t('login.iAm')}</Label>
-                  <RadioGroup defaultValue="customer" value={role} onValueChange={(value) => setRole(value as UserRole)} className="flex gap-4">
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="customer" id="r-customer" />
-                      <Label htmlFor="r-customer">{t('admin.customer')}</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="seller" id="r-seller" />
-                      <Label htmlFor="r-seller">{t('admin.seller')}</Label>
-                    </div>
-                  </RadioGroup>
-                </div>
-                <Button type="submit" className="w-full" disabled={isSubmitting}>{isSubmitting ? t('login.signingUp') : t('login.createAccount')}</Button>
+                <Button type="submit" className="w-full" disabled={isSubmitting}>
+                  {isSubmitting ? t('login.signingUp') : t('login.createAccount')}
+                </Button>
               </form>
 
               <div className="relative">
@@ -370,7 +503,11 @@ export default function LoginPage() {
                 </div>
               </div>
 
-              <Button variant="outline" className="w-full" onClick={() => handleGoogleSignIn(role)}>
+              <Button 
+                variant="outline" 
+                className="w-full" 
+                onClick={() => handleGoogleSignIn(role)}
+              >
                 {t('login.googleSignUp')}
               </Button>
               {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
