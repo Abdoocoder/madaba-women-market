@@ -16,18 +16,19 @@ export function checkFirebaseConfig() {
   
   const missingVars: string[] = [];
   Object.entries(config).forEach(([key, value]) => {
-    if (!value) {
+    if (!value || value.includes('your-') || value === 'undefined') {
       missingVars.push(key);
       if (isDevelopment) {
-        console.error(`❌ Missing Firebase config: ${key}`);
+        console.error(`❌ Missing or placeholder Firebase config: ${key}`);
       }
     }
   });
 
   if (missingVars.length > 0) {
     if (isDevelopment) {
-      console.error("🚨 Missing Firebase environment variables:", missingVars);
-      console.log("💡 Please check your .env.local file and ensure all Firebase variables are set.");
+      console.error("🚨 Missing or placeholder Firebase environment variables:", missingVars);
+      console.log("💡 Please check your .env.local file and ensure all Firebase variables are set with actual values from your Firebase project.");
+      console.log("💡 Run the setup-credentials.sh script or check the Firebase console for your project settings.");
     }
     return false;
   } else {

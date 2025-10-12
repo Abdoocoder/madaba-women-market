@@ -18,7 +18,8 @@ const hasFirebaseConfig =
   process.env.FIREBASE_PROJECT_ID && 
   process.env.FIREBASE_CLIENT_EMAIL && 
   process.env.FIREBASE_PRIVATE_KEY &&
-  process.env.FIREBASE_PRIVATE_KEY !== '-----BEGIN PRIVATE KEY-----\nYOUR_ACTUAL_PRIVATE_KEY\n-----END PRIVATE KEY-----\n';
+  process.env.FIREBASE_PRIVATE_KEY !== '-----BEGIN PRIVATE KEY-----\nYOUR_ACTUAL_PRIVATE_KEY\n-----END PRIVATE KEY-----\n' &&
+  !process.env.FIREBASE_PRIVATE_KEY.includes('your-');
 
 // Function to initialize Firebase Admin
 function initializeFirebaseAdmin() {
@@ -33,9 +34,11 @@ function initializeFirebaseAdmin() {
       console.log('⚠️ Firebase Admin not initialized - missing or invalid configuration');
       // Only log detailed info in development to avoid exposing env vars in production
       if (process.env.NODE_ENV === 'development') {
-        console.log('FIREBASE_PROJECT_ID exists:', !!process.env.FIREBASE_PROJECT_ID);
-        console.log('FIREBASE_CLIENT_EMAIL exists:', !!process.env.FIREBASE_CLIENT_EMAIL);
-        console.log('FIREBASE_PRIVATE_KEY exists and valid:', !!(process.env.FIREBASE_PRIVATE_KEY && process.env.FIREBASE_PRIVATE_KEY !== '-----BEGIN PRIVATE KEY-----\nYOUR_ACTUAL_PRIVATE_KEY\n-----END PRIVATE KEY-----\n'));
+        console.log('FIREBASE_PROJECT_ID exists and valid:', !!(process.env.FIREBASE_PROJECT_ID && !process.env.FIREBASE_PROJECT_ID.includes('your-')));
+        console.log('FIREBASE_CLIENT_EMAIL exists and valid:', !!(process.env.FIREBASE_CLIENT_EMAIL && !process.env.FIREBASE_CLIENT_EMAIL.includes('your-')));
+        console.log('FIREBASE_PRIVATE_KEY exists and valid:', !!(process.env.FIREBASE_PRIVATE_KEY && 
+          process.env.FIREBASE_PRIVATE_KEY !== '-----BEGIN PRIVATE KEY-----\nYOUR_ACTUAL_PRIVATE_KEY\n-----END PRIVATE KEY-----\n' && 
+          !process.env.FIREBASE_PRIVATE_KEY.includes('your-')));
       }
     } else {
       console.log('⚠️ Firebase Admin not initialized - running in browser');
@@ -78,6 +81,12 @@ initializeFirebaseAdmin();
 
 // Safe getter functions that won't fail during build
 export function getAdminAuth() {
+  // Check if we have valid configuration first
+  if (!hasFirebaseConfig) {
+    console.error('Firebase Admin not configured - check environment variables');
+    throw new Error('Firebase Admin not configured - check environment variables. Make sure FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, and FIREBASE_PRIVATE_KEY are set correctly in your .env.local file.');
+  }
+  
   // Ensure app is initialized
   if (!firebaseApp) {
     const initResult = initializeFirebaseAdmin();
@@ -101,6 +110,12 @@ export function getAdminAuth() {
 }
 
 export function getAdminDb() {
+  // Check if we have valid configuration first
+  if (!hasFirebaseConfig) {
+    console.error('Firebase Admin not configured - check environment variables');
+    throw new Error('Firebase Admin not configured - check environment variables. Make sure FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, and FIREBASE_PRIVATE_KEY are set correctly in your .env.local file.');
+  }
+  
   // Ensure app is initialized
   if (!firebaseApp) {
     const initResult = initializeFirebaseAdmin();
