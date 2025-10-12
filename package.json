@@ -54,7 +54,7 @@
     "geist": "^1.3.1",
     "input-otp": "1.4.1",
     "lucide-react": "^0.454.0",
-    "next": "15.2.4",
+    "next": "^15.5.4",
     "next-cloudinary": "latest",
     "next-themes": "latest",
     "path": "latest",
