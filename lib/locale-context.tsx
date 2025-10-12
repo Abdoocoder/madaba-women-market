@@ -16,6 +16,7 @@ import arTerms from "@/locales/ar/terms.json"
 import arFaq from "@/locales/ar/faq.json"
 import arHelp from "@/locales/ar/help.json"
 import arFooter from "@/locales/ar/footer.json"
+import arHeader from "@/locales/ar/header.json"
 
 import enCommon from "@/locales/en/common.json"
 import enHome from "@/locales/en/home.json"
@@ -29,6 +30,8 @@ import enTerms from "@/locales/en/terms.json"
 import enFaq from "@/locales/en/faq.json"
 import enHelp from "@/locales/en/help.json"
 import enFooter from "@/locales/en/footer.json"
+import enHeader from "@/locales/en/header.json"
+
 
 // Legacy imports for compatibility (will be removed after migration)
 import arLegacy from "@/locales/ar.json"
@@ -59,7 +62,8 @@ const arTranslations = {
   terms: arTerms,
   faq: arFaq,
   help: arHelp,
-  footer: arFooter
+  footer: arFooter,
+  header: arHeader
 }
 
 const enTranslations = {
@@ -75,7 +79,8 @@ const enTranslations = {
   terms: enTerms,
   faq: enFaq,
   help: enHelp,
-  footer: enFooter
+  footer: enFooter,
+  header: enHeader
 }
 
 const translations = {
