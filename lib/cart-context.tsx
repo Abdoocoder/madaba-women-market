@@ -56,40 +56,80 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   // Sync cart with Firebase when user is authenticated
   useEffect(() => {
+    let unsubscribe: (() => void) | null = null;
+    
     if (!user || !user.id) return
 
     const cartRef = doc(db, "carts", user.id)
     
-    // Set up real-time listener for cart updates
-    const unsubscribe = onSnapshot(cartRef, (docSnap) => {
-      if (docSnap.exists()) {
-        const cartData = docSnap.data()
-        if (cartData.items) {
-          setItems(cartData.items)
-          // Also save to localStorage for offline access
-          safeLocalStorage.setItem("seydaty_cart", JSON.stringify(cartData.items))
-        }
-      }
-    }, (error) => {
-      // Handle permission errors gracefully
-      if (error.code === 'permission-denied') {
-        console.warn("Insufficient permissions to read cart data. Using local storage only.");
-        // Try to load from localStorage as fallback
+    // Set up real-time listener for cart updates with better error handling
+    const setupListener = () => {
+      try {
+        unsubscribe = onSnapshot(cartRef, (docSnap) => {
+          if (docSnap.exists()) {
+            const cartData = docSnap.data()
+            if (cartData.items) {
+              setItems(cartData.items)
+              // Also save to localStorage for offline access
+              safeLocalStorage.setItem("seydaty_cart", JSON.stringify(cartData.items))
+            }
+          }
+        }, (error) => {
+          // Handle permission errors gracefully
+          if (error.code === 'permission-denied') {
+            console.warn("Insufficient permissions to read cart data. Using local storage only.");
+            // Try to load from localStorage as fallback
+            const storedCart = safeLocalStorage.getItem("seydaty_cart");
+            if (storedCart) {
+              try {
+                setItems(JSON.parse(storedCart));
+              } catch (parseError) {
+                console.error('Error parsing local cart data:', parseError);
+                safeLocalStorage.setItem("seydaty_cart", JSON.stringify([]));
+              }
+            }
+          } else if (error.code === 'unavailable' || error.code === 'cancelled') {
+            // Handle network errors or cancelled operations
+            console.warn("Temporary network issue with cart data. Using local storage.");
+            const storedCart = safeLocalStorage.getItem("seydaty_cart");
+            if (storedCart) {
+              try {
+                setItems(JSON.parse(storedCart));
+              } catch (parseError) {
+                console.error('Error parsing local cart data:', parseError);
+              }
+            }
+          } else {
+            console.error("Error listening to cart updates:", error);
+          }
+        })
+      } catch (error) {
+        console.error("Error setting up cart listener:", error);
+        // Fallback to localStorage
         const storedCart = safeLocalStorage.getItem("seydaty_cart");
         if (storedCart) {
           try {
             setItems(JSON.parse(storedCart));
           } catch (parseError) {
             console.error('Error parsing local cart data:', parseError);
-            safeLocalStorage.setItem("seydaty_cart", JSON.stringify([]));
           }
         }
-      } else {
-        console.error("Error listening to cart updates:", error);
       }
-    })
-
-    return () => unsubscribe()
+    };
+    
+    // Initialize listener with a slight delay to avoid race conditions
+    const timeoutId = setTimeout(setupListener, 100);
+    
+    return () => {
+      clearTimeout(timeoutId);
+      if (unsubscribe) {
+        try {
+          unsubscribe();
+        } catch (error) {
+          console.warn("Error unsubscribing from cart listener:", error);
+        }
+      }
+    }
   }, [user])
 
   // Save cart to localStorage whenever items change
@@ -99,8 +139,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   // Save cart to Firebase when user is authenticated and items change
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout | null = null;
+    
     const saveCartToFirebase = async () => {
-      if (!user || !user.id || items.length === 0) return
+      if (!user || !user.id) return
 
       try {
         const cartRef = doc(db, "carts", user.id)
@@ -111,6 +153,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
         const firebaseError = error as { code?: string };
         if (firebaseError.code === 'permission-denied') {
           console.warn("Insufficient permissions to save cart data to Firebase. Data saved to local storage only.");
+        } else if (firebaseError.code === 'unavailable' || firebaseError.code === 'cancelled') {
+          console.warn("Temporary network issue. Cart saved to local storage only.");
         } else {
           console.error("Error saving cart to Firebase:", error);
         }
@@ -118,8 +162,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
 
     // Debounce the save operation
-    const timeoutId = setTimeout(saveCartToFirebase, 1000)
-    return () => clearTimeout(timeoutId)
+    timeoutId = setTimeout(saveCartToFirebase, 1000)
+    
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId)
+      }
+    }
   }, [items, user])
 
   const addToCart = (product: Product) => {

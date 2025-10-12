@@ -11,6 +11,12 @@
 
 ## 🔥 Recent Updates & Improvements
 
+### ✅ **Firestore Internal Error Fix** (Latest)
+- **Fixed Firestore Internal Assertion Error**: Resolved "Unexpected state (ID: ca9)" error by improving listener cleanup
+- **Enhanced Error Handling**: Improved auth and cart context to handle network issues and permission errors gracefully
+- **Race Condition Prevention**: Added timeouts to prevent race conditions in Firestore listeners
+- **Environment Configuration**: Added sample .env.local file with placeholder values
+
 ### ✅ **Firebase Admin SDK Integration** (Latest - Just Fixed!)
 - **Build Error Resolution**: Fixed "Service account object must contain a string 'private_key' property" error
 - **Safe Initialization**: Updated Firebase Admin SDK to handle build-time scenarios gracefully with singleton pattern
@@ -371,6 +377,21 @@ NODE_ENV=production
 ⚠️ **Security Note**: Never commit `.env.local` to version control. Keep your Firebase private keys secure!
 
 ## 🔧 Troubleshooting
+
+### **Firebase Firestore Internal Error**
+If you encounter: `FIRESTORE (12.3.0) INTERNAL ASSERTION FAILED: Unexpected state (ID: ca9)`
+
+**Solution**: This error was resolved in our latest update. We've implemented several fixes:
+- Added proper cleanup of Firestore listeners in auth and cart contexts
+- Implemented timeouts to prevent race conditions
+- Enhanced error handling for network issues and permission errors
+- Added graceful fallbacks to localStorage when Firestore is unavailable
+
+If the error persists:
+1. Ensure you have the latest code with our fixes
+2. Check your Firebase configuration in `.env.local`
+3. Restart the development server
+4. Clear your browser cache and localStorage
 
 ### **Firebase Admin SDK Build Error**
 If you encounter: `Service account object must contain a string "private_key" property`

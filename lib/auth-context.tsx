@@ -37,39 +37,53 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        try {
-          const userDocRef = doc(db, "users", firebaseUser.uid);
-          const userDocSnap = await getDoc(userDocRef);
+    let unsubscribe: (() => void) | null = null;
+    
+    // Wrap the onAuthStateChanged in a setTimeout to avoid race conditions
+    const initAuthListener = () => {
+      unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+        if (firebaseUser) {
+          try {
+            const userDocRef = doc(db, "users", firebaseUser.uid);
+            const userDocSnap = await getDoc(userDocRef);
 
-          if (userDocSnap.exists()) {
-            const userData = userDocSnap.data() as User;
-            setUser(userData);
-          } else {
-            // Create new user document
-            const newUser: User = {
-              id: firebaseUser.uid,
-              email: firebaseUser.email || '',
-              name: firebaseUser.displayName || 'New User',
-              photoURL: firebaseUser.photoURL || '',
-              role: 'customer', 
-              createdAt: new Date(),
-            };
-            await setDoc(userDocRef, newUser);
-            setUser(newUser);
+            if (userDocSnap.exists()) {
+              const userData = userDocSnap.data() as User;
+              setUser(userData);
+            } else {
+              // Create new user document
+              const newUser: User = {
+                id: firebaseUser.uid,
+                email: firebaseUser.email || '',
+                name: firebaseUser.displayName || 'New User',
+                photoURL: firebaseUser.photoURL || '',
+                role: 'customer', 
+                createdAt: new Date(),
+              };
+              await setDoc(userDocRef, newUser);
+              setUser(newUser);
+            }
+          } catch (error) {
+            console.error("Error fetching/creating user document:", error);
+            setUser(null);
           }
-        } catch (error) {
-          console.error("Error fetching/creating user document:", error);
-          setUser(null);
+        } else {
+          setUser(null)
         }
-      } else {
-        setUser(null)
-      }
-      setIsLoading(false)
-    })
+        setIsLoading(false)
+      });
+    };
 
-    return () => unsubscribe()
+    // Initialize the auth listener
+    const timeoutId = setTimeout(initAuthListener, 0);
+    
+    // Cleanup function
+    return () => {
+      clearTimeout(timeoutId);
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    }
   }, [])
 
   const login = async (email: string, password: string): Promise<boolean> => {
