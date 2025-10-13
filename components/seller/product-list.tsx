@@ -27,13 +27,15 @@ export function ProductList({ products, onEdit, onDelete }: ProductListProps) {
 
   return (
     <div className="space-y-4">
-      {products.map((product) => (
+      {products
+        .filter(product => product.id && product.id.trim() !== '') // Filter out products without valid IDs
+        .map((product) => (
         <Card key={product.id}>
           <CardContent className="p-4">
             <div className="flex gap-4">
               <div className="relative w-24 h-24 flex-shrink-0">
                 <Image
-                  src={product.image || "/placeholder.svg?height=200&width=200"}
+                  src={product.image || "/placeholder.svg"}
                   alt={product.nameAr}
                   fill
                   className="object-cover rounded-md"

@@ -21,35 +21,44 @@ export default function StoreProductPage() {
   const storeId = params.storeId as string
   const productId = params.productId as string
   
-  const { t, locale } = useLocale()
-  const { addToCart } = useCart()
-  const [product, setProduct] = useState<Product | null>(null)
-  const [seller, setSeller] = useState<User | null>(null)
-  const [relatedProducts, setRelatedProducts] = useState<Product[]>([])
-  const [loading, setLoading] = useState(true)
-
+  // Debugging: Log route parameters
   useEffect(() => {
+    console.log("Store product page params:", { storeId, productId });
+    if (!storeId) {
+      console.error("Missing storeId parameter");
+    }
+    if (!productId) {
+      console.error("Missing productId parameter");
+    }
+    
     if (!storeId || !productId) return
 
     const fetchData = async () => {
       setLoading(true)
       try {
+        // Debugging: Log what we're trying to fetch
+        console.log("Fetching product data for:", { storeId, productId });
+        
         // Fetch product data
         const productRef = doc(db, 'products', productId)
         const productSnap = await getDoc(productRef)
 
         if (!productSnap.exists() || productSnap.data().sellerId !== storeId) {
+          console.error("Product not found or doesn't belong to store:", { productId, storeId });
           notFound()
           return
         }
         const productData = { id: productSnap.id, ...productSnap.data() } as Product
+        console.log("Fetched product data:", productData);
         setProduct(productData)
 
         // Fetch seller data
         const sellerRef = doc(db, 'users', storeId)
         const sellerSnap = await getDoc(sellerRef)
         if (sellerSnap.exists()) {
-          setSeller({ id: sellerSnap.id, ...sellerSnap.data() } as User)
+          const sellerData = { id: sellerSnap.id, ...sellerSnap.data() } as User
+          console.log("Fetched seller data:", sellerData);
+          setSeller(sellerData)
         }
 
         // Fetch related products from the same category and seller
@@ -61,7 +70,11 @@ export default function StoreProductPage() {
           // limit(4) // you might want to limit the results
         )
         const relatedSnap = await getDocs(relatedQuery)
-        setRelatedProducts(relatedSnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product)))
+        const relatedProductsData = relatedSnap.docs
+          .map(doc => ({ id: doc.id, ...doc.data() } as Product))
+          .filter(product => product.id && product.id.trim() !== '') // Filter out products without valid IDs
+        console.log("Fetched related products:", relatedProductsData);
+        setRelatedProducts(relatedProductsData)
 
       } catch (error) {
         console.error("Error fetching product or seller data:", error)
@@ -73,13 +86,21 @@ export default function StoreProductPage() {
 
     fetchData()
 
-  }, [storeId, productId])
+  }, [storeId, productId]);
+  
+  const { t, language } = useLocale()
+  const { addToCart } = useCart()
+  const [product, setProduct] = useState<Product | null>(null)
+  const [seller, setSeller] = useState<User | null>(null)
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
 
   if (loading) return <div className="flex justify-center items-center h-screen"><p>{t('common.loading')}</p></div>
   if (!product) return notFound()
 
-  const rating = product.rating || 0
-  const reviewCount = product.reviewCount || 0
+  // Use default values since rating and reviewCount are not in the Product model
+  const rating = 4.5
+  const reviewCount = 0
 
   return (
     <div className="container mx-auto py-8 px-4 md:px-6">
@@ -87,9 +108,9 @@ export default function StoreProductPage() {
         <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
             {/* Product Image */}
             <div className="relative h-96 md:h-full bg-muted rounded-lg overflow-hidden">
-                {product.imageUrl && (
+                {product.image && (
                     <Image 
-                        src={product.imageUrl} 
+                        src={product.image} 
                         alt={product.name} 
                         fill 
                         className="object-cover"
@@ -110,7 +131,7 @@ export default function StoreProductPage() {
                 </div>
                 
                 <p className="text-2xl lg:text-3xl font-extrabold mb-6">
-                    {new Intl.NumberFormat(locale, { style: 'currency', currency: 'JOD' }).format(product.price)}
+                    {new Intl.NumberFormat(language === 'ar' ? 'ar-JO' : 'en-JO', { style: 'currency', currency: 'JOD' }).format(product.price)}
                 </p>
                 
                 <p className="text-muted-foreground mb-6 leading-relaxed">{product.description}</p>
@@ -138,11 +159,15 @@ export default function StoreProductPage() {
         </div>
 
         {/* Related Products */}
-        {relatedProducts.length > 0 && (
+        {relatedProducts
+          .filter(product => product.id && product.id.trim() !== '') // Filter out products without valid IDs
+          .length > 0 && (
             <div className="mt-16">
                 <h2 className="text-2xl font-bold mb-6">{t('product.relatedProducts')}</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {relatedProducts.map(p => <ProductCard key={p.id} product={p} />)}
+                    {relatedProducts
+                      .filter(product => product.id && product.id.trim() !== '') // Filter out products without valid IDs
+                      .map(p => <ProductCard key={p.id} product={p} />)}
                 </div>
             </div>
         )}

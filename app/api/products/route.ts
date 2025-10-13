@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
             descriptionAr: descriptionAr,
             price: price,
             category: category,
-            image: imageUrl || '/placeholder.svg?height=400&width=400',
+            image: imageUrl || '/placeholder.svg',
             sellerId: sellerId,
             sellerName: sellerName,
             stock: stock,

@@ -47,12 +47,27 @@ export default function Home() {
         const fetchedProducts = querySnapshot.docs
           .map((doc) => {
             const productData = doc.data();
-            return {
+            const product: any = {
               id: doc.id,
               ...productData,
             };
+            
+            // Debugging: Log product data
+            console.log("Fetched product:", product);
+            
+            // Validate that we have all required data
+            if (!product.id || (typeof product.id === 'string' && product.id.trim() === '')) {
+              console.error("Product is missing valid ID:", productData);
+              return null; // Skip this product
+            }
+            if (!product.sellerId) {
+              console.error("Product is missing sellerId:", product);
+              return null; // Skip this product
+            }
+            
+            return product;
           })
-          .filter((product: { id: string }) => product.id) as Product[] // Filter out products without valid IDs
+          .filter((product): product is Product => product !== null) // Filter out null products
         setProducts(fetchedProducts)
       } catch (error) {
         console.error("Error fetching products:", error)
@@ -65,7 +80,7 @@ export default function Home() {
   }, [])
 
   const filteredAndSortedProducts = useMemo(() => {
-    let filtered = products.filter(product => product.id) // Filter out products without valid IDs
+    let filtered = products.filter(product => product.id && product.id.trim() !== '') // Filter out products without valid IDs
 
     // Filter by search query
     if (searchQuery) {

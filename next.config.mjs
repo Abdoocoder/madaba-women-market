@@ -12,7 +12,7 @@ const nextConfig = {
 
   images: {
     formats: ['image/webp', 'image/avif'],
-    unoptimized: false,
+    unoptimized: true, // Temporarily disable image optimization
     remotePatterns: [
       {
         protocol: 'https',
@@ -27,7 +27,12 @@ const nextConfig = {
         pathname: '/**',
       }
     ],
-    // Local images are automatically handled
+    localPatterns: [
+      {
+        pathname: '/**',
+        search: '**',
+      },
+    ],
   },
 
   compiler: {

@@ -94,7 +94,7 @@ export function ProductManagement({ products, onProductsUpdate }: ProductManagem
                   <div className="flex gap-4">
                     <div className="relative w-24 h-24 flex-shrink-0">
                       <Image
-                        src={product.image || "/placeholder.svg?height=200&width=200"}
+                        src={product.image || "/placeholder.svg"}
                         alt={product.nameAr}
                         fill
                         className="object-cover rounded-md"
@@ -143,7 +143,7 @@ export function ProductManagement({ products, onProductsUpdate }: ProductManagem
                 <div className="flex gap-4">
                   <div className="relative w-24 h-24 flex-shrink-0">
                     <Image
-                      src={product.image || "/placeholder.svg?height=200&width=200"}
+                      src={product.image || "/placeholder.svg"}
                       alt={product.nameAr}
                       fill
                       className="object-cover rounded-md"

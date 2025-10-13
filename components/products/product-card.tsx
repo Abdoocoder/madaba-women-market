@@ -1,6 +1,7 @@
 'use client'
 
 import type React from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { ShoppingCart, Star } from "lucide-react"
@@ -24,6 +25,12 @@ export function ProductCard({ product }: ProductCardProps) {
   const { t, language } = useLocale()
   const router = useRouter()
 
+  // Early return if product is missing required fields
+  if (!product.id || !product.sellerId) {
+    console.warn("ProductCard received invalid product, skipping render:", product);
+    return null;
+  }
+
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation() // Prevent card click event
@@ -41,12 +48,12 @@ export function ProductCard({ product }: ProductCardProps) {
     addToCart(product)
   }
 
-  const rating = product.rating || (Math.floor(Math.random() * 2) + 4); 
-  const reviewCount = product.reviewCount || 0;
+  const rating = 4.5; // Hardcoded rating since it's not in the Product model
+  const reviewCount = 0; // Hardcoded review count since it's not in the Product model
 
   // Updated product URL to point to the nested store product page
   const productUrl = `/store/${product.sellerId}/product/${product.id}`;
-
+  
   const handleCardClick = () => {
     router.push(productUrl)
   }
@@ -56,13 +63,20 @@ export function ProductCard({ product }: ProductCardProps) {
       onClick={handleCardClick}
       className="overflow-hidden h-full flex flex-col group hover:shadow-xl transition-shadow duration-300 cursor-pointer"
     >
-      <div className="relative aspect-square">
+      <div className="relative aspect-square w-full h-full">
+        {/* Debugging: Show image URL */}
+        <div className="absolute top-0 left-0 z-10 bg-black/50 text-white text-xs p-1 hidden">
+          {product.image || "No image"}
+        </div>
         <Image
-          src={product.imageUrl || "/placeholder.svg"} // Removed query params to avoid config
+          src={product.image || "/placeholder.svg"}
           alt={language === "ar" ? product.nameAr : product.name}
           fill
           className="object-cover transition-transform duration-300 group-hover:scale-105"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          onError={(e) => {
+            console.error("Error loading image for product:", product.id, product.image);
+          }}
         />
         {product.featured && (
           <Badge className="absolute top-2 right-2 bg-gradient-to-r from-purple-600 to-pink-600 border-none text-white">
@@ -113,7 +127,7 @@ export function ProductCard({ product }: ProductCardProps) {
         </div>
         
         <div className="flex items-center justify-between">
-          <span className="text-xl font-bold text-primary">{formatCurrency(product.price, language)}</span>
+          <span className="text-xl font-bold text-primary">{formatCurrency(product.price)}</span>
           <span className={`text-xs font-semibold px-2 py-1 rounded-md ${product.stock > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
             {product.stock > 0 ? `${t("product.inStock")}: ${product.stock}`: t("product.outOfStock")}
           </span>

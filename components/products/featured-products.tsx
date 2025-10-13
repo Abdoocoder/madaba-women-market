@@ -26,12 +26,27 @@ export function FeaturedProducts() {
         const products = querySnapshot.docs
           .map((doc) => {
             const productData = doc.data();
-            return {
+            const product: any = {
               id: doc.id,
               ...productData,
             };
+            
+            // Debugging: Log product data
+            console.log("Fetched featured product:", product);
+            
+            // Validate that we have all required data
+            if (!product.id || (typeof product.id === 'string' && product.id.trim() === '')) {
+              console.error("Featured product is missing valid ID:", productData);
+              return null; // Skip this product
+            }
+            if (!product.sellerId) {
+              console.error("Featured product is missing sellerId:", product);
+              return null; // Skip this product
+            }
+            
+            return product;
           })
-          .filter((product: { id: string }) => product.id) as Product[] // Filter out products without valid IDs
+          .filter((product): product is Product => product !== null) // Filter out null products
         setFeaturedProducts(products)
       } catch (error) {
         console.error("Error fetching featured products:", error)
@@ -65,7 +80,7 @@ export function FeaturedProducts() {
           transition={{ duration: 0.5, delay: 0.2 }}
         >
           {featuredProducts
-            .filter(product => product.id) // Filter out products without valid IDs
+            .filter(product => product.id && product.id.trim() !== '') // Filter out products without valid IDs
             .map((product, index) => (
               <motion.div
                 key={product.id}
