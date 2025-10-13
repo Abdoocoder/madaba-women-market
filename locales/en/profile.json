@@ -1,4 +1,9 @@
 {
   "changeAvatar": "Change Avatar",
-  "emailChangeNote": "Email cannot be changed after account creation"
+  "emailChangeNote": "Email cannot be changed after account creation",
+  "name": "Full Name",
+  "enterName": "Enter your full name",
+  "phone": "Phone Number",
+  "myProfile": "My Profile",
+  "accountSettings": "Account Settings"
 }

@@ -7,6 +7,7 @@ import { createContext, useContext, useState, useEffect } from "react"
 import arCommon from "@/locales/ar/common.json"
 import arHome from "@/locales/ar/home.json"
 import arProduct from "@/locales/ar/product.json"
+import arProfile from "@/locales/ar/profile.json"
 import arSeller from "@/locales/ar/seller.json"
 import arAdmin from "@/locales/ar/admin.json"
 import arBuyer from "@/locales/ar/buyer.json"
@@ -21,6 +22,7 @@ import arHeader from "@/locales/ar/header.json"
 import enCommon from "@/locales/en/common.json"
 import enHome from "@/locales/en/home.json"
 import enProduct from "@/locales/en/product.json"
+import enProfile from "@/locales/en/profile.json"
 import enSeller from "@/locales/en/seller.json"
 import enAdmin from "@/locales/en/admin.json"
 import enBuyer from "@/locales/en/buyer.json"
@@ -62,6 +64,7 @@ const arTranslations = {
   common: arCommon,
   home: arHome,
   product: arProduct,
+  profile: arProfile,
   seller: arSeller,
   admin: arAdmin,
   buyer: arBuyer,
@@ -79,6 +82,7 @@ const enTranslations = {
   common: enCommon,
   home: enHome,
   product: enProduct,
+  profile: enProfile,
   seller: enSeller,
   admin: enAdmin,
   buyer: enBuyer,

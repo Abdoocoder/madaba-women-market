@@ -19,6 +19,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
+  const [name, setName] = useState("") // Added for minimal registration
   const [role, setRole] = useState<UserRole>("customer")
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -65,7 +66,8 @@ export default function LoginPage() {
     setIsSubmitting(true)
     setError(null)
 
-    if (!email || !password || !confirmPassword) {
+    // Minimal registration - only require name, email, password, and confirm password
+    if (!name || !email || !password || !confirmPassword) {
       setError(t("login.fillAllFields"))
       setIsSubmitting(false)
       return
@@ -90,9 +92,9 @@ export default function LoginPage() {
     }
 
     try {
-      const success = await signUp(email, password, role)
+      const success = await signUp(email, password, role, name) // Pass name to signUp
       if (success) {
-        router.push("/")
+        router.push("/") // Redirect to complete profile or dashboard
       }
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error)
@@ -233,6 +235,20 @@ export default function LoginPage() {
                   </div>
                 </RadioGroup>
               </div>
+              
+              {/* Minimal Registration Fields */}
+              <div className="grid gap-2">
+                <Label htmlFor="name">{t("profile.name")}</Label>
+                <Input
+                  id="name"
+                  type="text"
+                  placeholder={t("profile.enterName")}
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+              </div>
+              
               <div className="grid gap-2">
                 <Label htmlFor="email">{t("admin.email")}</Label>
                 <Input

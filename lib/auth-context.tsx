@@ -19,7 +19,7 @@ import type { User, UserRole } from "./types"
 interface AuthContextType {
   user: User | null
   login: (email: string, password: string) => Promise<boolean>
-  signUp: (email: string, password: string, role: UserRole) => Promise<boolean>
+  signUp: (email: string, password: string, role: UserRole, name?: string) => Promise<boolean> // Updated signature
   signInWithGoogle: (role: UserRole) => Promise<boolean>
   logout: () => void
   sendPasswordReset: (email: string) => Promise<boolean>
@@ -133,7 +133,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
   
-  const signUp = async (email: string, password: string, role: UserRole): Promise<boolean> => {
+  const signUp = async (email: string, password: string, role: UserRole, name?: string): Promise<boolean> => {
     try {
       // Validate email format
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -150,10 +150,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const firebaseUser = userCredential.user;
       const userDocRef = doc(db, "users", firebaseUser.uid);
       
+      // Use provided name or default to a generic name based on role
+      const displayName = name || `New ${role.charAt(0).toUpperCase() + role.slice(1)}`;
+      
       const newUser: User = {
         id: firebaseUser.uid,
         email: firebaseUser.email || '',
-        name: firebaseUser.displayName || `New ${role.charAt(0).toUpperCase() + role.slice(1)}`,
+        name: displayName,
         photoURL: firebaseUser.photoURL || '',
         role: role,
         createdAt: new Date(),
