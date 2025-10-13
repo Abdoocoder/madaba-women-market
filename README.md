@@ -1,6 +1,6 @@
-# Madaba Women Market | سوق مدابا للسيدات
+# Madaba Women Market | سوق مادبا للسيدات
 
-🌟 **A modern, production-ready e-commerce platform built with Next.js 15, Firebase, and TypeScript**
+🌟 **A leading platform in Madaba aimed at empowering women and supporting them to achieve success through e-commerce, built with Next.js 15, Firebase, and TypeScript**
 
 ![Next.js](https://img.shields.io/badge/Next.js-15.5.4-black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)
@@ -105,7 +105,7 @@ npm run dev
 
 ## 🌟 Overview
 
-Madaba Women Market is a comprehensive e-commerce platform designed to empower women entrepreneurs. Built with **Next.js 15** and modern web technologies, this **production-ready** application provides a complete marketplace experience with features for customers, sellers, and administrators.
+Madaba Women Market is a leading platform in Madaba aimed at empowering women and supporting them to achieve success through e-commerce. Built with **Next.js 15** and modern web technologies, this **production-ready** application provides a complete marketplace experience with features for customers, sellers, and administrators.
 
 🏆 **Latest Achievement**: Successfully resolved all Next.js 15 compatibility issues, Firebase Admin SDK build errors, and TypeScript compilation errors, making it fully production-ready!
 
@@ -442,7 +442,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 <div align="center">
 
-**Built with ❤️ for women entrepreneurs**
+**Built with ❤️ to empower women in Madaba**
 
 [🌐 Live Demo](https://madaba-women-market.vercel.app/) | [📚 Documentation](DEPLOYMENT.md) | [🐛 Report Bug](https://github.com/Abdoocoder/madaba-women-market/issues)
 
