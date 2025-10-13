@@ -70,7 +70,7 @@ Implemented a streamlined registration process for the e-commerce platform that 
 ## Technical Implementation Details
 
 ### Authentication Flow
-```typescript
+\`\`\`typescript
 // Updated signUp function signature
 signUp: (email: string, password: string, role: UserRole, name?: string) => Promise<boolean>
 
@@ -83,7 +83,7 @@ const newUser: User = {
   role: role,
   createdAt: new Date(),
 };
-```
+\`\`\`
 
 ### Form Validation
 - Client-side validation for required fields

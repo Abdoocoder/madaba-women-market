@@ -12,15 +12,15 @@ This guide explains how to deploy the updated Firestore security rules that incl
 
 ### 1. Install Firebase CLI (if not already installed)
 
-```bash
+\`\`\`bash
 npm install -g firebase-tools
-```
+\`\`\`
 
 ### 2. Login to Firebase
 
-```bash
+\`\`\`bash
 firebase login
-```
+\`\`\`
 
 This will open a browser window where you can log in with your Google account that has access to the Firebase project.
 
@@ -30,26 +30,26 @@ You can deploy the rules using either of these methods:
 
 #### Method 1: Using the custom script (recommended)
 
-```bash
+\`\`\`bash
 npm run deploy-rules
-```
+\`\`\`
 
 #### Method 2: Using Firebase CLI directly
 
-```bash
+\`\`\`bash
 firebase deploy --only firestore:rules
-```
+\`\`\`
 
 ## What the Updated Rules Do
 
 The updated Firestore rules now include permissions for the `carts` collection:
 
-```javascript
+\`\`\`javascript
 // Carts - users can only access their own cart
 match /carts/{userId} {
   allow read, write: if request.auth != null && request.auth.uid == userId;
 }
-```
+\`\`\`
 
 This rule ensures that:
 - Only authenticated users can read/write to cart documents

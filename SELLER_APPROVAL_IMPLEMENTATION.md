@@ -17,7 +17,7 @@ The implementation includes the following changes:
 - Added a check in the POST endpoint to verify that the seller has been approved before allowing product creation
 - Changed the default `approved` status for new products from `true` to `false`, requiring admin approval
 
-```typescript
+\`\`\`typescript
 // Check if seller is approved before allowing product creation
 if (user.status !== 'approved') {
     return NextResponse.json({ 
@@ -28,7 +28,7 @@ if (user.status !== 'approved') {
 
 // New products require admin approval
 approved: false
-```
+\`\`\`
 
 ### 2. Frontend UI Changes
 
@@ -39,7 +39,7 @@ approved: false
 - Added a notification banner for pending sellers
 - Improved error handling for product creation attempts by pending sellers
 
-```typescript
+\`\`\`typescript
 // Check if seller is approved
 const isSellerApproved = user.status === 'approved';
 
@@ -53,7 +53,7 @@ const isSellerApproved = user.status === 'approved';
     <p className="text-yellow-700 mt-1">{t("seller.pendingApprovalMessage")}</p>
   </div>
 )}
-```
+\`\`\`
 
 ### 3. Authentication Enhancement
 
@@ -62,9 +62,9 @@ const isSellerApproved = user.status === 'approved';
 - Modified the authentication function to include the user's status in the returned user object
 - This ensures that the approval status is available throughout the application
 
-```typescript
+\`\`\`typescript
 status: userData?.status || 'approved', // Default to approved for non-sellers
-```
+\`\`\`
 
 ### 4. Translation Updates
 

@@ -42,6 +42,7 @@
     "@radix-ui/react-tooltip": "1.1.6",
     "@vercel/analytics": "latest",
     "@vercel/speed-insights": "latest",
+    "child_process": "latest",
     "class-variance-authority": "^0.7.1",
     "cloudinary": "latest",
     "clsx": "^2.1.1",
@@ -70,6 +71,7 @@
     "sonner": "^1.7.4",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
+    "util": "latest",
     "vue-router": "latest",
     "zod": "^3.25.67"
   },
