@@ -16,14 +16,14 @@ The application uses a `.env.local` file to store configuration variables. A sam
 ### Client-side Configuration
 These variables are used by the frontend application:
 
-```
+\`\`\`
 NEXT_PUBLIC_FIREBASE_API_KEY=your-api-key-here
 NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-auth-domain-here
 NEXT_PUBLIC_FIREBASE_PROJECT_ID=your-project-id-here
 NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your-storage-bucket-here
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your-messaging-sender-id-here
 NEXT_PUBLIC_FIREBASE_APP_ID=your-app-id-here
-```
+\`\`\`
 
 To obtain these values:
 1. Go to the Firebase Console
@@ -35,11 +35,11 @@ To obtain these values:
 ### Admin SDK Configuration
 These variables are used by the server-side API routes:
 
-```
+\`\`\`
 FIREBASE_PROJECT_ID=your-project-id-here
 FIREBASE_CLIENT_EMAIL=your-service-account@project.iam.gserviceaccount.com
 FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nYOUR_ACTUAL_PRIVATE_KEY\n-----END PRIVATE KEY-----\n"
-```
+\`\`\`
 
 To obtain these values:
 1. Go to the Firebase Console
@@ -51,11 +51,11 @@ To obtain these values:
 
 ## Cloudinary Configuration
 
-```
+\`\`\`
 NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=your-cloud-name-here
 CLOUDINARY_API_KEY=your-cloudinary-api-key-here
 CLOUDINARY_API_SECRET=your-cloudinary-api-secret-here
-```
+\`\`\`
 
 To obtain these values:
 1. Go to your Cloudinary Dashboard
@@ -66,18 +66,18 @@ To obtain these values:
 ### Development Environment
 For local development, you can use placeholder values in your `.env.local` file:
 
-```
+\`\`\`
 NODE_ENV=development
-```
+\`\`\`
 
 The application includes error handling that will gracefully handle missing or invalid credentials during development.
 
 ### Production Environment
 For production deployment, ensure all variables contain valid credentials:
 
-```
+\`\`\`
 NODE_ENV=production
-```
+\`\`\`
 
 ## Security Considerations
 
@@ -90,9 +90,9 @@ When adding the Firebase private key to your environment variables, ensure it ma
 - Keep the quotes around the entire value
 
 Example:
-```
+\`\`\`
 FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nYOUR_KEY_HERE\n-----END PRIVATE KEY-----\n"
-```
+\`\`\`
 
 ## Troubleshooting
 
@@ -117,9 +117,9 @@ If image uploads fail:
 ## Using the Setup Script
 The repository includes a setup script to help you configure your environment:
 
-```bash
+\`\`\`bash
 bash setup-credentials.sh
-```
+\`\`\`
 
 This script will guide you through the process of obtaining and setting up your credentials.
 

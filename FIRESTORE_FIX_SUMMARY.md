@@ -2,9 +2,9 @@
 
 ## Issue Identified
 The application was experiencing a critical Firebase Firestore error:
-```
+\`\`\`
 FIRESTORE (12.3.0) INTERNAL ASSERTION FAILED: Unexpected state (ID: ca9)
-```
+\`\`\`
 
 This error was accompanied by:
 1. Permission denied errors for cart data access
@@ -41,7 +41,7 @@ This error was accompanied by:
 ## Technical Details
 
 ### Auth Context Fix
-```typescript
+\`\`\`typescript
 useEffect(() => {
   let unsubscribe: (() => void) | null = null;
   
@@ -63,10 +63,10 @@ useEffect(() => {
     }
   }
 }, [])
-```
+\`\`\`
 
 ### Cart Context Fix
-```typescript
+\`\`\`typescript
 useEffect(() => {
   let unsubscribe: (() => void) | null = null;
   
@@ -109,7 +109,7 @@ useEffect(() => {
     }
   }
 }, [user])
-```
+\`\`\`
 
 ## Testing
 The fixes have been implemented to:
