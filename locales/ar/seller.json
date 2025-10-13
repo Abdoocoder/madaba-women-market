@@ -97,5 +97,8 @@
     "storeCategoryRequired": "فئة المتجر مطلوبة",
     "accountCreationFailed": "فشل في إنشاء الحساب. يرجى المحاولة مرة أخرى.",
     "registrationFailed": "فشل في تسجيل البائع. يرجى المحاولة مرة أخرى."
-  }
+  },
+  "pendingApprovalTitle": "الحساب في انتظار الموافقة",
+  "pendingApprovalMessage": "حسابك كبائع في انتظار موافقة الإدارة. ستتمكن من إضافة المنتجات بمجرد الموافقة.",
+  "productCreationError": "فشل في إنشاء المنتج. يرجى المحاولة مرة أخرى."
 }

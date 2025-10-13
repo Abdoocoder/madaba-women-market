@@ -27,6 +27,7 @@ async function verifyTokenAndGetUser(idToken: string): Promise<User | null> {
             name: userData?.name || decodedToken.name || 'Unknown User',
             photoURL: userData?.photoURL || decodedToken.picture || '',
             role: userData?.role || 'customer',
+            status: userData?.status || 'approved', // Default to approved for non-sellers
             createdAt: userData?.createdAt || new Date(),
         } as User;
     } catch (error) {

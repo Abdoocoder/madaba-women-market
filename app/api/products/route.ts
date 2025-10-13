@@ -81,6 +81,14 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
+    // Check if seller is approved before allowing product creation
+    if (user.status !== 'approved') {
+        return NextResponse.json({ 
+            message: 'Seller account pending approval',
+            details: 'Your seller account is pending admin approval. You will be able to add products once approved.'
+        }, { status: 403 });
+    }
+
     try {
         const formData = await request.formData();
         const nameAr = formData.get('nameAr') as string;
@@ -116,7 +124,7 @@ export async function POST(request: NextRequest) {
             sellerName: sellerName,
             stock: stock,
             featured: false,
-            approved: true,
+            approved: false, // New products require admin approval
             createdAt: new Date(),
         }
 

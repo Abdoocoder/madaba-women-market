@@ -156,8 +156,12 @@ export default function SellerDashboardPage() {
         setShowAddForm(false)
       } else if (response.status === 401) {
         console.error("Unauthorized access to create product API - token may have expired")
+      } else if (response.status === 403) {
+        const errorData = await response.json();
+        alert(errorData.message + "\n" + errorData.details);
       } else {
         console.error("Error creating product. Status:", response.status)
+        alert(t("seller.productCreationError"));
       }
     } catch (error) {
       console.error("Error adding product:", error)
@@ -228,6 +232,9 @@ export default function SellerDashboardPage() {
   if (!user || user.role !== "seller") {
     return <div>{t("common.loading")}</div>
   }
+
+  // Check if seller is approved
+  const isSellerApproved = user.status === 'approved';
 
   return (
     <div className="container mx-auto py-8 px-4 space-y-8">
@@ -340,11 +347,28 @@ export default function SellerDashboardPage() {
         <TabsContent value="products" className="space-y-6">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold">{t("seller.products")}</h2>
-            <Button onClick={() => setShowAddForm(true)}>
-              <Plus className="mr-2 h-4 w-4" />
-              {t("seller.addProduct")}
-            </Button>
+            {isSellerApproved ? (
+              <Button onClick={() => setShowAddForm(true)}>
+                <Plus className="mr-2 h-4 w-4" />
+                {t("seller.addProduct")}
+              </Button>
+            ) : (
+              <Button disabled title={t("seller.pendingApprovalMessage")}>
+                <Plus className="mr-2 h-4 w-4" />
+                {t("seller.addProduct")}
+              </Button>
+            )}
           </div>
+          
+          {!isSellerApproved && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+              <div className="flex items-center">
+                <Clock className="h-5 w-5 text-yellow-600 mr-2" />
+                <h3 className="font-medium text-yellow-800">{t("seller.pendingApprovalTitle")}</h3>
+              </div>
+              <p className="text-yellow-700 mt-1">{t("seller.pendingApprovalMessage")}</p>
+            </div>
+          )}
 
           {showAddForm && (
             <ProductForm
