@@ -32,7 +32,6 @@ import enHelp from "@/locales/en/help.json"
 import enFooter from "@/locales/en/footer.json"
 import enHeader from "@/locales/en/header.json"
 
-
 // Legacy imports for compatibility (will be removed after migration)
 import arLegacy from "@/locales/ar.json"
 import enLegacy from "@/locales/en.json"
@@ -46,7 +45,16 @@ interface LocaleContextType {
   dir: "rtl" | "ltr"
 }
 
-const LocaleContext = createContext<LocaleContextType | undefined>(undefined)
+// Create a default context value
+const defaultLocaleContext: LocaleContextType = {
+  language: "ar",
+  setLanguage: () => {},
+  t: (key) => key,
+  dir: "rtl",
+};
+
+
+const LocaleContext = createContext<LocaleContextType>(defaultLocaleContext)
 
 // Combine modular translations
 const arTranslations = {

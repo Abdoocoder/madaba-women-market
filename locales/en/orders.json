@@ -1,19 +1,19 @@
 {
-  "id": "Order ID",
+  "myOrders": "My Orders",
+  "fetchError": "Failed to fetch orders.",
+  "statusUpdated": "Order status updated.",
+  "statusUpdateError": "Failed to update order status.",
+  "noOrders": "You have no orders yet.",
   "customer": "Customer",
   "date": "Date",
-  "total": "Total",
   "status": "Status",
+  "total": "Total",
   "actions": "Actions",
-  "pending": "Pending",
-  "processing": "Processing",
-  "shipped": "Shipped",
-  "delivered": "Delivered",
-  "cancelled": "Cancelled",
-  "updatingStatus": "Updating order status...",
-  "statusUpdated": "Order status updated successfully!",
-  "statusUpdateFailed": "Failed to update order status.",
-  "noOrders": "No orders found",
-  "details": "Order Details",
-  "items": "Order Items"
+  "changeStatus": "Change Status",
+  "statuses": {
+    "pending": "Pending",
+    "shipped": "Shipped",
+    "delivered": "Delivered",
+    "cancelled": "Cancelled"
+  }
 }

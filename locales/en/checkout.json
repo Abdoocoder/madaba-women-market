@@ -1,0 +1,14 @@
+{
+  "title": "Checkout",
+  "shippingInfo": "Shipping Information",
+  "name": "Full Name",
+  "address": "Shipping Address",
+  "phone": "Phone Number",
+  "orderSummary": "Order Summary",
+  "quantity": "Quantity",
+  "placeOrder": "Place Order",
+  "placingOrder": "Placing Order...",
+  "fillAllFields": "Please fill in all shipping fields.",
+  "orderPlacedSuccess": "Your order has been placed successfully!",
+  "orderPlacedError": "Failed to place order. Please try again."
+}

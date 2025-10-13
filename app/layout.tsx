@@ -1,5 +1,4 @@
 import { Cairo } from "next/font/google";
-import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "@/lib/auth-context";
 import { CartProvider } from "@/lib/cart-context";
 import { LocaleProvider } from "@/lib/locale-context";
@@ -7,6 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { HeaderWrapper } from "@/components/layout/header-wrapper";
 import { Footer } from "@/components/layout/footer";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { ToasterProvider } from "@/components/toaster-provider";
 import "./globals.css";
 
 const cairo = Cairo({ subsets: ["arabic", "latin"] });
@@ -22,7 +22,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>)
 {
   return (
-    <html lang="ar" dir="rtl" suppressHydrationWarning>
+    <html lang="ar" dir="rtl" suppressHydrationWarning data-scroll-behavior="smooth">
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </head>
@@ -36,9 +36,7 @@ export default function RootLayout({
           <AuthProvider>
             <CartProvider>
               <LocaleProvider>
-                <div suppressHydrationWarning>
-                  <Toaster position="bottom-center" />
-                </div>
+                <ToasterProvider />
                 <HeaderWrapper />
                 <div className="flex-grow pt-16">{children}</div>
                 <Footer />

@@ -1,19 +1,19 @@
 {
-  "id": "رقم الطلب",
+  "myOrders": "طلباتي",
+  "fetchError": "فشل في جلب الطلبات.",
+  "statusUpdated": "تم تحديث حالة الطلب.",
+  "statusUpdateError": "فشل في تحديث حالة الطلب.",
+  "noOrders": "ليس لديك أي طلبات حتى الآن.",
   "customer": "العميل",
   "date": "التاريخ",
-  "total": "الإجمالي",
   "status": "الحالة",
+  "total": "المجموع",
   "actions": "الإجراءات",
-  "pending": "قيد الانتظار",
-  "processing": "قيد المعالجة",
-  "shipped": "تم الشحن",
-  "delivered": "تم التوصيل",
-  "cancelled": "ملغي",
-  "updatingStatus": "جار تحديث حالة الطلب...",
-  "statusUpdated": "تم تحديث حالة الطلب بنجاح!",
-  "statusUpdateFailed": "فشل تحديث حالة الطلب.",
-  "noOrders": "لم يتم العثور على طلبات",
-  "details": "تفاصيل الطلب",
-  "items": "عناصر الطلب"
+  "changeStatus": "تغيير الحالة",
+  "statuses": {
+    "pending": "معلق",
+    "shipped": "تم الشحن",
+    "delivered": "تم التوصيل",
+    "cancelled": "ملغي"
+  }
 }

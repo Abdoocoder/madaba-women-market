@@ -63,6 +63,9 @@
   "contactUs": "Contact Us",
   "loginToFollow": "Please login to follow this store",
   "customersOnly": "Only customers can follow stores",
+  "visitStore": "Visit Store",
+  "follow": "Follow",
+  "memberSince": "Member since",
   "register": {
     "title": "New Seller Registration",
     "description": "Create a seller account to start selling your products",

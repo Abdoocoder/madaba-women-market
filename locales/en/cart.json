@@ -1,0 +1,15 @@
+{
+  "title": "Shopping Cart",
+  "yourCart": "Your Cart",
+  "empty": "Your cart is empty.",
+  "continueShopping": "Continue Shopping",
+  "subtotal": "Subtotal",
+  "total": "Total",
+  "checkout": "Checkout",
+  "itemAdded": "Item Added",
+  "hasBeenAdded": "has been added to your cart.",
+  "differentStoreTitle": "Different Store Alert",
+  "differentStoreMessage": "Your cart contains items from a different store. You can only order from one store at a time. Do you want to clear your cart and add this new item?",
+  "clearAndAdd": "Clear and Add",
+  "remove": "Remove"
+}

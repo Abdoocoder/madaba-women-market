@@ -1,0 +1,14 @@
+{
+  "title": "الدفع",
+  "shippingInfo": "معلومات الشحن",
+  "name": "الاسم الكامل",
+  "address": "عنوان الشحن",
+  "phone": "رقم الهاتف",
+  "orderSummary": "ملخص الطلب",
+  "quantity": "الكمية",
+  "placeOrder": "إتمام الطلب",
+  "placingOrder": "جاري إرسال الطلب...",
+  "fillAllFields": "يرجى ملء جميع حقول الشحن.",
+  "orderPlacedSuccess": "تم إرسال طلبك بنجاح!",
+  "orderPlacedError": "فشل إرسال الطلب. يرجى المحاولة مرة أخرى."
+}

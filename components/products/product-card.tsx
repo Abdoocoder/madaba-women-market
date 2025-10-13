@@ -1,7 +1,6 @@
-"use client"
+'use client'
 
 import type React from "react"
-
 import Image from "next/image"
 import Link from "next/link"
 import { ShoppingCart, Star } from "lucide-react"
@@ -27,6 +26,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault()
+    e.stopPropagation() // Prevent card click event
 
     if (!user) {
       router.push("/login")
@@ -34,100 +34,102 @@ export function ProductCard({ product }: ProductCardProps) {
     }
 
     if (user.role !== "customer") {
+      // Optionally, show a toast message here
       return
     }
 
     addToCart(product)
   }
 
-  // Generate a random rating for demo purposes (in a real app, this would come from the database)
-  const randomRating = Math.floor(Math.random() * 2) + 4; // Between 4-5 stars
+  const rating = product.rating || (Math.floor(Math.random() * 2) + 4); 
+  const reviewCount = product.reviewCount || 0;
+
+  // Updated product URL to point to the nested store product page
+  const productUrl = `/store/${product.sellerId}/product/${product.id}`;
+
+  const handleCardClick = () => {
+    router.push(productUrl)
+  }
 
   return (
-    <div className="block">
-      <Card className="overflow-hidden hover:shadow-lg transition-shadow h-full flex flex-col">
-        <div className="relative aspect-square">
-          <Image 
-            src={product.image || "/placeholder.svg?height=400&width=400"} 
-            alt={product.nameAr} 
-            fill 
-            className="object-cover" 
-            priority={!!product.featured} // Add priority for featured products
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" // Add sizes for better optimization
-          />
-          {product.featured && (
-            <Badge className="absolute top-2 right-2 bg-gradient-to-r from-purple-600 to-pink-600">
-              {t("product.featured")}
-            </Badge>
-          )}
-        </div>
-        <CardContent className="p-4 flex-grow">
-          <h3 className="font-semibold text-lg mb-1 text-balance">
-            {language === "ar" ? product.nameAr : product.name}
-          </h3>
-          <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
-            {language === "ar" ? product.descriptionAr : product.description}
-          </p>
-          
-          {/* Seller Info - Using div instead of Link to avoid nested anchor tags */}
-          {product.sellerName && product.sellerId && (
-            <div className="mb-2">
-              <span className="text-xs text-muted-foreground me-1">
-                {t("product.seller")}:
-              </span>
-              <Link 
-                href={`/seller/${product.sellerId}`} 
-                className="text-xs text-primary hover:underline"
-                onClick={(e) => {
-                  e.stopPropagation()
-                }}
-              >
-                {product.sellerName}
-              </Link>
-            </div>
-          )}
-          
-          {/* Rating */}
-          <div className="flex items-center gap-1 mb-2">
-            <div className="flex items-center">
-              {[...Array(5)].map((_, i) => (
-                <Star 
-                  key={i} 
-                  className={`w-3 h-3 ${i < randomRating ? 'fill-yellow-500 text-yellow-500' : 'text-gray-300'}`} 
-                />
-              ))}
-            </div>
+    <Card 
+      onClick={handleCardClick}
+      className="overflow-hidden h-full flex flex-col group hover:shadow-xl transition-shadow duration-300 cursor-pointer"
+    >
+      <div className="relative aspect-square">
+        <Image
+          src={product.imageUrl || "/placeholder.svg"} // Removed query params to avoid config
+          alt={language === "ar" ? product.nameAr : product.name}
+          fill
+          className="object-cover transition-transform duration-300 group-hover:scale-105"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+        />
+        {product.featured && (
+          <Badge className="absolute top-2 right-2 bg-gradient-to-r from-purple-600 to-pink-600 border-none text-white">
+            {t("product.featured")}
+          </Badge>
+        )}
+      </div>
+      <CardContent className="p-4 flex-grow flex flex-col">
+        <h3 className="font-semibold text-lg mb-1 text-balance group-hover:text-primary transition-colors">
+          {language === "ar" ? product.nameAr : product.name}
+        </h3>
+        
+        <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+          {language === "ar" ? product.descriptionAr : product.description}
+        </p>
+
+        <div className="flex-grow"></div>
+
+        {product.sellerName && product.sellerId && (
+          <div className="mb-2 text-xs">
+            <span className="text-muted-foreground me-1">
+              {t("product.soldBy")}:
+            </span>
+            <Link 
+              href={`/seller/${product.sellerId}`} 
+              className="text-primary hover:underline font-medium"
+              onClick={(e) => e.stopPropagation()} // Prevent parent Link navigation
+            >
+              {product.sellerName}
+            </Link>
+          </div>
+        )}
+        
+        <div className="flex items-center gap-1 mb-3">
+          <div className="flex items-center">
+            {[...Array(5)].map((_, i) => (
+              <Star 
+                key={i} 
+                className={`w-4 h-4 ${i < Math.floor(rating) ? 'fill-yellow-400 text-yellow-500' : 'text-gray-300'}`} 
+              />
+            ))}
+          </div>
+          {reviewCount > 0 && 
             <span className="text-xs text-muted-foreground ms-1">
-              ({randomRating}.0)
+              ({reviewCount})
             </span>
-          </div>
-          
-          <div className="flex items-center justify-between">
-            <span className="text-xl font-bold text-primary">{formatCurrency(product.price)}</span>
-            <span className="text-xs text-muted-foreground">
-              {t("product.inStock")}: {product.stock}
-            </span>
-          </div>
-        </CardContent>
-        <CardFooter className="p-4 pt-0">
-          {!user ? (
-            <Button onClick={handleAddToCart} className="w-full" disabled={product.stock === 0}>
-              <ShoppingCart className="ml-2 h-4 w-4" />
-              {product.stock === 0 ? t("product.outOfStock") : t("header.login")}
-            </Button>
-          ) : user.role === "customer" ? (
-            <Button onClick={handleAddToCart} className="w-full" disabled={product.stock === 0}>
-              <ShoppingCart className="ml-2 h-4 w-4" />
-              {product.stock === 0 ? t("product.outOfStock") : t("product.addToCart")}
-            </Button>
-          ) : (
-            <Button className="w-full" disabled>
-              <ShoppingCart className="ml-2 h-4 w-4" />
-              {t("product.addToCart")}
-            </Button>
-          )}
-        </CardFooter>
-      </Card>
-    </div>
+          }
+        </div>
+        
+        <div className="flex items-center justify-between">
+          <span className="text-xl font-bold text-primary">{formatCurrency(product.price, language)}</span>
+          <span className={`text-xs font-semibold px-2 py-1 rounded-md ${product.stock > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+            {product.stock > 0 ? `${t("product.inStock")}: ${product.stock}`: t("product.outOfStock")}
+          </span>
+        </div>
+      </CardContent>
+      <CardFooter className="p-3 pt-0">
+          <Button 
+            onClick={handleAddToCart} 
+            className="w-full"
+            disabled={product.stock === 0 || user?.role !== 'customer'}
+            aria-label={t('product.addToCart')}
+          >
+            <ShoppingCart className="me-2 h-4 w-4" />
+            {t("product.addToCart")}
+          </Button>
+      </CardFooter>
+    </Card>
   )
 }

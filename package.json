@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "next build",
+    "build": "node_modules/next/dist/bin/next build",
     "deploy": "vercel --prod",
     "dev": "next dev",
     "lint": "next lint",
@@ -62,7 +62,7 @@
     "react-day-picker": "9.8.0",
     "react-dom": "^19",
     "react-hook-form": "latest",
-    "react-hot-toast": "latest",
+    "react-hot-toast": "^2.6.0",
     "react-resizable-panels": "^2.1.7",
     "recharts": "latest",
     "server-only": "latest",
