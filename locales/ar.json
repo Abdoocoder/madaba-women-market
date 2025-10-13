@@ -218,6 +218,8 @@
   "login.listProducts": "أدرج منتجاتك",
   "login.manageOrders": "إدارة طلبات العملاء",
   "login.getNotified": "احصل على إشعارات بالمبيعات",
+  "login.noAccount": "ليس لديك حساب؟",
+  "login.alreadyAccount": "لديك حساب بالفعل؟",
   "seller.dashboard": "لوحة تحكم البائع",
   "seller.overview": "نظرة عامة",
   "seller.products": "المنتجات",

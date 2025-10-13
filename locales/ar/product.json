@@ -7,7 +7,7 @@
   "inStock": "متوفر",
   "customerReviews": "تقييمات العملاء",
   "rating": "تقييمك",
-  "yourReview": "مراجعتك",
+  "yourReview": "ująعتك",
   "reviewPlaceholder": "اكتب مراجعتك هنا...",
   "submitReview": "إرسال المراجعة",
   "noReviews": "لا توجد مراجعات حتى الآن. كن أول من يراجع!",
@@ -30,5 +30,7 @@
   "added": "تمت الإضافة",
   "addedToWishlist": "تمت إضافة المنتج إلى قائمة الأمنيات الخاصة بك.",
   "error": "خطأ",
-  "failedToUpdateWishlist": "فشل في تحديث قائمة الأمنيات الخاصة بك."
+  "failedToUpdateWishlist": "فشل في تحديث قائمة الأمنيات الخاصة بك.",
+  "relatedProducts": "منتجات ذات صلة",
+  "soldBy": "تباع بواسطة"
 }

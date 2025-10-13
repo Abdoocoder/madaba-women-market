@@ -30,5 +30,7 @@
   "added": "Added",
   "addedToWishlist": "Product added to your wishlist.",
   "error": "Error",
-  "failedToUpdateWishlist": "Failed to update your wishlist."
+  "failedToUpdateWishlist": "Failed to update your wishlist.",
+  "relatedProducts": "Related Products",
+  "soldBy": "Sold By"
 }

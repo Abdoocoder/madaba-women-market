@@ -12,6 +12,7 @@
   "changeStatus": "Change Status",
   "statuses": {
     "pending": "Pending",
+    "processing": "Processing",
     "shipped": "Shipped",
     "delivered": "Delivered",
     "cancelled": "Cancelled"

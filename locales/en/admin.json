@@ -34,7 +34,8 @@
     "deleteSuccess": "Success story deleted successfully!",
     "deleteFailed": "Failed to delete success story.",
     "fetchFailed": "Failed to fetch success stories.",
-    "selectSeller": "Select Seller (Optional)"
+    "selectSeller": "Select Seller (Optional)",
+    "actions": "Actions"
   },
   "statistics": "Statistics",
   "reports": "Reports",
@@ -51,7 +52,7 @@
   "unfeature": "Unfeature",
   "approved": "Approved",
   "pending": "Pending",
-  "suspended": "Suspended",
+  "rejected": "Rejected",
   "featured": "Featured",
   "manage": "Manage",
   "productManagement": "Product Management",

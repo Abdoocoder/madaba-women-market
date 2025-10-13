@@ -12,6 +12,7 @@
   "changeStatus": "تغيير الحالة",
   "statuses": {
     "pending": "معلق",
+    "processing": "قيد المعالجة",
     "shipped": "تم الشحن",
     "delivered": "تم التوصيل",
     "cancelled": "ملغي"

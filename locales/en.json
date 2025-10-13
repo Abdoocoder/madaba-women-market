@@ -221,6 +221,8 @@
   "login.listProducts": "List your products",
   "login.manageOrders": "Manage customer orders",
   "login.getNotified": "Get notified of sales",
+  "login.noAccount": "Don't have an account?",
+  "login.alreadyAccount": "Already have an account?",
   "seller.dashboard": "Seller Dashboard",
   "seller.overview": "Overview",
   "seller.products": "Products",
