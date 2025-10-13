@@ -66,7 +66,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   // Effect to sync cart with Firebase for logged-in users
   useEffect(() => {
-    if (!user) return
+    // Add proper null check for user and user.id
+    if (!user || !user.id) return
 
     const cartRef = doc(db, "carts", user.id)
     const unsubscribe = onSnapshot(cartRef, (docSnap) => {
@@ -85,11 +86,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
     })
 
     return () => unsubscribe()
-  }, [user])
+  }, [user, items, storeSellerId])
 
   // Debounced effect to save cart to Firebase
   useEffect(() => {
-    if (!user) return
+    // Add proper null check for user and user.id
+    if (!user || !user.id) return
     
     const handler = setTimeout(async () => {
       try {

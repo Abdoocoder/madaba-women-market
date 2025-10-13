@@ -5,7 +5,6 @@ import { LocaleProvider } from "@/lib/locale-context";
 import { ThemeProvider } from "@/components/theme-provider";
 import { HeaderWrapper } from "@/components/layout/header-wrapper";
 import { Footer } from "@/components/layout/footer";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 import { ToasterProvider } from "@/components/toaster-provider";
 import "./globals.css";
 
@@ -44,7 +43,6 @@ export default function RootLayout({
             </CartProvider>
           </AuthProvider>
         </ThemeProvider>
-        <SpeedInsights />
       </body>
     </html>
   );
