@@ -5,6 +5,7 @@
   "scripts": {
     "build": "next build",
     "deploy": "vercel --prod",
+    "deploy-rules": "node scripts/deploy-firestore-rules.js",
     "dev": "next dev",
     "lint": "next lint",
     "start": "next start"

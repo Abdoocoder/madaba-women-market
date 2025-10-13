@@ -81,8 +81,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
           setStoreSellerId(fbSellerId || null)
         }
       }
-    }, (error) => {
-      console.error("Firebase onSnapshot error:", error)
+    }, (error: any) => {
+      console.error("Firebase onSnapshot error:", error);
+      // Handle permission denied errors specifically
+      if (error.code === 'permission-denied') {
+        console.error("Permission denied accessing cart. Check Firestore rules.");
+      }
     })
 
     return () => unsubscribe()
@@ -97,8 +101,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
       try {
         const cartRef = doc(db, "carts", user.id)
         await setDoc(cartRef, { items, sellerId: storeSellerId })
-      } catch (error) {
-        console.error("Failed to save cart to Firebase", error)
+      } catch (error: any) {
+        console.error("Failed to save cart to Firebase", error);
+        // Handle permission denied errors specifically
+        if (error.code === 'permission-denied') {
+          console.error("Permission denied saving cart. Check Firestore rules.");
+        }
       }
     }, 1000) // Debounce for 1 second
 
