@@ -1,129 +1,93 @@
 'use client'
 
-import { useEffect, useState } from 'react';
-import { useAuth } from '@/lib/auth-context';
-import { useRouter } from 'next/navigation';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import toast from 'react-hot-toast';
-import { useLocale } from '@/lib/locale-context';
-import { Order } from '@/lib/types';
+import { useEffect, useState } from 'react'
+import { useAuth } from '@/lib/auth-context'
+import { Order } from '@/lib/types'
+import { collection, query, where, onSnapshot, doc, updateDoc } from 'firebase/firestore'
+import { db } from '@/lib/firebase'
+import { useToast } from '@/components/ui/use-toast'
+import { format } from 'date-fns'
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Badge } from "@/components/ui/badge"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
-const OrderManagementPage = () => {
-  const { user, isLoading, getAuthToken } = useAuth();
-  const router = useRouter();
-  const [orders, setOrders] = useState<Order[]>([]);
-  const { t } = useLocale();
-
-  useEffect(() => {
-    if (!isLoading && user?.role !== 'admin') {
-      router.push('/');
-    }
-  }, [user, isLoading, router]);
+export default function OrdersPage() {
+  const { user } = useAuth()
+  const [orders, setOrders] = useState<Order[]>([])
+  const { toast } = useToast()
 
   useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const token = await getAuthToken();
-        if (!token) {
-          throw new Error('No authentication token available');
-        }
+    if (!user) return
 
-        const response = await fetch('/api/admin/orders', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        });
+    const ordersRef = collection(db, 'orders')
+    const q = query(ordersRef, where("sellerId", "==", user.id))
 
-        if (!response.ok) {
-          throw new Error(`Failed to fetch orders: ${response.status} ${response.statusText}`);
-        }
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const fetchedOrders = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id })) as Order[]
+      // Sort orders by creation date
+      fetchedOrders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      setOrders(fetchedOrders)
+    })
 
-        const orderList = await response.json();
-        setOrders(orderList);
-      } catch (error) {
-        console.error('Error fetching orders:', error);
-        toast.error(t('messages.failedToFetchOrders'));
-      }
-    };
+    return () => unsubscribe()
+  }, [user])
 
-    if (user?.role === 'admin') {
-      fetchOrders();
-    }
-  }, [user, getAuthToken, t]);
-
-  const handleStatusChange = async (orderId: string, status: 'pending' | 'processing' | 'shipped' | 'delivered') => {
-    const toastId = toast.loading(t('order.updatingStatus'));
+  const handleStatusChange = async (orderId: string, newStatus: string) => {
+    const orderRef = doc(db, 'orders', orderId)
     try {
-      const token = await getAuthToken();
-      if (!token) {
-        throw new Error('No authentication token available');
-      }
-
-      const response = await fetch('/api/admin/orders', {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ orderId, status }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to update order status: ${response.status} ${response.statusText}`);
-      }
-
-      await response.json();
-      setOrders(orders.map(o => o.id === orderId ? { ...o, status } : o));
-      toast.success(t('order.statusUpdated'), { id: toastId });
+      await updateDoc(orderRef, { status: newStatus })
+      toast({ title: "Success", description: "Order status updated successfully." })
     } catch (error) {
-      console.error('Error updating order status:', error);
-      toast.error(t('order.statusUpdateFailed'), { id: toastId });
+      console.error("Error updating order status: ", error)
+      toast({ title: "Error", description: "Failed to update order status.", variant: "destructive" })
     }
-  };
-
-  if (isLoading || user?.role !== 'admin') {
-    return <div>{t('admin.loading')}</div>;
   }
 
   return (
-    <div className="container mx-auto py-10">
-      <h1 className="text-3xl font-bold mb-6">{t('admin.manageOrders')}</h1>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>{t('order.id')}</TableHead>
-            <TableHead>{t('order.customer')}</TableHead>
-            <TableHead>{t('order.total')}</TableHead>
-            <TableHead>{t('order.status')}</TableHead>
-            <TableHead>{t('order.actions')}</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {orders.map(o => (
-            <TableRow key={o.id}>
-              <TableCell>{o.id}</TableCell>
-              <TableCell>{o.customerName || o.customerId}</TableCell>
-              <TableCell>{o.total}</TableCell>
-              <TableCell>
-                <Select value={o.status} onValueChange={(value) => handleStatusChange(o.id, value as 'pending' | 'processing' | 'shipped' | 'delivered')}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="pending">{t('order.pending')}</SelectItem>
-                    <SelectItem value="processing">{t('order.processing')}</SelectItem>
-                    <SelectItem value="shipped">{t('order.shipped')}</SelectItem>
-                    <SelectItem value="delivered">{t('order.delivered')}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </TableCell>
+    <Card>
+      <CardHeader>
+        <CardTitle>My Orders</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Customer</TableHead>
+              <TableHead>Date</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Total</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
-  );
-};
-
-export default OrderManagementPage;
+          </TableHeader>
+          <TableBody>
+            {orders.map((order) => (
+              <TableRow key={order.id}>
+                <TableCell>
+                  <div className="font-medium">{order.customerName}</div>
+                  <div className="text-sm text-muted-foreground">{order.shippingAddress}</div>
+                  <div className="text-sm text-muted-foreground">{order.customerPhone}</div>
+                </TableCell>
+                <TableCell>{format(new Date(order.createdAt), 'PPP')}</TableCell>
+                <TableCell>
+                  <Select value={order.status} onValueChange={(newStatus) => handleStatusChange(order.id, newStatus)}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="processing">Processing</SelectItem>
+                      <SelectItem value="shipped">Shipped</SelectItem>
+                      <SelectItem value="delivered">Delivered</SelectItem>
+                      <SelectItem value="cancelled">Cancelled</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </TableCell>
+                <TableCell className="text-right">{order.totalPrice}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
+  )
+}

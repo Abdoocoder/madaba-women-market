@@ -110,76 +110,61 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: 'Only customers can create orders' }, { status: 403 })
     }
 
-    const body = await request.json()
-    const { items, shippingAddress } = body as {
-      items: { product: Product; quantity: number }[]
-      shippingAddress?: string
+    const body = await request.json();
+    const {
+      customerName,
+      shippingAddress,
+      customerPhone,
+      items,
+      totalPrice,
+      storeId,
+      paymentMethod,
+    } = body;
+
+    if (!customerName || !shippingAddress || !customerPhone || !items || !totalPrice || !storeId || !paymentMethod) {
+      return NextResponse.json({ message: 'Missing required fields' }, { status: 400 });
     }
 
-    if (!items || !Array.isArray(items) || items.length === 0) {
-      return NextResponse.json({ message: 'Order must contain at least one item' }, { status: 400 })
+    const adminDb = getAdminDb();
+
+    // Get seller info
+    const sellerRef = adminDb.collection('users').doc(storeId as string);
+    const sellerSnap = await sellerRef.get();
+    if (!sellerSnap.exists) {
+        return NextResponse.json({ message: 'Seller not found' }, { status: 404 });
     }
+    const sellerData = sellerSnap.data();
 
-    const adminDb = getAdminDb()
-    const ordersRef = adminDb.collection('orders')
 
-    // 🔹 Group items by sellerId
-    const ordersBySeller: Record<
-      string,
-      { sellerId: string; items: { product: Product; quantity: number }[]; total: number }
-    > = {}
+    const orderData = {
+      customerId: user.id,
+      customerName,
+      sellerId: storeId,
+      sellerName: sellerData.storeName || sellerData.name,
+      items,
+      totalPrice,
+      status: 'pending',
+      shippingAddress,
+      customerPhone,
+      paymentMethod,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
 
-    for (const item of items) {
-      const { product, quantity } = item
-
-      if (!product?.id || !product?.sellerId || quantity <= 0) {
-        return NextResponse.json({ message: 'Invalid item data' }, { status: 400 })
-      }
-
-      if (!ordersBySeller[product.sellerId]) {
-        ordersBySeller[product.sellerId] = {
-          sellerId: product.sellerId,
-          items: [],
-          total: 0,
-        }
-      }
-
-      ordersBySeller[product.sellerId].items.push(item)
-      ordersBySeller[product.sellerId].total += product.price * quantity
-    }
-
-    // 🔹 Create separate orders for each seller
-    const createdOrders: Order[] = []
-
-    for (const sellerOrder of Object.values(ordersBySeller)) {
-      const orderData = {
-        customerId: user.id,
-        customerEmail: user.email,
-        sellerId: sellerOrder.sellerId,
-        items: sellerOrder.items,
-        total: sellerOrder.total,
-        status: 'pending' as const,
-        shippingAddress: shippingAddress || null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      }
-
-      const docRef = await ordersRef.add(orderData)
-      createdOrders.push({ id: docRef.id, ...orderData })
-    }
+    const docRef = await adminDb.collection('orders').add(orderData);
 
     return NextResponse.json(
-      { message: 'Orders created successfully', orders: createdOrders },
+      { message: 'Order created successfully', orderId: docRef.id },
       { status: 201 },
-    )
+    );
   } catch (error) {
-    console.error('Error creating order:', error)
+    console.error('Error creating order:', error);
     return NextResponse.json(
       {
         message: 'Internal Server Error',
         error: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 },
-    )
+    );
   }
 }

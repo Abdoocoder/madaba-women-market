@@ -1,3 +1,4 @@
+
 'use client'
 
 import { useState } from 'react'
@@ -61,6 +62,7 @@ export default function StoreCheckoutPage() {
             status: 'pending', // initial status
             shippingAddress: address,
             customerPhone: phone,
+            paymentMethod: 'COD', // Payment method
             createdAt: serverTimestamp(),
         })
 
@@ -98,6 +100,10 @@ export default function StoreCheckoutPage() {
                             <div className="space-y-2">
                                 <Label htmlFor="phone">{t('checkout.phone')}</Label>
                                 <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} required />
+                            </div>
+                             <div className="mb-4">
+                                <p className="font-medium">💰 طريقة الدفع: </p>
+                                <p>الدفع عند الاستلام (COD)</p>
                             </div>
                         </form>
                     </CardContent>
