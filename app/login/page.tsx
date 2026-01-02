@@ -13,6 +13,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import type { UserRole } from "@/lib/types"
 import { motion, AnimatePresence } from "framer-motion"
 import { Mail, Lock, User, Loader2, ArrowRight, Store } from "lucide-react"
+import { supabase } from "@/lib/supabase"
 
 export default function LoginPage() {
   const { login, signUp, signInWithGoogle, sendPasswordReset } = useAuth()
@@ -52,7 +53,26 @@ export default function LoginPage() {
     try {
       const success = await login(email, password)
       if (success) {
-        router.push("/")
+        // Wait for auth context to update user state, then redirect based on role
+        setTimeout(async () => {
+          // Fetch the user's role from Supabase
+          const { data: { user: authUser } } = await supabase.auth.getUser()
+          if (authUser) {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('role')
+              .eq('id', authUser.id)
+              .single()
+
+            if (profile?.role === "seller") {
+              router.push("/seller/dashboard")
+            } else if (profile?.role === "customer") {
+              router.push("/profile")
+            } else {
+              router.push("/")
+            }
+          }
+        }, 300)
       }
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error)
@@ -94,7 +114,14 @@ export default function LoginPage() {
     try {
       const success = await signUp(email, password, role, name)
       if (success) {
-        router.push("/")
+        // Redirect based on user role after successful signup
+        if (role === "seller") {
+          router.push("/seller/dashboard")
+        } else if (role === "customer") {
+          router.push("/profile")
+        } else {
+          router.push("/")
+        }
       }
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error)
@@ -108,7 +135,14 @@ export default function LoginPage() {
     setError(null)
     const success = await signInWithGoogle(selectedRole)
     if (success) {
-      router.push("/")
+      // Redirect based on selected role after Google sign-in
+      if (selectedRole === "seller") {
+        router.push("/seller/dashboard")
+      } else if (selectedRole === "customer") {
+        router.push("/profile")
+      } else {
+        router.push("/")
+      }
     } else {
       setError(t("login.failedGoogle"))
     }
