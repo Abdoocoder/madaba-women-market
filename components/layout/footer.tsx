@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import Image from "next/image"
-import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Youtube } from "lucide-react"
+import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Youtube, Globe } from "lucide-react"
 import { useLocale } from "@/lib/locale-context"
 import { Separator } from "@/components/ui/separator"
 
@@ -38,13 +38,7 @@ export function Footer() {
           {/* Company Info */}
           <div className="space-y-4">
             <Link href="/" className="flex items-center gap-2">
-              <Image 
-                src="/placeholder-logo.svg" 
-                alt={t("app.name")} 
-                width={32} 
-                height={32} 
-                className="h-8 w-8" 
-              />
+              <Globe className="h-8 w-8 text-purple-600" />
               <span className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                 {t("app.name")}
               </span>
@@ -133,8 +127,8 @@ export function Footer() {
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="text-sm text-muted-foreground text-center md:text-left">
             <p>
-              {t("footer.copyright", { year: new Date().getFullYear() })} 
-              <span className="font-medium text-foreground"> {t("app.name")}</span>. 
+              {t("footer.copyright", { year: new Date().getFullYear() })}
+              <span className="font-medium text-foreground"> {t("app.name")}</span>.
               {t("footer.allRightsReserved")}
             </p>
           </div>

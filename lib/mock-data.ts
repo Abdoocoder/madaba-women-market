@@ -9,7 +9,7 @@ export const MOCK_PRODUCTS: Product[] = [
     descriptionAr: "عباية سوداء جميلة مع تطريز",
     price: 45.0,
     category: "fashion",
-    image: "/elegant-black-abaya.png",
+    image: "https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&q=80&w=400",
     sellerId: "2",
     sellerName: "نورة محمد",
     stock: 15,
@@ -25,7 +25,7 @@ export const MOCK_PRODUCTS: Product[] = [
     descriptionAr: "عطر شرقي فاخر",
     price: 65.0,
     category: "beauty",
-    image: "/luxury-perfume-bottle.png",
+    image: "https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&q=80&w=400",
     sellerId: "2",
     sellerName: "نورة محمد",
     stock: 30,
@@ -41,7 +41,7 @@ export const MOCK_PRODUCTS: Product[] = [
     descriptionAr: "سوار ذهبي مصنوع يدوياً",
     price: 180.0,
     category: "jewelry",
-    image: "/gold-bracelet.png",
+    image: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&q=80&w=400",
     sellerId: "2",
     sellerName: "نورة محمد",
     stock: 8,
@@ -57,7 +57,7 @@ export const MOCK_PRODUCTS: Product[] = [
     descriptionAr: "حقيبة يد جلدية فاخرة",
     price: 120.0,
     category: "accessories",
-    image: "/luxury-handbag.png",
+    image: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&q=80&w=400",
     sellerId: "2",
     sellerName: "نورة محمد",
     stock: 12,
@@ -97,24 +97,24 @@ export const CATEGORIES = [
 ]
 
 export const MOCK_REVIEWS: Review[] = [
-    {
-        id: "1",
-        productId: "1",
-        userId: "1",
-        userName: "فاطمة علي",
-        rating: 5,
-        comment: "Absolutely beautiful abaya! The quality is amazing.",
-        createdAt: new Date("2024-02-01"),
-    },
-    {
-        id: "2",
-        productId: "1",
-        userId: "2",
-        userName: "عائشة أحمد",
-        rating: 4,
-        comment: "Very elegant and comfortable. I love the embroidery.",
-        createdAt: new Date("2024-02-05"),
-    },
+  {
+    id: "1",
+    productId: "1",
+    userId: "1",
+    userName: "فاطمة علي",
+    rating: 5,
+    comment: "Absolutely beautiful abaya! The quality is amazing.",
+    createdAt: new Date("2024-02-01"),
+  },
+  {
+    id: "2",
+    productId: "1",
+    userId: "2",
+    userName: "عائشة أحمد",
+    rating: 4,
+    comment: "Very elegant and comfortable. I love the embroidery.",
+    createdAt: new Date("2024-02-05"),
+  },
 ];
 
-export const MOCK_USERS: User[] = MOCK_SELLERS.map(seller => ({...seller, role: 'seller', createdAt: seller.joinedAt}));
+export const MOCK_USERS: User[] = MOCK_SELLERS.map(seller => ({ ...seller, role: 'seller', createdAt: seller.joinedAt }));

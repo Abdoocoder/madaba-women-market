@@ -3,7 +3,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { ShoppingCart, User, LogOut, LayoutDashboard, Heart, Menu, Package } from "lucide-react"
+import { ShoppingCart, User, LogOut, LayoutDashboard, Heart, Menu, Package, Globe } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -27,21 +27,21 @@ interface HeaderProps {
 }
 
 // Unified component for user dashboard links
-function UserDashboardLinks({ 
-  user, 
-  t, 
+function UserDashboardLinks({
+  user,
+  t,
   isMobile = false,
-  onCloseMobileMenu 
-}: { 
-  user: UserType | null; 
-  t: (key: string) => string; 
+  onCloseMobileMenu
+}: {
+  user: UserType | null;
+  t: (key: string) => string;
   isMobile?: boolean;
   onCloseMobileMenu?: () => void;
 }) {
   if (!user) return null;
 
-  const linkClass = isMobile 
-    ? "w-full justify-start" 
+  const linkClass = isMobile
+    ? "w-full justify-start"
     : "cursor-pointer";
 
   const handleClick = () => {
@@ -102,7 +102,7 @@ export function Header({ cartItemCount = 0, user: initialUser }: HeaderProps) {
       <div className="container flex h-16 items-center justify-between">
         {/* Logo Section */}
         <Link href="/" className="flex items-center gap-2 shrink-0">
-          <Image src="/placeholder-logo.svg" alt={t("app.name")} width={32} height={32} className="h-8 w-8" />
+          <Globe className="h-8 w-8 text-purple-600" />
           <span className="text-xl md:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
             {t("app.name")}
           </span>
@@ -183,15 +183,15 @@ export function Header({ cartItemCount = 0, user: initialUser }: HeaderProps) {
             </div>
           )}
         </div>
-        
+
         {/* Mobile Menu Button */}
         <div className="md:hidden">
-            <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-                <Menu className="h-6 w-6" />
-            </Button>
+          <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+            <Menu className="h-6 w-6" />
+          </Button>
         </div>
       </div>
-      
+
       {/* Mobile Menu */}
       {mobileMenuOpen && (
         <div className="md:hidden border-t bg-background/95 backdrop-blur">
@@ -202,9 +202,9 @@ export function Header({ cartItemCount = 0, user: initialUser }: HeaderProps) {
                 <LanguageSwitcher />
                 <ThemeToggle />
               </div>
-              
+
               <Separator />
-              
+
               {/* Mobile Navigation Links */}
               <Link href="/products" onClick={handleCloseMobileMenu}>
                 <Button variant="ghost" className="w-full justify-start">
@@ -254,15 +254,15 @@ export function Header({ cartItemCount = 0, user: initialUser }: HeaderProps) {
                       {t("header.profile")}
                     </Button>
                   </Link>
-                  <UserDashboardLinks 
-                    user={user} 
-                    t={t} 
-                    isMobile={true} 
-                    onCloseMobileMenu={handleCloseMobileMenu} 
+                  <UserDashboardLinks
+                    user={user}
+                    t={t}
+                    isMobile={true}
+                    onCloseMobileMenu={handleCloseMobileMenu}
                   />
-                  <Button 
-                    variant="ghost" 
-                    onClick={() => { handleLogout(); handleCloseMobileMenu(); }} 
+                  <Button
+                    variant="ghost"
+                    onClick={() => { handleLogout(); handleCloseMobileMenu(); }}
                     className="w-full justify-start"
                   >
                     <LogOut className="mr-2 h-4 w-4" />
