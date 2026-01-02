@@ -24,22 +24,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
-  const fetchUserProfile = async (userId: string) => {
+  const fetchUserProfile = async (userId: string, email?: string) => {
     try {
+      // 1. Try to fetch by ID (standard way)
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single()
 
-      if (error) {
-        if (error.code === 'PGRST116') {
-          // Profile doesn't exist yet, it will be created in the auth listener or signUp
-          return null
+      if (data) return data as User
+
+      // 2. Fallback to Email (for migrated users whose IDs changed)
+      if (email) {
+        const { data: emailData } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('email', email)
+          .single()
+
+        if (emailData) {
+          console.log("🔗 Migrated user detected. Linked profile by email:", email)
+          // Note: Ideally we should update the profile ID to match userId here,
+          // but that requires RLS permission or a RPC call.
+          return emailData as User
         }
+      }
+
+      if (error && error.code !== 'PGRST116') {
         throw error
       }
-      return data as User
+      return null
     } catch (error) {
       console.error("Error fetching user profile:", error)
       return null
@@ -49,7 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (session?.user) {
-        const profile = await fetchUserProfile(session.user.id)
+        const profile = await fetchUserProfile(session.user.id, session.user.email)
         if (profile) {
           setUser(profile)
         } else {
@@ -202,7 +217,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const refreshAuthUser = async () => {
     const { data: { user: supabaseUser } } = await supabase.auth.getUser()
     if (supabaseUser) {
-      const profile = await fetchUserProfile(supabaseUser.id)
+      const profile = await fetchUserProfile(supabaseUser.id, supabaseUser.email)
       if (profile) {
         setUser(profile)
       }

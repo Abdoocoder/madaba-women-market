@@ -59,11 +59,21 @@ export default function LoginPage() {
             // Fetch the user's role from Supabase to ensure we have the latest
             const { data: { user: authUser } } = await supabase.auth.getUser()
             if (authUser) {
-              const { data: profile } = await supabase
+              let { data: profile } = await supabase
                 .from('profiles')
                 .select('role')
                 .eq('id', authUser.id)
                 .single()
+
+              // Fallback to email for migrated users
+              if (!profile && authUser.email) {
+                const { data: emailProfile } = await supabase
+                  .from('profiles')
+                  .select('role')
+                  .eq('email', authUser.email)
+                  .single()
+                profile = emailProfile
+              }
 
               const userRole = profile?.role || "customer"
 
@@ -152,11 +162,21 @@ export default function LoginPage() {
         try {
           const { data: { user: authUser } } = await supabase.auth.getUser()
           if (authUser) {
-            const { data: profile } = await supabase
+            let { data: profile } = await supabase
               .from('profiles')
               .select('role')
               .eq('id', authUser.id)
               .single()
+
+            // Fallback to email for migrated users
+            if (!profile && authUser.email) {
+              const { data: emailProfile } = await supabase
+                .from('profiles')
+                .select('role')
+                .eq('email', authUser.email)
+                .single()
+              profile = emailProfile
+            }
 
             const userRole = profile?.role || selectedRole
 
