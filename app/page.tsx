@@ -14,17 +14,11 @@ import ClientOnly from "@/components/client-only"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { motion } from "framer-motion"
+import { interpolateTranslation } from "@/lib/utils"
 
 export type SortOption = "date-desc" | "price-asc" | "price-desc" | "name-asc"
 
 // Simple interpolation function for translations
-function interpolateTranslation(translation: string, params: Record<string, string | number>): string {
-  let result = translation
-  for (const [key, value] of Object.entries(params)) {
-    result = result.replace(`{${key}}`, String(value))
-  }
-  return result
-}
 
 export default function Home() {
   const { user } = useAuth()
@@ -126,7 +120,16 @@ export default function Home() {
       <div className="min-h-screen bg-background">
         {/* Hero Section */}
         <section className="relative overflow-hidden bg-primary text-primary-foreground">
-          {/* Abstract Background Pattern */}
+          {/* Visual Hero Background */}
+          <div className="absolute inset-0 z-0">
+            <img
+              src="/madaba-hero.png"
+              alt="Madaba Heritage"
+              className="w-full h-full object-cover opacity-30"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-primary via-primary/80 to-transparent"></div>
+          </div>
+
           <div className="absolute inset-0 opacity-10 pointer-events-none">
             <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-white blur-3xl"></div>
             <div className="absolute top-1/2 -left-24 w-72 h-72 rounded-full bg-secondary blur-2xl"></div>

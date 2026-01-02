@@ -16,3 +16,16 @@ export function formatDate(date: Date): string {
     day: "numeric",
   })
 }
+
+/**
+ * Simple interpolation function for translations
+ * Replaces placeholders like {count} with actual values
+ */
+export function interpolateTranslation(translation: string, params: Record<string, string | number>): string {
+  if (!translation) return ""
+  let result = translation
+  for (const [key, value] of Object.entries(params)) {
+    result = result.replace(`{${key}}`, String(value))
+  }
+  return result
+}

@@ -12,7 +12,7 @@ import { useLocale } from "@/lib/locale-context"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import type { UserRole } from "@/lib/types"
 import { motion, AnimatePresence } from "framer-motion"
-import { Mail, Lock, User, Loader2, ArrowRight, Store } from "lucide-react"
+import { Mail, Lock, User, Loader2, ArrowRight, Store, Eye, EyeOff } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 
 export default function LoginPage() {
@@ -27,6 +27,7 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [activeTab, setActiveTab] = useState<"login" | "signup">("login")
+  const [showPassword, setShowPassword] = useState(false)
 
   const isValidEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -290,12 +291,23 @@ export default function LoginPage() {
                       <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                       <Input
                         id="password"
-                        type="password"
-                        className="pl-9 h-11"
+                        type={showPassword ? "text" : "password"}
+                        className="pl-9 pr-10 h-11"
                         required
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                       />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-3.5 text-muted-foreground hover:text-foreground focus:outline-none"
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </button>
                     </div>
                   </div>
 
@@ -431,25 +443,40 @@ export default function LoginPage() {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="password-signup">{t("login.password")}</Label>
-                      <Input
-                        id="password-signup"
-                        type="password"
-                        className="h-11"
-                        required
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                      />
+                      <div className="relative">
+                        <Input
+                          id="password-signup"
+                          type={showPassword ? "text" : "password"}
+                          className="pr-10 h-11"
+                          required
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-3.5 text-muted-foreground hover:text-foreground focus:outline-none"
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </button>
+                      </div>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="confirm-password">{t("login.confirmPassword")}</Label>
-                      <Input
-                        id="confirm-password"
-                        type="password"
-                        className="h-11"
-                        required
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                      />
+                      <div className="relative">
+                        <Input
+                          id="confirm-password"
+                          type={showPassword ? "text" : "password"}
+                          className="pr-10 h-11"
+                          required
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                        />
+                      </div>
                     </div>
                   </div>
 
@@ -523,10 +550,10 @@ export default function LoginPage() {
       {/* Right Side Image/Branding */}
       <div className="hidden lg:block relative bg-muted">
         <Image
-          src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&q=80&w=1920"
+          src="/madaba-hero.png"
           alt="Madaba Women Market"
           fill
-          className="object-cover"
+          className="object-cover opacity-80"
           priority
         />
         <div className="absolute inset-0 bg-primary/40 mix-blend-multiply" />
