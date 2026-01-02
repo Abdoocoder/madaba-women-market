@@ -11,13 +11,15 @@
   --card-foreground: oklch(0.15 0.02 320);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.15 0.02 320);
-  --primary: oklch(0.55 0.22 320);
+  /* Deep Purple from logo */
+  --primary: oklch(0.35 0.18 290);
   --primary-foreground: oklch(0.99 0.01 320);
   --secondary: oklch(0.95 0.02 320);
   --secondary-foreground: oklch(0.15 0.02 320);
   --muted: oklch(0.96 0.01 320);
   --muted-foreground: oklch(0.5 0.02 320);
-  --accent: oklch(0.92 0.05 340);
+  /* Rose Gold from logo */
+  --accent: oklch(0.7 0.12 15);
   --accent-foreground: oklch(0.15 0.02 320);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.99 0.01 320);
@@ -47,13 +49,13 @@
   --card-foreground: oklch(0.98 0.01 320);
   --popover: oklch(0.15 0.02 320);
   --popover-foreground: oklch(0.98 0.01 320);
-  --primary: oklch(0.65 0.22 320);
+  --primary: oklch(0.6 0.15 290);
   --primary-foreground: oklch(0.12 0.02 320);
   --secondary: oklch(0.2 0.02 320);
   --secondary-foreground: oklch(0.98 0.01 320);
   --muted: oklch(0.2 0.02 320);
   --muted-foreground: oklch(0.65 0.02 320);
-  --accent: oklch(0.25 0.05 340);
+  --accent: oklch(0.4 0.12 15);
   --accent-foreground: oklch(0.98 0.01 320);
   --destructive: oklch(0.396 0.141 25.723);
   --destructive-foreground: oklch(0.98 0.01 320);

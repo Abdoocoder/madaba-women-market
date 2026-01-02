@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import Image from "next/image"
-import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Youtube, Globe } from "lucide-react"
+import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Youtube } from "lucide-react"
 import { useLocale } from "@/lib/locale-context"
 import { Separator } from "@/components/ui/separator"
 
@@ -38,8 +38,8 @@ export function Footer() {
           {/* Company Info */}
           <div className="space-y-4">
             <Link href="/" className="flex items-center gap-2">
-              <Globe className="h-8 w-8 text-purple-600" />
-              <span className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+              <Image src="/logo.png" alt="Logo" width={32} height={32} className="h-8 w-8 object-contain" />
+              <span className="text-xl font-bold bg-gradient-to-r from-purple-900 to-rose-400 bg-clip-text text-transparent">
                 {t("app.name")}
               </span>
             </Link>
