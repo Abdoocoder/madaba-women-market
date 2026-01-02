@@ -5,7 +5,6 @@
   "scripts": {
     "build": "next build",
     "deploy": "vercel --prod",
-    "deploy-rules": "node scripts/deploy-firestore-rules.js",
     "dev": "next dev",
     "lint": "next lint",
     "start": "next start"
@@ -52,8 +51,6 @@
     "date-fns": "4.1.0",
     "dotenv": "^17.2.3",
     "embla-carousel-react": "^8.6.0",
-    "firebase": "latest",
-    "firebase-admin": "latest",
     "framer-motion": "latest",
     "fs": "latest",
     "geist": "^1.3.1",
