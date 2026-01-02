@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect } from "react"
 import { ProductCard } from "@/components/products/product-card"
 import { ProductFilters } from "@/components/products/product-filters"
 import { FeaturedProducts } from "@/components/products/featured-products"
+import { ProductGridSkeleton } from "@/components/products/product-grid-skeleton"
 import { SuccessStories } from "@/components/success-stories"
 import { useAuth } from "@/lib/auth-context"
 import { useLocale } from "@/lib/locale-context"
@@ -211,15 +212,13 @@ export default function Home() {
               {/* Products Grid */}
               <div className="lg:col-span-3">
                 {isLoading ? (
-                  <div className="text-center py-12">
-                    <p className="text-muted-foreground">{t("common.loading")}</p>
-                  </div>
+                  <ProductGridSkeleton />
                 ) : filteredAndSortedProducts.length === 0 ? (
                   <div className="text-center py-12">
                     <p className="text-muted-foreground">{t("home.noProducts")}</p>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
+                  <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                     {filteredAndSortedProducts.map((product) => (
                       <ProductCard key={product.id} product={product} />
                     ))}

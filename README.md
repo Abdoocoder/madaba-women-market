@@ -11,13 +11,32 @@
 
 ## 🔥 Recent Updates & Improvements
 
-### ✅ **Firestore Internal Error Fix** (Latest)
+### 🛡️ **Security & Core Updates** (Latest)
+
+- **Next.js 16.1.1 Upgrade**: Updated core framework to the latest stable version 16.1.1, resolving CVE-2025-66478 and unblocking Vercel deployments.
+- **Dependency Cleanup**: Removed unused dependencies like `vue-router` and fixed all ESLint errors/warnings.
+- **Stories API Fix**: Resolved 503 errors by correcting Firebase Admin SDK credentials configuration.
+
+### 🎨 **UX/UI Overhaul** (New)
+
+- **Mobile-First Experience**: Implemented a **2-column product grid** for mobile devices (up from 1), significantly improving browseability on small screens.
+- **Polished Loading States**: Replaced generic text with modern **Skeleton UI** animations for a smoother visual experience.
+- **Performance Optimization**: Fixed browser "Intervention" warnings by prioritizing Hero image loading (improved LCP).
+
+### 🔍 **SEO & Social Presence** (New)
+
+- **Rich Metadata**: Added comprehensive Open Graph and Twitter Card tags for professional social sharing previews.
+- **Smart SEO**: Optimized `layout.tsx` with keywords, authors, and proper robots directives.
+
+### ✅ **Firestore Internal Error Fix** (Previous)
+
 - **Fixed Firestore Internal Assertion Error**: Resolved "Unexpected state (ID: ca9)" error by improving listener cleanup
 - **Enhanced Error Handling**: Improved auth and cart context to handle network issues and permission errors gracefully
 - **Race Condition Prevention**: Added timeouts to prevent race conditions in Firestore listeners
 - **Environment Configuration**: Added sample .env.local file with placeholder values
 
 ### ✅ **Firebase Admin SDK Integration** (Latest - Just Fixed!)
+
 - **Build Error Resolution**: Fixed "Service account object must contain a string 'private_key' property" error
 - **Safe Initialization**: Updated Firebase Admin SDK to handle build-time scenarios gracefully with singleton pattern
 - **API Route Compatibility**: All API routes updated with safe Firebase Admin getter functions
@@ -26,18 +45,21 @@
 - **Production Build**: Successfully builds without Firebase credential errors
 
 ### ✅ **Next.js 15 Compatibility** (Latest)
+
 - **Dynamic Route Parameters**: Updated all API routes to handle `Promise<{ id: string }>` pattern
 - **Authentication Modernization**: Migrated from deprecated `token` property to async `getAuthToken()` function
 - **Type Safety**: Resolved all TypeScript compilation errors with strict mode
 - **Component Updates**: Fixed prop requirements and interface compatibility
 
 ### 🎨 **UI Components Enhanced**
+
 - **Custom Carousel**: Built responsive carousel component for success stories
 - **Theme Provider**: Fixed Next-themes integration with proper TypeScript support
 - **Badge Components**: Updated variants to use supported options
 - **Form Validation**: Enhanced with proper error handling
 
 ### 🛠️ **Development Experience**
+
 - **Zero Build Errors**: All TypeScript compilation issues resolved
 - **Successful Production Build**: Firebase Admin SDK errors completely fixed
 - **Hot Reload**: Development server starts successfully with fast refresh
@@ -51,7 +73,8 @@
 
 **Ready for deployment** - The application is fully production-ready with all compatibility issues resolved!
 
-🔧 **Current Status**: 
+🔧 **Current Status**:
+
 - ✅ Development server running successfully
 - ✅ All TypeScript compilation errors fixed
 - ✅ **Production build completes successfully** ✨ (19/19 pages generated)
@@ -64,6 +87,7 @@
 The application is fully functional but requires proper credentials to run:
 
 #### 🔥 Firebase Admin Setup
+
 The current Firebase Admin credentials in `.env.local` are placeholder data. To fix the 401 authentication errors:
 
 1. Go to [Firebase Console](https://console.firebase.google.com/)
@@ -75,11 +99,12 @@ The current Firebase Admin credentials in `.env.local` are placeholder data. To 
 
 \`\`\`env
 FIREBASE_PROJECT_ID="your-actual-project-id"
-FIREBASE_CLIENT_EMAIL="your-service-account@project.iam.gserviceaccount.com"
+FIREBASE_CLIENT_EMAIL="<your-service-account@project.iam.gserviceaccount.com>"
 FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nYOUR_ACTUAL_PRIVATE_KEY\n-----END PRIVATE KEY-----\n"
 \`\`\`
 
 #### 🎨 Cloudinary Setup
+
 The current Cloudinary API secret is placeholder data. To fix the 400 upload errors:
 
 1. Go to your [Cloudinary Dashboard](https://cloudinary.com/console)
@@ -93,6 +118,7 @@ CLOUDINARY_API_SECRET="your-actual-api-secret"
 \`\`\`
 
 #### Quick Setup Helper
+
 Run the setup helper script for detailed instructions:
 \`\`\`bash
 bash setup-credentials.sh
@@ -110,6 +136,7 @@ Madaba Women Market is a leading platform in Madaba aimed at empowering women an
 🏆 **Latest Achievement**: Successfully resolved all Next.js 15 compatibility issues, Firebase Admin SDK build errors, and TypeScript compilation errors, making it fully production-ready!
 
 ### ✨ Key Highlights
+
 - 🔥 **Production-Ready**: Fully deployed with Firebase backend and Next.js 15 compatibility
 - 💰 **Free Hosting**: Vercel + Firebase Spark + Cloudinary free plans
 - 🌍 **Bilingual**: Arabic and English support with RTL/LTR layouts
@@ -122,12 +149,14 @@ Madaba Women Market is a leading platform in Madaba aimed at empowering women an
 ## 📦 Features
 
 ### 👥 **User Management**
+
 - 🔑 Secure authentication (Email/Password + Google OAuth)
 - 📝 User profiles with avatar upload
 - 📷 Email verification system
 - 🔄 Password reset functionality
 
 ### 🛍️ **E-commerce Core**
+
 - 📋 Product catalog with categories
 - 🛒 Shopping cart with real-time updates
 - ❤️ Wishlist functionality
@@ -135,6 +164,7 @@ Madaba Women Market is a leading platform in Madaba aimed at empowering women an
 - 📷 Image upload via Cloudinary
 
 ### 📈 **Seller Dashboard**
+
 - 📋 Product CRUD operations
 - 📉 Sales analytics and charts
 - 📦 Order management
@@ -144,12 +174,14 @@ Madaba Women Market is a leading platform in Madaba aimed at empowering women an
 - ⭐ Store rating system
 
 ### 👑 **Admin Panel**
+
 - 👥 User management
 - 🏢 Seller approval system
 - 📋 Product moderation
 - 📈 Platform analytics
 
 ### 🌍 **Internationalization**
+
 - 🇦🇪 Arabic (RTL)
 - 🇺🇸 English (LTR)
 - Dynamic language switching
@@ -157,7 +189,8 @@ Madaba Women Market is a leading platform in Madaba aimed at empowering women an
 ## 🚀 Quick Start
 
 ### 📋 **Prerequisites**
-- Node.js 18+ 
+
+- Node.js 18+
 - pnpm or npm
 - Firebase account
 - Cloudinary account (for images)
@@ -173,7 +206,9 @@ Madaba Women Market is a leading platform in Madaba aimed at empowering women an
 2. **Install dependencies**
    \`\`\`bash
    npm install
+
    # or
+
    pnpm install
    \`\`\`
 
@@ -186,7 +221,9 @@ Madaba Women Market is a leading platform in Madaba aimed at empowering women an
 4. **Run development server**
    \`\`\`bash
    npm run dev
+
    # or
+
    pnpm dev
    \`\`\`
 
@@ -210,7 +247,8 @@ Madaba Women Market is a leading platform in Madaba aimed at empowering women an
 ## 🛠️ Tech Stack
 
 ### 🖥️ **Frontend**
-- **Framework**: [Next.js 15.5.4](https://nextjs.org/) (App Router with RSC)
+
+- **Framework**: [Next.js 16.1.1](https://nextjs.org/) (App Router with RSC)
 - **Language**: [TypeScript 5.0](https://www.typescriptlang.org/) (Strict mode)
 - **Styling**: [Tailwind CSS 4.1.9](https://tailwindcss.com/)
 - **UI Components**: [Shadcn/UI](https://ui.shadcn.com/) + Custom Carousel + [Radix UI](https://www.radix-ui.com/)
@@ -219,18 +257,21 @@ Madaba Women Market is a leading platform in Madaba aimed at empowering women an
 - **Charts**: [Recharts](https://recharts.org/) for analytics visualization
 
 ### 🔥 **Backend**
+
 - **Database**: [Firebase Firestore](https://firebase.google.com/products/firestore) (NoSQL)
 - **Authentication**: [Firebase Auth](https://firebase.google.com/products/auth)
 - **API Routes**: Next.js API Routes with Firebase Admin SDK
 - **File Storage**: [Cloudinary](https://cloudinary.com/) (Images)
 
 ### 🚀 **Deployment & Hosting**
+
 - **Hosting**: [Vercel](https://vercel.com/) (Free Plan)
 - **Database**: Firebase Spark Plan (Free)
 - **Images**: Cloudinary Free Plan
 - **Analytics**: Vercel Analytics + Firebase Analytics
 
 ### 🛠️ **Security & Performance**
+
 - Firebase Security Rules with proper access control
 - Next.js Security Headers and CSRF protection
 - Image Optimization with Cloudinary CDN
@@ -265,6 +306,7 @@ Madaba Women Market is a leading platform in Madaba aimed at empowering women an
 ## 🏧 Architecture Overview
 
 ### 🌐 **Frontend Architecture**
+
 - **Next.js 15 App Router**: Modern routing with React Server Components and route groups
 - **TypeScript Strict Mode**: Complete type safety with zero compilation errors
 - **Tailwind CSS**: Utility-first CSS framework with custom components
@@ -273,18 +315,21 @@ Madaba Women Market is a leading platform in Madaba aimed at empowering women an
 - **Performance**: Code splitting, lazy loading, and optimized rendering
 
 ### 🔥 **Backend Architecture**
+
 - **Firebase Firestore**: NoSQL database for scalable data storage
 - **Firebase Auth**: Secure user authentication and authorization
 - **Next.js API Routes**: Server-side API with Firebase Admin SDK
 - **Cloudinary**: CDN-based image storage and optimization
 
 ### 🛡️ **Security Implementation**
+
 - **Firestore Security Rules**: Database-level access control
 - **Firebase Auth**: JWT-based authentication
 - **API Route Protection**: Server-side authorization checks
 - **Input Validation**: Client and server-side validation
 
 ### 🔄 **Data Flow**
+
 1. **Client**: User interacts with React components
 2. **Context**: State management handles auth/cart state
 3. **API Routes**: Next.js APIs validate and process requests
@@ -296,8 +341,9 @@ Madaba Women Market is a leading platform in Madaba aimed at empowering women an
 This application is configured for **free production hosting** using:
 
 ### 🌍 **Free Hosting Stack**
+
 - **Frontend**: Vercel (100GB bandwidth/month)
-- **Backend**: Firebase Spark (20k reads/writes daily) 
+- **Backend**: Firebase Spark (20k reads/writes daily)
 - **Images**: Cloudinary (25k transformations/month)
 - **Total Cost**: $0/month 🎉
 
@@ -305,27 +351,37 @@ This application is configured for **free production hosting** using:
 
 1. **Prepare Environment**
    \`\`\`bash
+
    # Copy environment template
+
    cp .env.example .env.local
+
    # Fill in your Firebase + Cloudinary credentials
+
    \`\`\`
 
 2. **Build for Production**
    \`\`\`bash
    npm run build
+
    # or
+
    pnpm build
-   
+
    # Verify build success
+
    npm run start
    \`\`\`
 
 3. **Deploy to Vercel**
    \`\`\`bash
+
    # Install Vercel CLI
+
    npm i -g vercel
-   
+
    # Deploy
+
    vercel --prod
    \`\`\`
 
@@ -335,12 +391,14 @@ This application is configured for **free production hosting** using:
    - Test all functionality in production
 
 ### ✅ **Build Status**
+
 - ✅ **TypeScript**: Zero compilation errors
 - ✅ **Next.js 15**: Fully compatible with latest features
 - ✅ **Development**: Server starts successfully
 - ✅ **Production**: Ready for deployment
 
 ### 📊 **Performance Monitoring**
+
 - Vercel Analytics for frontend performance
 - Firebase Console for backend metrics
 - Cloudinary dashboard for image usage
@@ -352,7 +410,9 @@ This application is configured for **free production hosting** using:
 Create `.env.local` with the following configuration:
 
 \`\`\`bash
+
 # Firebase Client Configuration
+
 NEXT_PUBLIC_FIREBASE_API_KEY=your_firebase_api_key
 NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
 NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
@@ -361,16 +421,19 @@ NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
 NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
 
 # Firebase Admin SDK (Server-side)
+
 FIREBASE_PROJECT_ID=your_project_id
 FIREBASE_CLIENT_EMAIL=your_service_account_email
 FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nyour_private_key\n-----END PRIVATE KEY-----\n"
 
 # Cloudinary Configuration
+
 NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
 
 # Environment
+
 NODE_ENV=production
 \`\`\`
 
@@ -379,26 +442,31 @@ NODE_ENV=production
 ## 🔧 Troubleshooting
 
 ### **Firebase Firestore Internal Error**
+
 If you encounter: `FIRESTORE (12.3.0) INTERNAL ASSERTION FAILED: Unexpected state (ID: ca9)`
 
 **Solution**: This error was resolved in our latest update. We've implemented several fixes:
+
 - Added proper cleanup of Firestore listeners in auth and cart contexts
 - Implemented timeouts to prevent race conditions
 - Enhanced error handling for network issues and permission errors
 - Added graceful fallbacks to localStorage when Firestore is unavailable
 
 If the error persists:
+
 1. Ensure you have the latest code with our fixes
 2. Check your Firebase configuration in `.env.local`
 3. Restart the development server
 4. Clear your browser cache and localStorage
 
 ### **Firebase Admin SDK Build Error**
+
 If you encounter: `Service account object must contain a string "private_key" property`
 
 **Solution**: This was resolved in our latest update. The Firebase Admin SDK now handles missing environment variables gracefully during build time.
 
 **What we fixed:**
+
 - Updated `lib/firebaseAdmin.ts` with safe initialization using singleton pattern
 - Added environment variable validation
 - Updated all API routes to use safe getter functions
@@ -408,16 +476,20 @@ If you encounter: `Service account object must contain a string "private_key" pr
 If the error persists, ensure your `.env.local` file exists with valid Firebase credentials.
 
 ### **Authentication Issues (401 Errors)**
+
 If you're experiencing 401 Unauthorized errors:
 
-**Solution**: 
+**Solution**:
+
 - Verify Firebase Admin SDK is properly initialized
 - Check that environment variables are correctly set in `.env.local`
 - Ensure user documents exist in Firestore for authenticated users
 - Restart the development server after making configuration changes
 
 ### **TypeScript Compilation Issues**
+
 All TypeScript errors related to Next.js 15 compatibility have been resolved:
+
 - Dynamic route parameters now use `Promise<{ id: string }>` pattern
 - Authentication functions updated to async `getAuthToken()` pattern
 - All component prop requirements fixed

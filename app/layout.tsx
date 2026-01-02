@@ -10,16 +10,38 @@ import "./globals.css";
 
 const cairo = Cairo({ subsets: ["arabic", "latin"] });
 export const metadata = {
-  metadataBase: new URL("https://madaba-women-market.vercel.app"), // استبدل بالرابط الفعلي
-  title: "سيدتي ماركت | منصة النساء في مادبا",
-  description: "منصة لدعم وتمكين سيدات مادبا عبر التجارة الإلكترونية.",
-    generator: 'v0.app'
+  metadataBase: new URL("https://madaba-women-market.vercel.app"),
+  title: {
+    default: "سيدتي ماركت | منصة النساء في مادبا",
+    template: "%s | سيدتي ماركت"
+  },
+  description: "منصة لدعم وتمكين سيدات مادبا عبر التجارة الإلكترونية. اكتشفي منتجات يدوية مميزة، أزياء، وحرف تقليدية.",
+  keywords: ["مادبا", "سوق نسائي", "منتجات يدوية", "الأردن", "حرف", "تجارة إلكترونية"],
+  authors: [{ name: "Madaba Women Market" }],
+  creator: "Madaba Women Market",
+  openGraph: {
+    type: "website",
+    locale: "ar_JO",
+    url: "https://madaba-women-market.vercel.app",
+    title: "سيدتي ماركت | منصة النساء في مادبا",
+    description: "منصة لدعم وتمكين سيدات مادبا عبر التجارة الإلكترونية.",
+    siteName: "سيدتي ماركت",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "سيدتي ماركت | منصة النساء في مادبا",
+    description: "منصة لدعم وتمكين سيدات مادبا عبر التجارة الإلكترونية.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  generator: 'v0.app'
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{ children: React.ReactNode }>)
-{
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="ar" dir="rtl" suppressHydrationWarning data-scroll-behavior="smooth">
       <head>
