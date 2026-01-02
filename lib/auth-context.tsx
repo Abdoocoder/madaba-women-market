@@ -82,6 +82,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       })
 
       if (error) {
+        // Check for common configuration issues after migration
+        if (error.message?.includes("provider is not enabled")) {
+          throw new Error("تنبيه: ميزة تسجيل الدخول بالبريد الإلكتروني غير مفعّلة في إعدادات Supabase. يرجى تفعيل (Email Provider) من لوحة تحكم Supabase > Authentication > Providers.");
+        }
+
         // Special check for migration: if login fails, see if they exist in profiles
         try {
           console.log("🔍 Checking profiles for email (case-insensitive):", email);
