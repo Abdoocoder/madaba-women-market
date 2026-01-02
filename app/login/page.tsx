@@ -12,7 +12,7 @@ import { useLocale } from "@/lib/locale-context"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import type { UserRole } from "@/lib/types"
 import { motion, AnimatePresence } from "framer-motion"
-import { Mail, Lock, User, Loader2, ArrowRight } from "lucide-react"
+import { Mail, Lock, User, Loader2, ArrowRight, Store } from "lucide-react"
 
 export default function LoginPage() {
   const { login, signUp, signInWithGoogle, sendPasswordReset } = useAuth()
