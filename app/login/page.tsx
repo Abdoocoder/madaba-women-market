@@ -70,7 +70,7 @@ export default function LoginPage() {
                 const { data: emailProfile } = await supabase
                   .from('profiles')
                   .select('role')
-                  .eq('email', authUser.email)
+                  .ilike('email', authUser.email)
                   .single()
                 profile = emailProfile
               }
