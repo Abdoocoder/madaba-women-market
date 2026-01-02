@@ -267,7 +267,7 @@ export default function ProductDetailPage() {
                         <div className="flex items-center gap-4 mb-6">
                             <span className="font-semibold">{t("product.seller")}:</span>
                             <div className="flex items-center gap-2">
-                                <Image src="/placeholder-user.jpg" alt="Seller" width={32} height={32} className="rounded-full" />
+                                <Image src="https://i.pravatar.cc/150?u=seller" alt="Seller" width={32} height={32} className="rounded-full" />
                                 <Link href={`/seller/${product.sellerId}`} className="font-medium hover:underline">
                                     {product.sellerName || product.sellerId}
                                 </Link>
@@ -341,7 +341,7 @@ export default function ProductDetailPage() {
                                         <Card key={review.id}>
                                             <CardContent className="p-4">
                                                 <div className="flex items-center mb-2">
-                                                    <Image src="/placeholder-user.jpg" alt={review.userName} width={40} height={40} className="rounded-full" />
+                                                    <Image src={`https://i.pravatar.cc/150?u=${review.userId}`} alt={review.userName} width={40} height={40} className="rounded-full" />
                                                     <div className="mx-3">
                                                         <p className="font-semibold">{review.userName}</p>
                                                         <div className="flex items-center gap-1">

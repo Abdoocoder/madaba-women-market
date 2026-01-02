@@ -143,7 +143,7 @@ export default function ProfileForm() {
                     <Card>
                         <CardHeader className="items-center">
                             <Avatar className="w-24 h-24 mb-4">
-                                <AvatarImage src={avatar || "/placeholder-user.jpg"} />
+                                <AvatarImage src={avatar || "https://i.pravatar.cc/150"} />
                                 <AvatarFallback><User className="w-12 h-12" /></AvatarFallback>
                             </Avatar>
                             <CardTitle>{user.name}</CardTitle>

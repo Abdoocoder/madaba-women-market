@@ -21,7 +21,7 @@ const avatarVariants = cva(
 
 export interface AvatarProps
   extends ComponentProps<"span">,
-    VariantProps<typeof avatarVariants> {}
+  VariantProps<typeof avatarVariants> { }
 
 /**
  * Avatar wrapper component
@@ -49,7 +49,7 @@ export const AvatarImage = forwardRef<HTMLImageElement, AvatarImageProps>(
   ({ className, src, alt = "User avatar", ...props }, ref) => (
     <Image
       ref={ref}
-      src={src || "/placeholder-user.jpg"}
+      src={src || "https://i.pravatar.cc/150"}
       alt={alt}
       className={cn("aspect-square h-full w-full object-cover", className)}
       width={64}

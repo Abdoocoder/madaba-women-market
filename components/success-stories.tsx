@@ -36,7 +36,7 @@ export function SuccessStories() {
             author: "نورة خالد",
             story:
               "بفضل سيدتي ماركت، تمكنت من الوصول إلى شريحة واسعة من الزبائن وعرض منتجاتي بكل سهولة. المنصة سهلة الاستخدام وفريق الدعم متعاون جداً.",
-            imageUrl: "/placeholder-user.jpg",
+            imageUrl: "https://i.pravatar.cc/150?u=seller1",
             date: new Date().toISOString(),
             sellerId: "seller1",
           },
@@ -45,7 +45,7 @@ export function SuccessStories() {
             author: "فاطمة عبد الله",
             story:
               "تجربتي مع سيدتي ماركت كانت رائعة. لقد بدأت بمشروع صغير من المنزل والآن لدي متجري الخاص الذي يحقق مبيعات ممتازة. شكراً لكم!",
-            imageUrl: "/placeholder-user.jpg",
+            imageUrl: "https://i.pravatar.cc/150?u=seller2",
             date: new Date().toISOString(),
             sellerId: "seller2",
           },
@@ -54,7 +54,7 @@ export function SuccessStories() {
             author: "عائشة محمد",
             story:
               "وجدت في سيدتي ماركت البيئة المثالية لعرض أعمالي اليدوية. التصميم الأنيق والتركيز على المنتجات النسائية ساعدني في بناء علامتي التجارية.",
-            imageUrl: "/placeholder-user.jpg",
+            imageUrl: "https://i.pravatar.cc/150?u=seller3",
             date: new Date().toISOString(),
             sellerId: "seller3",
           },
@@ -110,14 +110,14 @@ export function SuccessStories() {
               <CardHeader className="flex flex-row items-center gap-4">
                 <div className="relative w-14 h-14 shrink-0">
                   <Image
-                    src={story.imageUrl || "/placeholder-user.jpg"}
+                    src={story.imageUrl || "https://i.pravatar.cc/150"}
                     alt={story.author}
                     fill
                     sizes="56px"
                     className="rounded-full object-cover w-auto h-auto"
                     onError={(e) => {
                       const img = e.currentTarget as HTMLImageElement
-                      img.src = "/placeholder-user.jpg"
+                      img.src = "https://i.pravatar.cc/150"
                     }}
                   />
                 </div>
