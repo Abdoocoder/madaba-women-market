@@ -21,6 +21,17 @@ export async function GET() {
 
         if (error) throw error;
 
+        if (!data || data.length === 0) {
+            const { MOCK_SUCCESS_STORIES } = await import('@/lib/mock-stories');
+            return NextResponse.json(MOCK_SUCCESS_STORIES.map(s => ({
+                id: s.id,
+                author: s.author,
+                story: s.story,
+                imageUrl: s.avatarUrl,
+                date: new Date().toISOString()
+            })));
+        }
+
         const stories: SuccessStory[] = data.map((story: any) => ({
             id: story.id,
             author: story.author || 'Unknown Author',
