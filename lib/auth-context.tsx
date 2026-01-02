@@ -81,7 +81,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         password,
       })
 
-      if (error) throw error
+      if (error) {
+        // Special check for migration: if login fails, see if they exist in profiles
+        const { count } = await supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true })
+          .eq('email', email)
+
+        if (count && count > 0) {
+          throw new Error("تنبيه: حسابك موجود في متجرنا الجديد، لكنك تحتاج لضبط كلمة مرورك لأول مرة. يرجى استخدام 'نسيت كلمة المرور' لتعيين كلمة مرور جديدة.")
+        }
+
+        throw error
+      }
       return true
     } catch (error: any) {
       console.error("❌ Error logging in:", error)
