@@ -40,14 +40,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const { data: emailData } = await supabase
           .from('profiles')
           .select('*')
-          .eq('email', email)
+          .ilike('email', email)
           .single()
 
         if (emailData) {
-          console.log("🔗 Migrated user detected. Linked profile by email:", email)
-          // Note: Ideally we should update the profile ID to match userId here,
-          // but that requires RLS permission or a RPC call.
-          return emailData as User
+          console.log("🔗 Migrated user detected. Linking profile by email:", email)
+
+          // CRITICAL: Update the profile ID to match the new auth.uid()
+          // This fixes RLS and future ID lookups.
+          try {
+            const { error: updateError } = await supabase
+              .from('profiles')
+              .update({ id: userId })
+              .eq('email', email)
+
+            if (updateError) {
+              console.error("⚠️ Failed to link profile ID:", updateError)
+            } else {
+              console.log("✅ Profile ID successfully linked to Auth UID")
+            }
+          } catch (updateErr) {
+            console.error("⚠️ Exception linking profile ID:", updateErr)
+          }
+
+          return { ...emailData, id: userId } as User
         }
       }
 
