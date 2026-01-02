@@ -64,7 +64,9 @@ export default function LoginPage() {
               .eq('id', authUser.id)
               .single()
 
-            if (profile?.role === "seller") {
+            if (profile?.role === "admin") {
+              router.push("/admin")
+            } else if (profile?.role === "seller") {
               router.push("/seller/dashboard")
             } else if (profile?.role === "customer") {
               router.push("/profile")
@@ -115,7 +117,9 @@ export default function LoginPage() {
       const success = await signUp(email, password, role, name)
       if (success) {
         // Redirect based on user role after successful signup
-        if (role === "seller") {
+        if (role === "admin") {
+          router.push("/admin")
+        } else if (role === "seller") {
           router.push("/seller/dashboard")
         } else if (role === "customer") {
           router.push("/profile")
@@ -136,7 +140,9 @@ export default function LoginPage() {
     const success = await signInWithGoogle(selectedRole)
     if (success) {
       // Redirect based on selected role after Google sign-in
-      if (selectedRole === "seller") {
+      if (selectedRole === "admin") {
+        router.push("/admin")
+      } else if (selectedRole === "seller") {
         router.push("/seller/dashboard")
       } else if (selectedRole === "customer") {
         router.push("/profile")
