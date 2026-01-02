@@ -50,7 +50,7 @@ interface LocaleContextType {
 // Create a default context value
 const defaultLocaleContext: LocaleContextType = {
   language: "ar",
-  setLanguage: () => {},
+  setLanguage: () => { },
   t: (key) => key,
   dir: "rtl",
 };
@@ -121,13 +121,13 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
   }
 
   const t = (key: string, params?: Record<string, string | number>): string => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     const translationSet = translations[language] as Record<string, any>
-    
+
     // Handle nested keys (e.g., "common.backToHome")
     if (key.includes('.')) {
       const parts = key.split('.')
-      
+
       // Try to find in modular structure first
       let current: Record<string, unknown> | string | null = translationSet
       for (let i = 0; i < parts.length; i++) {
@@ -138,29 +138,29 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
           break
         }
       }
-      
+
       if (current && typeof current === 'string') {
         let translation = current
-      
+
         if (params) {
           Object.entries(params).forEach(([paramKey, value]: [string, string | number]) => {
             translation = translation.replace(`{${paramKey}}`, String(value))
           })
         }
-      
+
         return translation
       }
     }
-    
+
     // Fallback to flat structure for legacy keys
     let translation = translationSet[key] as string || key
-    
+
     if (params) {
       Object.entries(params).forEach(([paramKey, value]: [string, string | number]) => {
         translation = translation.replace(`{${paramKey}}`, String(value))
       })
     }
-    
+
     return translation
   }
 
