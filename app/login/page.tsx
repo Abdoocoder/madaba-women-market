@@ -11,19 +11,21 @@ import { Label } from "@/components/ui/label"
 import { useLocale } from "@/lib/locale-context"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import type { UserRole } from "@/lib/types"
+import { motion, AnimatePresence } from "framer-motion"
+import { Mail, Lock, User, Loader2, ArrowRight } from "lucide-react"
 
 export default function LoginPage() {
   const { login, signUp, signInWithGoogle, sendPasswordReset } = useAuth()
   const router = useRouter()
-  const { t } = useLocale()
+  const { t, language } = useLocale()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
-  const [name, setName] = useState("") // Added for minimal registration
+  const [name, setName] = useState("")
   const [role, setRole] = useState<UserRole>("customer")
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [activeTab, setActiveTab] = useState("login")
+  const [activeTab, setActiveTab] = useState<"login" | "signup">("login")
 
   const isValidEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -65,7 +67,6 @@ export default function LoginPage() {
     setIsSubmitting(true)
     setError(null)
 
-    // Minimal registration - only require name, email, password, and confirm password
     if (!name || !email || !password || !confirmPassword) {
       setError(t("login.fillAllFields"))
       setIsSubmitting(false)
@@ -91,9 +92,9 @@ export default function LoginPage() {
     }
 
     try {
-      const success = await signUp(email, password, role, name) // Pass name to signUp
+      const success = await signUp(email, password, role, name)
       if (success) {
-        router.push("/") // Redirect to complete profile or dashboard
+        router.push("/")
       }
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error)
@@ -128,198 +129,331 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="w-full lg:grid lg:min-h-[600px] lg:grid-cols-2 xl:min-h-[800px]">
-      <div className="flex items-center justify-center py-12">
-        <div className="mx-auto grid w-[350px] gap-6">
-          <div className="grid gap-2 text-center">
-            <h1 className="text-3xl font-bold">{t(`login.${activeTab}`)}</h1>
-            <p className="text-balance text-muted-foreground">
+    <div className="w-full lg:grid lg:min-h-screen lg:grid-cols-2">
+      <div className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-background relative overflow-hidden">
+        {/* Background Decoration */}
+        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 rounded-full bg-primary/5 blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-64 h-64 rounded-full bg-secondary/10 blur-3xl"></div>
+
+        <div className="w-full max-w-[440px] space-y-8 relative z-10">
+          <div className="text-center space-y-2">
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">
+              {t(`login.${activeTab}`)}
+            </h1>
+            <p className="text-muted-foreground text-sm">
               {activeTab === "login"
                 ? t("login.enterCredentials")
                 : t("login.join") + " " + t("app.name")}
             </p>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <Button
-              variant={activeTab === "login" ? "default" : "outline"}
+
+          <div className="grid grid-cols-2 p-1 bg-muted/50 rounded-lg">
+            <button
               onClick={() => setActiveTab("login")}
+              className={`text-sm font-medium py-2.5 rounded-md transition-all duration-300 ${activeTab === "login" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
             >
               {t("login.login")}
-            </Button>
-            <Button
-              variant={activeTab === "signup" ? "default" : "outline"}
+            </button>
+            <button
               onClick={() => setActiveTab("signup")}
+              className={`text-sm font-medium py-2.5 rounded-md transition-all duration-300 ${activeTab === "signup" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
             >
               {t("login.signup")}
-            </Button>
+            </button>
           </div>
-          {activeTab === "login" ? (
-            <form onSubmit={handleLogin} className="grid gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="email">{t("admin.email")}</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="m@example.com"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-              <div className="grid gap-2">
-                <div className="flex items-center">
-                  <Label htmlFor="password">{t("login.password")}</Label>
-                  <Link
-                    href="#"
-                    className="ml-auto inline-block text-sm underline"
-                    onClick={handleForgotPassword}
-                  >
-                    {t("login.forgotPassword")}
-                  </Link>
-                </div>
-                <Input
-                  id="password"
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </div>
-              <Button type="submit" className="w-full" disabled={isSubmitting}>
-                {isSubmitting ? t("login.loggingIn") : t("login.login")}
-              </Button>
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={() => handleGoogleSignIn(role)}
-              >
-                {t("login.googleSignIn")}
-              </Button>
-            </form>
-          ) : (
-            <form onSubmit={handleSignUp} className="grid gap-4">
-              <div className="grid gap-2">
-                <Label>{t("login.iAm")}</Label>
-                <RadioGroup
-                  defaultValue="customer"
-                  value={role}
-                  onValueChange={(value) => setRole(value as UserRole)}
-                  className="grid grid-cols-2 gap-4"
+
+          <div className="min-h-[420px]">
+            <AnimatePresence mode="wait">
+              {activeTab === "login" ? (
+                <motion.form
+                  key="login"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                  transition={{ duration: 0.3 }}
+                  onSubmit={handleLogin}
+                  className="space-y-5"
                 >
-                  <div>
-                    <RadioGroupItem
-                      value="customer"
-                      id="customer"
-                      className="peer sr-only"
-                    />
-                    <Label
-                      htmlFor="customer"
-                      className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-                    >
-                      {t("admin.customer")}
-                    </Label>
+                  <div className="space-y-2">
+                    <Label htmlFor="email">{t("admin.email")}</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="m@example.com"
+                        className="pl-9 h-11"
+                        required
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <RadioGroupItem
-                      value="seller"
-                      id="seller"
-                      className="peer sr-only"
-                    />
-                    <Label
-                      htmlFor="seller"
-                      className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-                    >
-                      {t("admin.seller")}
-                    </Label>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="password">{t("login.password")}</Label>
+                      <button
+                        type="button"
+                        className="text-xs text-primary hover:underline font-medium"
+                        onClick={handleForgotPassword}
+                      >
+                        {t("login.forgotPassword")}
+                      </button>
+                    </div>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="password"
+                        type="password"
+                        className="pl-9 h-11"
+                        required
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                      />
+                    </div>
                   </div>
-                </RadioGroup>
-              </div>
 
-              {/* Minimal Registration Fields */}
-              <div className="grid gap-2">
-                <Label htmlFor="name">{t("profile.name")}</Label>
-                <Input
-                  id="name"
-                  type="text"
-                  placeholder={t("profile.enterName")}
-                  required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                />
-              </div>
+                  <Button type="submit" className="w-full h-11 text-base shadow-lg shadow-primary/20 transition-all hover:scale-[1.01]" disabled={isSubmitting}>
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        {t("login.loggingIn")}
+                      </>
+                    ) : (
+                      t("login.login")
+                    )}
+                  </Button>
 
-              <div className="grid gap-2">
-                <Label htmlFor="email">{t("admin.email")}</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="m@example.com"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="password">{t("login.password")}</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="confirm-password">
-                  {t("login.confirmPassword")}
-                </Label>
-                <Input
-                  id="confirm-password"
-                  type="password"
-                  required
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                />
-              </div>
-              <Button type="submit" className="w-full" disabled={isSubmitting}>
-                {isSubmitting
-                  ? t("login.signingUp")
-                  : t("login.createAccount")}
-              </Button>
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={() => handleGoogleSignIn(role)}
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <span className="w-full border-t" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-background px-2 text-muted-foreground">
+                        Or continue with
+                      </span>
+                    </div>
+                  </div>
+
+                  <Button
+                    variant="outline"
+                    type="button"
+                    className="w-full h-11 font-medium hover:bg-muted/50"
+                    onClick={() => handleGoogleSignIn(role)}
+                  >
+                    <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
+                      <path
+                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                        fill="#4285F4"
+                      />
+                      <path
+                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                        fill="#34A853"
+                      />
+                      <path
+                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.26z"
+                        fill="#FBBC05"
+                      />
+                      <path
+                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                        fill="#EA4335"
+                      />
+                    </svg>
+                    {t("login.googleSignIn")}
+                  </Button>
+                </motion.form>
+              ) : (
+                <motion.form
+                  key="signup"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.3 }}
+                  onSubmit={handleSignUp}
+                  className="space-y-4"
+                >
+                  <div className="space-y-2">
+                    <Label>{t("login.iAm")}</Label>
+                    <RadioGroup
+                      defaultValue="customer"
+                      value={role}
+                      onValueChange={(value) => setRole(value as UserRole)}
+                      className="grid grid-cols-2 gap-4"
+                    >
+                      <div>
+                        <RadioGroupItem
+                          value="customer"
+                          id="customer"
+                          className="peer sr-only"
+                        />
+                        <Label
+                          htmlFor="customer"
+                          className="flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-transparent p-3 hover:bg-muted/50 cursor-pointer transition-all peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 text-sm font-medium"
+                        >
+                          <User className="h-5 w-5 mb-1.5 text-muted-foreground peer-data-[state=checked]:text-primary" />
+                          {t("admin.customer")}
+                        </Label>
+                      </div>
+                      <div>
+                        <RadioGroupItem
+                          value="seller"
+                          id="seller"
+                          className="peer sr-only"
+                        />
+                        <Label
+                          htmlFor="seller"
+                          className="flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-transparent p-3 hover:bg-muted/50 cursor-pointer transition-all peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 text-sm font-medium"
+                        >
+                          <Store className="h-5 w-5 mb-1.5 text-muted-foreground peer-data-[state=checked]:text-primary" />
+                          {t("admin.seller")}
+                        </Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="name">{t("profile.name")}</Label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="name"
+                        type="text"
+                        placeholder={t("profile.enterName")}
+                        className="pl-9 h-11"
+                        required
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="email-signup">{t("admin.email")}</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="email-signup"
+                        type="email"
+                        placeholder="m@example.com"
+                        className="pl-9 h-11"
+                        required
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="password-signup">{t("login.password")}</Label>
+                      <Input
+                        id="password-signup"
+                        type="password"
+                        className="h-11"
+                        required
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="confirm-password">{t("login.confirmPassword")}</Label>
+                      <Input
+                        id="confirm-password"
+                        type="password"
+                        className="h-11"
+                        required
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <Button type="submit" className="w-full h-11 text-base shadow-lg shadow-primary/20 transition-all hover:scale-[1.01]" disabled={isSubmitting}>
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        {t("login.signingUp")}
+                      </>
+                    ) : (
+                      <span className="flex items-center">
+                        {t("login.createAccount")} <ArrowRight className="ml-2 h-4 w-4" />
+                      </span>
+                    )}
+                  </Button>
+
+                  <div className="relative my-4">
+                    <div className="absolute inset-0 flex items-center">
+                      <span className="w-full border-t" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-background px-2 text-muted-foreground">
+                        Or join with
+                      </span>
+                    </div>
+                  </div>
+
+                  <Button
+                    variant="outline"
+                    type="button"
+                    className="w-full h-11 font-medium hover:bg-muted/50"
+                    onClick={() => handleGoogleSignIn(role)}
+                  >
+                    <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
+                      <path
+                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                        fill="#4285F4"
+                      />
+                      <path
+                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                        fill="#34A853"
+                      />
+                      <path
+                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.26z"
+                        fill="#FBBC05"
+                      />
+                      <path
+                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                        fill="#EA4335"
+                      />
+                    </svg>
+                    {t("login.googleSignUp")}
+                  </Button>
+                </motion.form>
+              )}
+            </AnimatePresence>
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-4 p-3 bg-red-50 text-red-600 text-sm rounded-md border border-red-100 flex items-center"
               >
-                {t("login.googleSignUp")}
-              </Button>
-            </form>
-          )}
-          {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
-          <div className="mt-4 text-center text-sm">
-            {activeTab === "login"
-              ? t("login.noAccount")
-              : t("login.alreadyAccount")}{" "}
-            <Link
-              href="#"
-              className="underline"
-              onClick={() =>
-                setActiveTab(activeTab === "login" ? "signup" : "login")
-              }
-            >
-              {activeTab === "login" ? t("login.signup") : t("login.login")}
-            </Link>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                {error}
+              </motion.div>
+            )}
           </div>
         </div>
       </div>
-      <div className="hidden bg-muted lg:block">
+
+      {/* Right Side Image/Branding */}
+      <div className="hidden lg:block relative bg-muted">
         <Image
           src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&q=80&w=1920"
-          alt="Image"
-          width="1920"
-          height="1080"
-          className="h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+          alt="Madaba Women Market"
+          fill
+          className="object-cover"
+          priority
         />
+        <div className="absolute inset-0 bg-primary/40 mix-blend-multiply" />
+        <div className="absolute inset-0 bg-black/20" />
+
+        <div className="absolute bottom-10 left-10 p-10 text-white max-w-lg z-10 transition-transform duration-700 hover:translate-x-2">
+          <h2 className="text-4xl font-bold mb-4 font-display leading-tight">{t("app.name")}</h2>
+          <p className="text-lg text-white/90 leading-relaxed max-w-md">
+            {language === 'ar'
+              ? "انضمي إلينا لدعم المنتجات المحلية وتمكين المرأة في مادبا. مجتمع يجمع بين الأصالة والإبداع."
+              : "Join us in supporting local products and empowering women in Madaba. A community bridging authenticity and creativity."}
+          </p>
+        </div>
       </div>
     </div>
   )

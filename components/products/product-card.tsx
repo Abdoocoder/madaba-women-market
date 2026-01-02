@@ -61,18 +61,15 @@ export function ProductCard({ product, onRemoveFromWishlist }: ProductCardProps)
   return (
     <Card
       onClick={handleCardClick}
-      className="overflow-hidden h-full flex flex-col group hover:shadow-xl transition-shadow duration-300 cursor-pointer"
+      className="overflow-hidden h-full flex flex-col group border-0 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer rounded-2xl bg-card hover:-translate-y-1"
     >
-      <div className="relative aspect-square w-full h-full">
-        {/* Debugging: Show image URL */}
-        <div className="absolute top-0 left-0 z-10 bg-black/50 text-white text-xs p-1 hidden">
-          {product.image || "No image"}
-        </div>
+      <div className="relative aspect-[4/3] w-full overflow-hidden">
+        <div className="absolute inset-0 bg-muted/20 z-0"></div>
         <Image
           src={product.image || "/placeholder.svg"}
           alt={language === "ar" ? product.nameAr : product.name}
           fill
-          className="object-cover transition-transform duration-300 group-hover:scale-105"
+          className="object-cover transition-transform duration-500 group-hover:scale-110"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           onError={() => {
             console.error("Error loading image for product:", product.id, product.image);
@@ -93,43 +90,44 @@ export function ProductCard({ product, onRemoveFromWishlist }: ProductCardProps)
           </Button>
         )}
         {product.featured && (
-          <Badge className="absolute top-2 right-2 bg-gradient-to-r from-purple-600 to-pink-600 border-none text-white">
+          <Badge className="absolute top-3 right-3 bg-gradient-to-r from-purple-600 to-pink-600 border-none text-white shadow-md font-medium px-2.5 py-1">
             {t("product.featured")}
           </Badge>
         )}
       </div>
-      <CardContent className="p-4 flex-grow flex flex-col">
-        <h3 className="font-semibold text-lg mb-1 text-balance group-hover:text-primary transition-colors">
-          {language === "ar" ? product.nameAr : product.name}
-        </h3>
+      <CardContent className="p-5 flex-grow flex flex-col pt-5">
+        <div className="flex justify-between items-start mb-2 gap-2">
+          <div>
+            {product.sellerName && (
+              <Link
+                href={`/seller/${product.sellerId}`}
+                className="text-xs font-medium text-primary hover:text-primary/80 transition-colors mb-1 block"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {product.sellerName}
+              </Link>
+            )}
+            <h3 className="font-bold text-lg leading-tight group-hover:text-primary transition-colors line-clamp-1">
+              {language === "ar" ? product.nameAr : product.name}
+            </h3>
+          </div>
+          <div className="font-bold text-lg text-primary bg-primary/5 px-2 py-1 rounded-lg shrink-0">
+            {formatCurrency(product.price)}
+          </div>
+        </div>
 
-        <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+        <p className="text-sm text-muted-foreground mb-4 line-clamp-2 text-balance leading-relaxed">
           {language === "ar" ? product.descriptionAr : product.description}
         </p>
 
         <div className="flex-grow"></div>
 
-        {product.sellerName && product.sellerId && (
-          <div className="mb-2 text-xs">
-            <span className="text-muted-foreground me-1">
-              {t("product.soldBy")}:
-            </span>
-            <Link
-              href={`/seller/${product.sellerId}`}
-              className="text-primary hover:underline font-medium"
-              onClick={(e) => e.stopPropagation()} // Prevent parent Link navigation
-            >
-              {product.sellerName}
-            </Link>
-          </div>
-        )}
-
-        <div className="flex items-center gap-1 mb-3">
-          <div className="flex items-center">
+        <div className="flex items-center gap-1 mb-4">
+          <div className="flex items-center text-yellow-400">
             {[...Array(5)].map((_, i) => (
               <Star
                 key={i}
-                className={`w-4 h-4 ${i < Math.floor(rating) ? 'fill-yellow-400 text-yellow-500' : 'text-gray-300'}`}
+                className={`w-3.5 h-3.5 ${i < Math.floor(rating) ? 'fill-current' : 'text-gray-200 fill-gray-200'}`}
               />
             ))}
           </div>
@@ -141,20 +139,19 @@ export function ProductCard({ product, onRemoveFromWishlist }: ProductCardProps)
         </div>
 
         <div className="flex items-center justify-between">
-          <span className="text-xl font-bold text-primary">{formatCurrency(product.price)}</span>
-          <span className={`text-xs font-semibold px-2 py-1 rounded-md ${product.stock > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-            {product.stock > 0 ? `${t("product.inStock")}: ${product.stock}` : t("product.outOfStock")}
+          <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded-full ${product.stock > 0 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'}`}>
+            {product.stock > 0 ? t("product.inStock") : t("product.outOfStock")}
           </span>
         </div>
       </CardContent>
-      <CardFooter className="p-3 pt-0">
+      <CardFooter className="p-5 pt-0">
         <Button
           onClick={handleAddToCart}
-          className="w-full"
+          className="w-full rounded-xl bg-muted/50 text-foreground hover:bg-primary hover:text-primary-foreground border-0 shadow-none hover:shadow-md transition-all h-11 font-medium group/btn"
           disabled={product.stock === 0 || user?.role !== 'customer'}
           aria-label={t('product.addToCart')}
         >
-          <ShoppingCart className="me-2 h-4 w-4" />
+          <ShoppingCart className="me-2 h-4 w-4 transition-transform group-hover/btn:scale-110" />
           {t("product.addToCart")}
         </Button>
       </CardFooter>

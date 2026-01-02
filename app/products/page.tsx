@@ -7,6 +7,7 @@ import { useLocale } from "@/lib/locale-context"
 import type { Product } from "@/lib/types"
 import ClientOnly from "@/components/client-only"
 import Link from "next/link"
+import { motion, AnimatePresence } from "framer-motion"
 
 export type SortOption = "date-desc" | "price-asc" | "price-desc" | "name-asc"
 
@@ -106,15 +107,21 @@ export default function ProductsPage() {
     <ClientOnly>
       <div className="min-h-screen bg-background">
         <div className="container py-8">
-          <div className="mb-8">
-            <Link href="/" className="text-primary hover:underline">
-              ← {t("common.backToHome")}
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8"
+          >
+            <Link href="/" className="text-primary hover:text-primary/80 transition-colors hover:underline inline-flex items-center gap-1 mb-4 text-sm font-medium">
+              <span>←</span> {t("common.backToHome")}
             </Link>
-            <h1 className="text-3xl font-bold mt-4">{t("home.allProducts")}</h1>
-            <p className="text-muted-foreground mt-2">
+            <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent w-fit">
+              {t("home.allProducts")}
+            </h1>
+            <p className="text-muted-foreground mt-2 font-medium">
               {formatProductCount()}
             </p>
-          </div>
+          </motion.div>
 
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
             {/* Filters Sidebar */}
@@ -134,19 +141,35 @@ export default function ProductsPage() {
             {/* Products Grid */}
             <div className="lg:col-span-3">
               {loading ? (
-                <div className="text-center py-12">
+                <div className="text-center py-20">
+                  <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
                   <p className="text-muted-foreground">{t("common.loading")}</p>
                 </div>
               ) : filteredAndSortedProducts.length === 0 ? (
-                <div className="text-center py-12">
-                  <p className="text-muted-foreground">{t("home.noProducts")}</p>
+                <div className="text-center py-20 bg-muted/20 rounded-xl border border-dashed border-muted">
+                  <p className="text-lg text-muted-foreground font-medium">{t("home.noProducts")}</p>
+                  <p className="text-sm text-muted-foreground/70 mt-1">Try changing your filters or search term.</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {filteredAndSortedProducts.map((product) => (
-                    <ProductCard key={product.id} product={product} />
-                  ))}
-                </div>
+                <motion.div
+                  layout
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+                >
+                  <AnimatePresence>
+                    {filteredAndSortedProducts.map((product) => (
+                      <motion.div
+                        layout
+                        key={product.id}
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <ProductCard product={product} />
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                </motion.div>
               )}
             </div>
           </div>
