@@ -1,50 +1,31 @@
 import { NextResponse, NextRequest } from 'next/server'
-import { getAdminDb } from '@/lib/firebaseAdmin'
+import { supabase } from '@/lib/supabase'
 import { getAuthenticatedUser } from '@/lib/server-auth'
-import type { Order } from '@/lib/types'
+import type { Order, Product } from '@/lib/types'
 
-/**
- * @swagger
- * /api/orders:
- *   get:
- *     description: Returns orders for the authenticated user based on their role
- *     responses:
- *       200:
- *         description: A list of orders.
- *       401:
- *         description: Unauthorized.
- */
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   try {
     const user = await getAuthenticatedUser(request)
     if (!user) {
       return NextResponse.json(
-        {
-          message: 'Authentication required',
-          hint: 'Please check server logs for configuration issues',
-          solution: 'Make sure Firebase Admin is properly configured with valid credentials in your .env.local file'
-        },
+        { message: 'Authentication required' },
         { status: 401 },
       )
     }
 
-    const adminDb = getAdminDb()
-    const ordersRef = adminDb.collection('orders')
-
-    // 🔹 Build Firestore query based on user role
-    let query:
-      | FirebaseFirestore.Query<FirebaseFirestore.DocumentData>
-      | FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>
+    let query = supabase.from('orders').select('*, order_items(*, products(*))')
 
     switch (user.role) {
       case 'seller':
-        query = ordersRef.where('sellerId', '==', user.id)
+        query = query.eq('seller_id', user.id)
         break
       case 'customer':
-        query = ordersRef.where('customerId', '==', user.id)
+        query = query.eq('customer_id', user.id)
         break
       case 'admin':
-        query = ordersRef
+        // No filter for admin
         break
       default:
         return NextResponse.json(
@@ -53,23 +34,42 @@ export async function GET(request: NextRequest) {
         )
     }
 
-    const snapshot = await query.get()
+    const { data: ordersData, error } = await query.order('created_at', { ascending: false })
 
-    const orders: Order[] = snapshot.docs.map(
-      (doc) => {
-        const data = doc.data() as Order;
-        return {
-          ...data,
-          id: doc.id,
-        };
-      }
-    )
+    if (error) throw error
 
-    // Sort orders by most recent
-    orders.sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-    )
+    const orders: Order[] = ordersData.map((order: any) => ({
+      id: order.id,
+      customerId: order.customer_id || '',
+      customerName: order.customer_name || 'Unknown Customer',
+      sellerId: order.seller_id || '',
+      sellerName: order.seller_name || 'Unknown Seller',
+      total: order.total_price || 0,
+      status: order.status || 'pending',
+      shippingAddress: order.shipping_address || '',
+      customerPhone: order.customer_phone || '',
+      paymentMethod: order.payment_method || 'COD',
+      createdAt: new Date(order.created_at),
+      items: order.order_items?.map((item: any) => ({
+        product: {
+          id: item.products?.id || '',
+          name: item.products?.name || 'Unknown Product',
+          nameAr: item.products?.name_ar || '',
+          description: item.products?.description || '',
+          descriptionAr: item.products?.description_ar || '',
+          price: item.products?.price || 0,
+          category: item.products?.category || '',
+          image: item.products?.image_url || '',
+          sellerId: item.products?.seller_id || '',
+          sellerName: item.products?.seller_name || '',
+          stock: item.products?.stock || 0,
+          featured: item.products?.featured || false,
+          approved: item.products?.approved || false,
+          createdAt: item.products?.created_at ? new Date(item.products.created_at) : new Date()
+        } as Product,
+        quantity: item.quantity || 1
+      })) || []
+    }))
 
     return NextResponse.json(orders)
   } catch (error) {
@@ -84,19 +84,6 @@ export async function GET(request: NextRequest) {
   }
 }
 
-/**
- * @swagger
- * /api/orders:
- *   post:
- *     description: Create a new order for the authenticated customer
- *     responses:
- *       201:
- *         description: Order created successfully.
- *       400:
- *         description: Invalid request data.
- *       401:
- *         description: Unauthorized.
- */
 export async function POST(request: NextRequest) {
   try {
     const user = await getAuthenticatedUser(request)
@@ -113,7 +100,7 @@ export async function POST(request: NextRequest) {
       customerName,
       shippingAddress,
       customerPhone,
-      items,
+      items, // Array of { product: { id }, quantity }
       totalPrice,
       storeId,
       paymentMethod,
@@ -123,38 +110,52 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: 'Missing required fields' }, { status: 400 });
     }
 
-    const adminDb = getAdminDb();
+    // Get seller info from profiles table
+    const { data: sellerProfile, error: sellerError } = await supabase
+      .from('profiles')
+      .select('name')
+      .eq('id', storeId)
+      .single();
 
-    // Get seller info
-    const sellerRef = adminDb.collection('users').doc(storeId as string);
-    const sellerSnap = await sellerRef.get();
-    if (!sellerSnap.exists) {
+    if (sellerError || !sellerProfile) {
       return NextResponse.json({ message: 'Seller not found' }, { status: 404 });
     }
-    const sellerData = sellerSnap.data();
-    if (!sellerData) {
-      return NextResponse.json({ message: 'Seller data is empty' }, { status: 404 });
-    }
 
-    const orderData = {
-      customerId: user.id,
-      customerName,
-      sellerId: storeId,
-      sellerName: sellerData.storeName || sellerData.name,
-      items,
-      totalPrice,
-      status: 'pending',
-      shippingAddress,
-      customerPhone,
-      paymentMethod,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+    // Insert order
+    const { data: order, error: orderError } = await supabase
+      .from('orders')
+      .insert({
+        customer_id: user.id,
+        customer_name: customerName,
+        seller_id: storeId,
+        seller_name: sellerProfile.name,
+        total_price: totalPrice,
+        status: 'pending',
+        shipping_address: shippingAddress,
+        customer_phone: customerPhone,
+        payment_method: paymentMethod,
+      })
+      .select()
+      .single();
 
-    const docRef = await adminDb.collection('orders').add(orderData);
+    if (orderError) throw orderError;
+
+    // Insert order items
+    const orderItems = items.map((item: any) => ({
+      order_id: order.id,
+      product_id: item.product.id,
+      quantity: item.quantity,
+      price: item.product.price,
+    }));
+
+    const { error: itemsError } = await supabase
+      .from('order_items')
+      .insert(orderItems);
+
+    if (itemsError) throw itemsError;
 
     return NextResponse.json(
-      { message: 'Order created successfully', orderId: docRef.id },
+      { message: 'Order created successfully', orderId: order.id },
       { status: 201 },
     );
   } catch (error) {

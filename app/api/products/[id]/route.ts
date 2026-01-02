@@ -1,30 +1,50 @@
-'use server'
-
 import { NextResponse, NextRequest } from 'next/server'
-import { getAdminDb } from '@/lib/firebaseAdmin'
+import { supabase } from '@/lib/supabase'
 import type { Product, User } from '@/lib/types'
 import { getAuthenticatedUser } from '@/lib/server-auth'
 
-async function authorizeSeller(request: NextRequest, productId: string): Promise<{user: User, product: Product} | NextResponse> {
+export const dynamic = 'force-dynamic'
+
+async function authorizeSeller(request: NextRequest, productId: string): Promise<{ user: User, product: Product } | NextResponse> {
     const user = await getAuthenticatedUser(request);
     if (!user || user.role !== 'seller') {
         return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
     try {
-        const adminDb = getAdminDb();
-        const productDoc = await adminDb.collection('products').doc(productId).get();
-        if (!productDoc.exists) {
+        const { data: p, error } = await supabase
+            .from('products')
+            .select('*')
+            .eq('id', productId)
+            .single();
+
+        if (error || !p) {
             return NextResponse.json({ message: 'Product not found' }, { status: 404 });
         }
 
-        const product = { id: productDoc.id, ...productDoc.data() } as Product;
-        
-        // Authorization check: Does the product belong to the authenticated seller?
+        const product: Product = {
+            id: p.id,
+            name: p.name,
+            nameAr: p.name_ar,
+            description: p.description,
+            descriptionAr: p.description_ar,
+            price: p.price,
+            category: p.category,
+            image: p.image_url,
+            sellerId: p.seller_id,
+            sellerName: p.seller_name,
+            stock: p.stock,
+            featured: p.featured,
+            approved: p.approved,
+            suspended: p.suspended,
+            purchaseCount: p.purchase_count,
+            createdAt: new Date(p.created_at)
+        };
+
         if (product.sellerId !== user.id) {
             return NextResponse.json({ message: 'Product not found or access denied' }, { status: 404 });
         }
-        
+
         return { user, product };
     } catch (error) {
         console.error('Error fetching product:', error);
@@ -32,20 +52,6 @@ async function authorizeSeller(request: NextRequest, productId: string): Promise
     }
 }
 
-
-/**
- * @swagger
- * /api/products/{id}:
- *   get:
- *     description: Returns a single product by ID, owned by the seller.
- *     responses:
- *       200:
- *         description: The requested product.
- *       401:
- *         description: Unauthorized.
- *       404:
- *         description: Product not found or access denied.
- */
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
     const authResult = await authorizeSeller(request, id);
@@ -55,19 +61,6 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     return NextResponse.json(product);
 }
 
-/**
- * @swagger
- * /api/products/{id}:
- *   put:
- *     description: Updates an existing product owned by the seller.
- *     responses:
- *       200:
- *         description: The updated product.
- *       401:
- *         description: Unauthorized.
- *       404:
- *         description: Product not found or access denied.
- */
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
     const authResult = await authorizeSeller(request, id);
@@ -77,19 +70,44 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
     try {
         const body = await request.json();
-        const { image, ...otherData } = body;
-        
-        // Use the provided image URL if available, otherwise keep the existing one
+        const { image, nameAr, descriptionAr, ...otherData } = body;
+
         const updatedData = {
             ...otherData,
-            ...(image && { image: image }), // Only update image if provided
-            updatedAt: new Date(),
+            ...(nameAr && { name_ar: nameAr, name: nameAr }),
+            ...(descriptionAr && { description_ar: descriptionAr, description: descriptionAr }),
+            ...(image && { image_url: image }),
+            updated_at: new Date().toISOString(),
         };
 
-        const adminDb = getAdminDb();
-        await adminDb.collection('products').doc(id).update(updatedData);
-        const updatedProduct = { ...product, ...updatedData };
-        
+        const { data, error } = await supabase
+            .from('products')
+            .update(updatedData)
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        const updatedProduct: Product = {
+            id: data.id,
+            name: data.name,
+            nameAr: data.name_ar,
+            description: data.description,
+            descriptionAr: data.description_ar,
+            price: data.price,
+            category: data.category,
+            image: data.image_url,
+            sellerId: data.seller_id,
+            sellerName: data.seller_name,
+            stock: data.stock,
+            featured: data.featured,
+            approved: data.approved,
+            suspended: data.suspended,
+            purchaseCount: data.purchase_count,
+            createdAt: new Date(data.created_at)
+        };
+
         return NextResponse.json(updatedProduct);
     } catch (error) {
         console.error(`Error updating product ${id}:`, error);
@@ -97,31 +115,18 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     }
 }
 
-/**
- * @swagger
- * /api/products/{id}:
- *   delete:
- *     description: Deletes a product by ID owned by the seller.
- *     responses:
- *       200:
- *         description: Deletion successful.
- *       401:
- *         description: Unauthorized.
- *       404:
- *         description: Product not found or access denied.
- */
 export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-    console.log('=== DELETE /api/products/[id] called ===');
     const { id } = await params;
-    console.log('Product ID from params:', id);
     const authResult = await authorizeSeller(request, id);
     if (authResult instanceof NextResponse) return authResult;
 
     try {
-        console.log('Deleting product with ID:', id);
-        const adminDb = getAdminDb();
-        await adminDb.collection('products').doc(id).delete();
-        console.log('Product deleted successfully:', id);
+        const { error } = await supabase
+            .from('products')
+            .delete()
+            .eq('id', id);
+
+        if (error) throw error;
         return NextResponse.json({ message: 'Product deleted successfully' });
     } catch (error) {
         console.error(`Error deleting product ${id}:`, error);

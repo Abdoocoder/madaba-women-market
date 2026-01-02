@@ -1,118 +1,70 @@
-'use server'
-
 import { NextResponse, NextRequest } from 'next/server'
-import { getAdminDb } from '@/lib/firebaseAdmin'
+import { supabase } from '@/lib/supabase'
 import { getAuthenticatedUser } from '@/lib/server-auth'
-import type { Order } from '@/lib/types'
+import type { Order, Product } from '@/lib/types'
 
-/**
- * @swagger
- * /api/admin/orders:
- *   get:
- *     description: Returns all orders for admin management
- *     responses:
- *       200:
- *         description: A list of all orders.
- *       401:
- *         description: Unauthorized.
- *       403:
- *         description: Forbidden - user is not an admin.
- */
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
     try {
-        console.log('=== GET /api/admin/orders ===');
         const user = await getAuthenticatedUser(request);
-        console.log('User from auth:', user);
-        
-        if (!user) {
-            console.log('❌ Authentication failed - no user found');
-            return NextResponse.json({ 
-                message: 'Authentication required'
-            }, { status: 401 });
-        }
-        
-        if (user.role !== 'admin') {
-            console.log('❌ Access denied - user is not an admin');
-            return NextResponse.json({ 
-                message: 'Access denied - admin role required',
-                userRole: user.role 
-            }, { status: 403 });
+
+        if (!user || user.role !== 'admin') {
+            return NextResponse.json({ message: 'Access denied' }, { status: 403 });
         }
 
-        const adminDb = getAdminDb();
-        const ordersRef = adminDb.collection('orders');
-        const snapshot = await ordersRef.get();
-        
-        // Import Firestore types
-        type DocumentSnapshot = FirebaseFirestore.DocumentSnapshot;
-        
-        // Fetch all customer data in parallel for better performance
-        const customerPromises: Promise<DocumentSnapshot>[] = [];
-        const orderData: Order[] = [];
-        
-        snapshot.forEach((doc) => {
-            const order = { id: doc.id, ...doc.data() } as Order;
-            orderData.push(order);
-            // Push promise to fetch customer data
-            customerPromises.push(adminDb.collection('users').doc(order.customerId).get());
-        });
-        
-        // Resolve all customer promises
-        const customerDocs = await Promise.all(customerPromises);
-        
-        // Combine order data with customer names
-        const orders = orderData.map((order, index) => {
-            const customerDoc = customerDocs[index];
-            const customerData = customerDoc.exists ? customerDoc.data() : null;
-            return {
-                ...order,
-                customerName: customerData?.name || order.customerId
-            };
-        });
-        
-        console.log(`✅ Found ${orders.length} orders for admin`);
+        const { data, error } = await supabase
+            .from('orders')
+            .select('*, customer:profiles!customer_id(name), order_items(*, product:products(*))');
+
+        if (error) throw error;
+
+        const orders: Order[] = data.map((o: any) => ({
+            id: o.id,
+            customerId: o.customer_id || '',
+            customerName: o.customer?.name || o.customer_name || 'Unknown Customer',
+            sellerId: o.seller_id || '',
+            sellerName: o.seller_name || 'Unknown Seller',
+            total: o.total_price || 0,
+            status: o.status || 'pending',
+            shippingAddress: o.shipping_address || '',
+            customerPhone: o.customer_phone || '',
+            paymentMethod: o.payment_method || 'COD',
+            createdAt: new Date(o.created_at),
+            items: o.order_items?.map((item: any) => ({
+                product: {
+                    id: item.product?.id || '',
+                    name: item.product?.name || 'Unknown Product',
+                    nameAr: item.product?.name_ar || '',
+                    description: item.product?.description || '',
+                    descriptionAr: item.product?.description_ar || '',
+                    price: item.product?.price || 0,
+                    category: item.product?.category || '',
+                    image: item.product?.image_url || '',
+                    sellerId: item.product?.seller_id || '',
+                    sellerName: item.product?.seller_name || '',
+                    stock: item.product?.stock || 0,
+                    featured: item.product?.featured || false,
+                    approved: item.product?.approved || false,
+                    createdAt: item.product?.created_at ? new Date(item.product.created_at) : new Date()
+                } as Product,
+                quantity: item.quantity || 1
+            })) || []
+        }));
 
         return NextResponse.json(orders);
     } catch (error) {
-        console.error('❌ Error fetching orders:', error);
-        return NextResponse.json({ 
-            message: 'Internal Server Error',
-            error: error instanceof Error ? error.message : 'Unknown error'
-        }, { status: 500 });
+        console.error('Error fetching orders:', error);
+        return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
     }
 }
 
-/**
- * @swagger
- * /api/admin/orders:
- *   put:
- *     description: Updates an order status
- *     responses:
- *       200:
- *         description: Order status updated successfully.
- *       400:
- *         description: Bad request (missing data).
- *       401:
- *         description: Unauthorized.
- *       403:
- *         description: Forbidden - user is not an admin.
- *       404:
- *         description: Order not found.
- */
 export async function PUT(request: NextRequest) {
     try {
-        console.log('=== PUT /api/admin/orders ===');
         const user = await getAuthenticatedUser(request);
-        
-        if (!user) {
-            return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-        }
-        
-        if (user.role !== 'admin') {
-            return NextResponse.json({ 
-                message: 'Access denied - admin role required',
-                userRole: user.role 
-            }, { status: 403 });
+
+        if (!user || user.role !== 'admin') {
+            return NextResponse.json({ message: 'Access denied' }, { status: 403 });
         }
 
         const { orderId, status } = await request.json();
@@ -121,23 +73,16 @@ export async function PUT(request: NextRequest) {
             return NextResponse.json({ message: 'Order ID and status are required' }, { status: 400 });
         }
 
-        const adminDb = getAdminDb();
-        const orderRef = adminDb.collection('orders').doc(orderId);
-        const orderDoc = await orderRef.get();
+        const { error } = await supabase
+            .from('orders')
+            .update({ status, updated_at: new Date().toISOString() })
+            .eq('id', orderId);
 
-        if (!orderDoc.exists) {
-            return NextResponse.json({ message: 'Order not found' }, { status: 404 });
-        }
-
-        await orderRef.update({ status });
-        console.log('✅ Order status updated successfully:', orderId);
+        if (error) throw error;
 
         return NextResponse.json({ message: 'Order status updated successfully' });
     } catch (error) {
-        console.error('❌ Error updating order status:', error);
-        return NextResponse.json({ 
-            message: 'Internal Server Error',
-            error: error instanceof Error ? error.message : 'Unknown error'
-        }, { status: 500 });
+        console.error('Error updating order status:', error);
+        return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
     }
 }

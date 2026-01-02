@@ -1,110 +1,55 @@
 import { NextResponse, NextRequest } from 'next/server'
-import { getAdminDb } from '@/lib/firebaseAdmin'
+import { supabase } from '@/lib/supabase'
 import { getAuthenticatedUser } from '@/lib/server-auth'
 
+export const dynamic = 'force-dynamic'
+
 interface SuccessStory {
-  id: string;
-  author: string;
-  story: string;
-  imageUrl?: string;
-  date: string;
-  sellerId?: string;
+    id: string;
+    author: string;
+    story: string;
+    imageUrl?: string;
+    date: string;
+    sellerId?: string;
 }
 
-/**
- * @swagger
- * /api/admin/stories:
- *   get:
- *     description: Returns all success stories for admin management
- *     responses:
- *       200:
- *         description: A list of success stories.
- *       401:
- *         description: Unauthorized.
- *       403:
- *         description: Forbidden - user is not an admin.
- */
 export async function GET(request: NextRequest) {
     try {
         const user = await getAuthenticatedUser(request);
-        
-        if (!user) {
-            return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-        }
-        
-        if (user.role !== 'admin') {
-            return NextResponse.json({ 
-                message: 'Access denied - admin role required',
-                userRole: user.role 
-            }, { status: 403 });
+
+        if (!user || user.role !== 'admin') {
+            return NextResponse.json({ message: 'Access denied' }, { status: 403 });
         }
 
-        let adminDb;
-        try {
-            adminDb = getAdminDb();
-        } catch (error) {
-            console.error('Firebase Admin initialization error:', error);
-            return NextResponse.json({ 
-                message: 'Service Unavailable - Firebase configuration error',
-                hint: 'Check server logs for configuration issues',
-                solution: 'Make sure Firebase Admin is properly configured with valid credentials in your .env.local file'
-            }, { status: 503 });
-        }
-        
-        const storiesRef = adminDb.collection('successStories');
-        const snapshot = await storiesRef.orderBy('date', 'desc').get();
-        
-        const stories: SuccessStory[] = [];
-        snapshot.forEach((doc) => {
-            const storyData = doc.data();
-            stories.push({
-                id: doc.id,
-                author: storyData.author,
-                story: storyData.story,
-                imageUrl: storyData.imageUrl,
-                date: storyData.date.toDate ? storyData.date.toDate() : new Date(storyData.date),
-                sellerId: storyData.sellerId,
-            });
-        });
-        
+        const { data, error } = await supabase
+            .from('success_stories')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        const stories: SuccessStory[] = data.map((story: any) => ({
+            id: story.id,
+            author: story.author,
+            story: story.story,
+            imageUrl: story.image_url,
+            date: story.created_at,
+            sellerId: story.seller_id,
+        }));
+
         return NextResponse.json(stories);
     } catch (error) {
         console.error('Error fetching success stories:', error);
-        return NextResponse.json({ 
-            message: 'Internal Server Error',
-            error: error instanceof Error ? error.message : 'Unknown error'
-        }, { status: 500 });
+        return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
     }
 }
 
-/**
- * @swagger
- * /api/admin/stories:
- *   post:
- *     description: Creates a new success story
- *     responses:
- *       201:
- *         description: Success story created successfully.
- *       400:
- *         description: Bad request (missing data).
- *       401:
- *         description: Unauthorized.
- *       403:
- *         description: Forbidden - user is not an admin.
- */
 export async function POST(request: NextRequest) {
     try {
         const user = await getAuthenticatedUser(request);
-        
-        if (!user) {
-            return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-        }
-        
-        if (user.role !== 'admin') {
-            return NextResponse.json({ 
-                message: 'Access denied - admin role required',
-                userRole: user.role 
-            }, { status: 403 });
+
+        if (!user || user.role !== 'admin') {
+            return NextResponse.json({ message: 'Access denied' }, { status: 403 });
         }
 
         const body = await request.json();
@@ -114,71 +59,39 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ message: 'Author and story are required' }, { status: 400 });
         }
 
-        let adminDb;
-        try {
-            adminDb = getAdminDb();
-        } catch (error) {
-            console.error('Firebase Admin initialization error:', error);
-            return NextResponse.json({ 
-                message: 'Service Unavailable - Firebase configuration error',
-                hint: 'Check server logs for configuration issues',
-                solution: 'Make sure Firebase Admin is properly configured with valid credentials in your .env.local file'
-            }, { status: 503 });
-        }
-        
-        const storyData = {
-            author,
-            story,
-            imageUrl: imageUrl || null,
-            date: new Date(),
-            sellerId: sellerId || null,
-        };
+        const { data, error } = await supabase
+            .from('success_stories')
+            .insert({
+                author,
+                story,
+                image_url: imageUrl || null,
+                seller_id: sellerId || null,
+            })
+            .select()
+            .single();
 
-        const docRef = await adminDb.collection('successStories').add(storyData);
-        
-        return NextResponse.json({ 
-            id: docRef.id,
-            ...storyData
+        if (error) throw error;
+
+        return NextResponse.json({
+            id: data.id,
+            author: data.author,
+            story: data.story,
+            imageUrl: data.image_url,
+            date: data.created_at,
+            sellerId: data.seller_id
         }, { status: 201 });
     } catch (error) {
         console.error('Error creating success story:', error);
-        return NextResponse.json({ 
-            message: 'Internal Server Error',
-            error: error instanceof Error ? error.message : 'Unknown error'
-        }, { status: 500 });
+        return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
     }
 }
 
-/**
- * @swagger
- * /api/admin/stories:
- *   put:
- *     description: Updates an existing success story
- *     responses:
- *       200:
- *         description: Success story updated successfully.
- *       400:
- *         description: Bad request (missing data).
- *       401:
- *         description: Unauthorized.
- *       403:
- *         description: Forbidden - user is not an admin.
- *       404:
- *         description: Success story not found.
- */
 export async function PUT(request: NextRequest) {
     try {
         const user = await getAuthenticatedUser(request);
-        
-        if (!user) {
-            return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-        }
-        
-        if (user.role !== 'admin') {
-            return NextResponse.json({ 
-                message: 'Access denied - admin role required',
-                userRole: user.role 
-            }, { status: 403 });
+
+        if (!user || user.role !== 'admin') {
+            return NextResponse.json({ message: 'Access denied' }, { status: 403 });
         }
 
         const { searchParams } = new URL(request.url);
@@ -195,78 +108,41 @@ export async function PUT(request: NextRequest) {
             return NextResponse.json({ message: 'Author and story are required' }, { status: 400 });
         }
 
-        let adminDb;
-        try {
-            adminDb = getAdminDb();
-        } catch (error) {
-            console.error('Firebase Admin initialization error:', error);
-            return NextResponse.json({ 
-                message: 'Service Unavailable - Firebase configuration error',
-                hint: 'Check server logs for configuration issues',
-                solution: 'Make sure Firebase Admin is properly configured with valid credentials in your .env.local file'
-            }, { status: 503 });
-        }
-        
-        const storyRef = adminDb.collection('successStories').doc(id);
-        const storyDoc = await storyRef.get();
+        const { data, error } = await supabase
+            .from('success_stories')
+            .update({
+                author,
+                story,
+                image_url: imageUrl || undefined,
+                seller_id: sellerId || undefined,
+                updated_at: new Date().toISOString(),
+            })
+            .eq('id', id)
+            .select()
+            .single();
 
-        if (!storyDoc.exists) {
-            return NextResponse.json({ message: 'Story not found' }, { status: 404 });
-        }
+        if (error) throw error;
 
-        const updateData = {
-            author,
-            story,
-            ...(imageUrl !== undefined && { imageUrl }), // Only update imageUrl if provided
-            ...(sellerId !== undefined && { sellerId }), // Only update sellerId if provided
-            updatedAt: new Date(),
-        };
-
-        await storyRef.update(updateData);
-        
-        return NextResponse.json({ 
-            id,
-            ...updateData
+        return NextResponse.json({
+            id: data.id,
+            author: data.author,
+            story: data.story,
+            imageUrl: data.image_url,
+            date: data.created_at,
+            sellerId: data.seller_id
         });
     } catch (error) {
         console.error('Error updating success story:', error);
-        return NextResponse.json({ 
-            message: 'Internal Server Error',
-            error: error instanceof Error ? error.message : 'Unknown error'
-        }, { status: 500 });
+        return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
     }
 }
 
-/**
- * @swagger
- * /api/admin/stories:
- *   delete:
- *     description: Deletes a success story by ID
- *     responses:
- *       200:
- *         description: Success story deleted successfully.
- *       400:
- *         description: Bad request (missing ID).
- *       401:
- *         description: Unauthorized.
- *       403:
- *         description: Forbidden - user is not an admin.
- *       404:
- *         description: Success story not found.
- */
 export async function DELETE(request: NextRequest) {
     try {
         const user = await getAuthenticatedUser(request);
-        
-        if (!user) {
-            return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-        }
-        
-        if (user.role !== 'admin') {
-            return NextResponse.json({ 
-                message: 'Access denied - admin role required',
-                userRole: user.role 
-            }, { status: 403 });
+
+        if (!user || user.role !== 'admin') {
+            return NextResponse.json({ message: 'Access denied' }, { status: 403 });
         }
 
         const { searchParams } = new URL(request.url);
@@ -276,33 +152,16 @@ export async function DELETE(request: NextRequest) {
             return NextResponse.json({ message: 'Story ID is required' }, { status: 400 });
         }
 
-        let adminDb;
-        try {
-            adminDb = getAdminDb();
-        } catch (error) {
-            console.error('Firebase Admin initialization error:', error);
-            return NextResponse.json({ 
-                message: 'Service Unavailable - Firebase configuration error',
-                hint: 'Check server logs for configuration issues',
-                solution: 'Make sure Firebase Admin is properly configured with valid credentials in your .env.local file'
-            }, { status: 503 });
-        }
-        
-        const storyRef = adminDb.collection('successStories').doc(id);
-        const storyDoc = await storyRef.get();
+        const { error } = await supabase
+            .from('success_stories')
+            .delete()
+            .eq('id', id);
 
-        if (!storyDoc.exists) {
-            return NextResponse.json({ message: 'Story not found' }, { status: 404 });
-        }
+        if (error) throw error;
 
-        await storyRef.delete();
-        
         return NextResponse.json({ message: 'Story deleted successfully' });
     } catch (error) {
         console.error('Error deleting success story:', error);
-        return NextResponse.json({ 
-            message: 'Internal Server Error',
-            error: error instanceof Error ? error.message : 'Unknown error'
-        }, { status: 500 });
+        return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
     }
 }

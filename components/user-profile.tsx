@@ -9,9 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { updateDoc, doc } from "firebase/firestore"
-import { updatePassword, updateProfile } from "firebase/auth"
-import { auth, db } from "@/lib/firebase"
+import { supabase } from "@/lib/supabase"
 
 export default function UserProfile() {
   const { user, refreshAuthUser } = useAuth()
@@ -56,25 +54,17 @@ export default function UserProfile() {
     setSuccess(null)
 
     try {
-      if (auth.currentUser) {
-        // Update Firebase Auth profile
-        await updateProfile(auth.currentUser, {
-          displayName: formData.name
-        })
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .update({ name: formData.name })
+        .eq("id", user.id)
 
-        // Update Firestore document
-        const userDocRef = doc(db, "users", user.id)
-        await updateDoc(userDocRef, {
-          name: formData.name,
-          email: formData.email
-        })
+      if (profileError) throw profileError
 
-        await refreshAuthUser()
-        setSuccess("Profile updated successfully!")
-        setIsEditing(false)
-      }
+      await refreshAuthUser()
+      setSuccess("Profile updated successfully!")
+      setIsEditing(false)
     } catch (error: unknown) {
-      // Type guard to safely access error properties
       if (error instanceof Error) {
         setError(error.message || "Failed to update profile");
       } else {
@@ -104,26 +94,21 @@ export default function UserProfile() {
     }
 
     try {
-      if (auth.currentUser) {
-        await updatePassword(auth.currentUser, passwordData.newPassword)
-        setSuccess("Password updated successfully!")
-        setIsChangingPassword(false)
-        setPasswordData({
-          currentPassword: "",
-          newPassword: "",
-          confirmPassword: ""
-        })
-      }
+      const { error: passwordError } = await supabase.auth.updateUser({
+        password: passwordData.newPassword
+      })
+
+      if (passwordError) throw passwordError
+
+      setSuccess("Password updated successfully!")
+      setIsChangingPassword(false)
+      setPasswordData({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: ""
+      })
     } catch (error: unknown) {
-      // Type guard to safely access error properties
-      if (error instanceof Error && 'code' in error) {
-        const firebaseError = error as { code: string; message?: string };
-        if (firebaseError.code === 'auth/requires-recent-login') {
-          setError("Please log out and log back in before changing your password for security reasons.");
-        } else {
-          setError(firebaseError.message || "Failed to update password");
-        }
-      } else if (error instanceof Error) {
+      if (error instanceof Error) {
         setError(error.message || "Failed to update password");
       } else {
         setError("Failed to update password");
@@ -132,6 +117,7 @@ export default function UserProfile() {
       setIsSubmitting(false);
     }
   }
+  // ... rest of the file ...
 
   const getRoleColor = (role: string) => {
     switch (role) {
@@ -169,8 +155,8 @@ export default function UserProfile() {
                     {user.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase() : 'U'}
                   </AvatarFallback>
                 ) : (
-                  <AvatarImage 
-                    src={user.photoURL} 
+                  <AvatarImage
+                    src={user.photoURL}
                     alt={user.name}
                     // Add onError handler to gracefully handle image loading failures
                     onError={(e) => {

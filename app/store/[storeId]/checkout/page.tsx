@@ -12,8 +12,7 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
 import Image from 'next/image'
 import { formatCurrency } from '@/lib/utils'
-import { collection, addDoc, serverTimestamp, doc, getDoc } from 'firebase/firestore'
-import { db } from '@/lib/firebase'
+import { supabase } from '@/lib/supabase'
 import { useToast } from '@/components/ui/use-toast'
 
 export default function StoreCheckoutPage() {
@@ -29,13 +28,11 @@ export default function StoreCheckoutPage() {
     const [phone, setPhone] = useState(user?.phone || '')
     const [loading, setLoading] = useState(false)
 
-    // Redirect if cart is empty, user is not logged in, or storeId doesn't match
     if (!user || items.length === 0 || storeSellerId !== params.storeId) {
-        // We can show a message or redirect. For now, redirecting to the store page.
         if (typeof window !== 'undefined') {
             router.push(`/store/${params.storeId}`)
         }
-        return null // Render nothing while redirecting
+        return null
     }
 
     const handlePlaceOrder = async (e: React.FormEvent) => {
@@ -47,24 +44,50 @@ export default function StoreCheckoutPage() {
         setLoading(true)
 
         try {
-            const sellerRef = doc(db, 'users', storeSellerId!)
-            const sellerSnap = await getDoc(sellerRef)
-            if (!sellerSnap.exists()) throw new Error('Seller not found')
-            const sellerData = sellerSnap.data()
+            // Fetch seller data from profiles
+            const { data: sellerData, error: sellerError } = await supabase
+                .from('profiles')
+                .select('store_name, name')
+                .eq('id', storeSellerId!)
+                .single()
 
-            await addDoc(collection(db, 'orders'), {
-                customerId: user.id,
-                customerName,
-                sellerId: storeSellerId,
-                sellerName: sellerData.storeName || sellerData.name,
-                items: items.map(item => ({ ...item.product, quantity: item.quantity })),
-                totalPrice,
-                status: 'pending', // initial status
-                shippingAddress: address,
-                customerPhone: phone,
-                paymentMethod: 'COD', // Payment method
-                createdAt: serverTimestamp(),
-            })
+            if (sellerError || !sellerData) throw new Error('Seller not found')
+
+            // 1. Create the order
+            const { data: orderData, error: orderError } = await supabase
+                .from('orders')
+                .insert({
+                    customer_id: user.id,
+                    customer_name: customerName,
+                    seller_id: storeSellerId,
+                    seller_name: sellerData.store_name || sellerData.name,
+                    total_price: totalPrice,
+                    status: 'pending',
+                    shipping_address: address,
+                    customer_phone: phone,
+                    payment_method: 'COD'
+                })
+                .select()
+                .single()
+
+            if (orderError) throw orderError
+
+            // 2. Create order items
+            if (orderData) {
+                const orderItems = items.map(item => ({
+                    order_id: orderData.id,
+                    product_id: item.product.id,
+                    product_name: item.product.name,
+                    quantity: item.quantity,
+                    price: item.product.price
+                }))
+
+                const { error: itemsError } = await supabase
+                    .from('order_items')
+                    .insert(orderItems)
+
+                if (itemsError) throw itemsError
+            }
 
             toast({ title: t('common.success'), description: t('checkout.orderPlacedSuccess') })
             clearCart()
@@ -76,6 +99,7 @@ export default function StoreCheckoutPage() {
             setLoading(false)
         }
     }
+    // ... rest of the file ...
 
     return (
         <div className="container mx-auto py-12 px-4 md:px-6">

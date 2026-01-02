@@ -2,8 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
 import type { CartItem, Product } from "./types"
-import { db } from "@/lib/firebase"
-import { doc, setDoc, onSnapshot } from "firebase/firestore"
+import { supabase } from "./supabase"
 import { useAuth } from "@/lib/auth-context"
 import { useToast } from "@/components/ui/use-toast"
 import { useLocale } from "./locale-context"
@@ -16,16 +15,12 @@ interface CartContextType {
   clearCart: () => void
   totalItems: number
   totalPrice: number
-  // New state to track the seller of the items currently in the cart
   storeSellerId: string | null
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined)
 
-// Local storage key prefix
 const CART_KEY = "seydaty_cart_v2"
-
-// Helper to get a namespaced localStorage key
 const getStorageKey = (userId?: string) => userId ? `${CART_KEY}_${userId}` : `${CART_KEY}_guest`
 
 export function CartProvider({ children }: { children: ReactNode }) {
@@ -35,7 +30,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast()
   const { t } = useLocale()
 
-  // Effect to load cart from localStorage on initial render or user change
+  // Load from local storage
   useEffect(() => {
     const storageKey = getStorageKey(user?.id)
     try {
@@ -44,74 +39,90 @@ export function CartProvider({ children }: { children: ReactNode }) {
         const { items: storedItems, sellerId: storedSellerId } = JSON.parse(storedCart)
         setItems(storedItems || [])
         setStoreSellerId(storedSellerId || null)
-      }
-      else {
-        // Clear state if no cart is found for the user
+      } else {
         setItems([])
         setStoreSellerId(null)
       }
     } catch (error) {
       console.error('Failed to parse cart from localStorage', error)
-      // Clear storage if parsing fails
       localStorage.removeItem(storageKey)
     }
   }, [user])
 
-  // Effect to save cart to localStorage whenever it changes
+  // Save to local storage
   useEffect(() => {
     const storageKey = getStorageKey(user?.id)
     const cartData = JSON.stringify({ items, sellerId: storeSellerId })
     localStorage.setItem(storageKey, cartData)
   }, [items, storeSellerId, user])
 
-  // Effect to sync cart with Firebase for logged-in users
+  // Sync with Supabase
   useEffect(() => {
-    // Add proper null check for user and user.id
     if (!user || !user.id) return
 
-    const cartRef = doc(db, "carts", user.id)
-    const unsubscribe = onSnapshot(cartRef, (docSnap) => {
-      if (docSnap.exists()) {
-        const { items: fbItems, sellerId: fbSellerId } = docSnap.data()
-        // Sync from Firebase only if it's different from local state to prevent loops
-        if (JSON.stringify(items) !== JSON.stringify(fbItems)) {
-          setItems(fbItems || [])
+    const fetchCart = async () => {
+      const { data, error } = await supabase
+        .from('carts')
+        .select('*')
+        .eq('user_id', user.id)
+        .single()
+
+      if (data && !error) {
+        if (JSON.stringify(items) !== JSON.stringify(data.items)) {
+          setItems(data.items || [])
         }
-        if (storeSellerId !== fbSellerId) {
-          setStoreSellerId(fbSellerId || null)
+        if (storeSellerId !== data.seller_id) {
+          setStoreSellerId(data.seller_id || null)
         }
       }
-    }, (error) => {
-      console.error("Firebase onSnapshot error:", error);
-      // Handle permission denied errors specifically
-      if (error && typeof error === 'object' && 'code' in error && error.code === 'permission-denied') {
-        console.error("Permission denied accessing cart. Check Firestore rules.");
-      }
-    })
+    }
 
-    return () => unsubscribe()
-  }, [user, items, storeSellerId])
+    fetchCart()
 
-  // Debounced effect to save cart to Firebase
+    const subscription = supabase
+      .channel(`cart:${user.id}`)
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'carts',
+        filter: `user_id=eq.${user.id}`
+      }, (payload) => {
+        const newData = payload.new as any
+        if (JSON.stringify(items) !== JSON.stringify(newData.items)) {
+          setItems(newData.items || [])
+        }
+        if (storeSellerId !== newData.seller_id) {
+          setStoreSellerId(newData.seller_id || null)
+        }
+      })
+      .subscribe()
+
+    return () => {
+      subscription.unsubscribe()
+    }
+  }, [user?.id])
+
+  // Save to Supabase (debounced)
   useEffect(() => {
-    // Add proper null check for user and user.id
     if (!user || !user.id) return
 
     const handler = setTimeout(async () => {
       try {
-        const cartRef = doc(db, "carts", user.id)
-        await setDoc(cartRef, { items, sellerId: storeSellerId })
+        await supabase
+          .from('carts')
+          .upsert({
+            user_id: user.id,
+            items,
+            seller_id: storeSellerId,
+            updated_at: new Date().toISOString()
+          })
       } catch (error) {
-        console.error("Failed to save cart to Firebase", error);
-        // Handle permission denied errors specifically
-        if (error && typeof error === 'object' && 'code' in error && error.code === 'permission-denied') {
-          console.error("Permission denied saving cart. Check Firestore rules.");
-        }
+        console.error("Failed to save cart to Supabase", error)
       }
-    }, 1000) // Debounce for 1 second
+    }, 1000)
 
     return () => clearTimeout(handler)
-  }, [items, storeSellerId, user])
+  }, [items, storeSellerId, user?.id])
 
   const handleClearAndAddToCart = (product: Product) => {
     setItems([{ product, quantity: 1 }])
@@ -123,7 +134,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }
 
   const addToCart = (product: Product) => {
-    // If cart is empty, add the item and set the seller ID
     if (items.length === 0 || !storeSellerId) {
       setStoreSellerId(product.sellerId)
       setItems([{ product, quantity: 1 }])
@@ -131,7 +141,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
       return
     }
 
-    // If item is from a different seller, ask for confirmation
     if (product.sellerId !== storeSellerId) {
       toast({
         title: t('cart.differentStoreTitle'),
@@ -149,7 +158,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
       return
     }
 
-    // If item already exists in cart, increase quantity
     setItems((prev) => {
       const existingItem = prev.find((item) => item.product.id === product.id)
       if (existingItem) {
@@ -167,7 +175,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems((prev) => {
       const newItems = prev.filter((item) => item.product.id !== productId)
       if (newItems.length === 0) {
-        setStoreSellerId(null) // Clear sellerId if cart becomes empty
+        setStoreSellerId(null)
       }
       return newItems
     })
@@ -187,7 +195,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const clearCart = () => {
     setItems([])
-    setStoreSellerId(null) // Also clear the sellerId
+    setStoreSellerId(null)
   }
 
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)

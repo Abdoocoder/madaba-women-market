@@ -3,8 +3,7 @@
 import { useState, useEffect } from "react"
 import { ProductCard } from "./product-card"
 import { useLocale } from "@/lib/locale-context"
-import { collection, getDocs, query, where, limit } from "firebase/firestore"
-import { db } from "@/lib/firebase"
+import { supabase } from "@/lib/supabase"
 import type { Product } from "@/lib/types"
 import { motion } from "framer-motion"
 
@@ -16,37 +15,34 @@ export function FeaturedProducts() {
   useEffect(() => {
     const fetchFeaturedProducts = async () => {
       try {
-        const productsQuery = query(
-          collection(db, "products"),
-          where("featured", "==", true),
-          where("approved", "==", true),
-          limit(8),
-        )
-        const querySnapshot = await getDocs(productsQuery)
-        const products = querySnapshot.docs
-          .map((doc) => {
-            const productData = doc.data();
-            const product = {
-              id: doc.id,
-              ...productData,
-            } as Product;
+        const { data, error } = await supabase
+          .from("products")
+          .select("*")
+          .eq("featured", true)
+          .eq("approved", true)
+          .limit(8)
 
-            // Debugging: Log product data
-            console.log("Fetched featured product:", product);
+        if (error) throw error
 
-            // Validate that we have all required data
-            if (!product.id || (typeof product.id === 'string' && product.id.trim() === '')) {
-              console.error("Featured product is missing valid ID:", productData);
-              return null; // Skip this product
-            }
-            if (!product.sellerId) {
-              console.error("Featured product is missing sellerId:", product);
-              return null; // Skip this product
-            }
+        const products: Product[] = data.map((p) => ({
+          id: p.id,
+          name: p.name,
+          nameAr: p.name_ar,
+          description: p.description,
+          descriptionAr: p.description_ar,
+          price: p.price,
+          category: p.category,
+          image: p.image_url,
+          sellerId: p.seller_id,
+          sellerName: p.seller_name,
+          stock: p.stock,
+          featured: p.featured,
+          approved: p.approved,
+          suspended: p.suspended,
+          purchaseCount: p.purchase_count,
+          createdAt: new Date(p.created_at)
+        }))
 
-            return product;
-          })
-          .filter((product): product is Product => product !== null) // Filter out null products
         setFeaturedProducts(products)
       } catch (error) {
         console.error("Error fetching featured products:", error)
@@ -57,6 +53,7 @@ export function FeaturedProducts() {
 
     fetchFeaturedProducts()
   }, [])
+  // ... rest of the file ...
 
   if (isLoading || featuredProducts.length === 0) {
     return null

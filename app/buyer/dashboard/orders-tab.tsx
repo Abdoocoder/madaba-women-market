@@ -6,8 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { db } from "@/lib/firebase";
-import { collection, query, where, getDocs, doc, getDoc } from "firebase/firestore";
+import { supabase } from "@/lib/supabase";
 import { Order, CartItem, Product } from "@/lib/types";
 import { formatCurrency } from "@/lib/utils";
 import { useLocale } from "@/lib/locale-context";
@@ -25,43 +24,41 @@ export function OrdersTab() {
   useEffect(() => {
     const fetchOrders = async () => {
       if (!user) return;
-      
+
       try {
         setLoading(true);
-        const ordersRef = collection(db, "orders");
-        const q = query(ordersRef, where("customerId", "==", user.id));
-        const querySnapshot = await getDocs(q);
-        
-        const ordersData: Order[] = [];
-        for (const docSnapshot of querySnapshot.docs) {
-          const orderData = docSnapshot.data() as Order;
-          // Fetch product details for each item
-          const itemsWithDetails: CartItem[] = [];
-          for (const item of orderData.items) {
-            const productDoc = await getDoc(doc(db, "products", item.product.id));
-            if (productDoc.exists()) {
-              const productData = {
-                id: productDoc.id,
-                ...productDoc.data()
-              } as Product;
-              
-              itemsWithDetails.push({
-                product: productData,
-                quantity: item.quantity
-              });
-            } else {
-              // If product doesn't exist, keep the original item
-              itemsWithDetails.push(item);
-            }
-          }
-          
-          ordersData.push({
-            ...orderData,
-            items: itemsWithDetails,
-            id: docSnapshot.id
-          });
-        }
-        
+        const { data, error } = await supabase
+          .from("orders")
+          .select("*, order_items(*, products(*))")
+          .eq("customer_id", user.id)
+          .order("created_at", { ascending: false });
+
+        if (error) throw error;
+
+        const ordersData: Order[] = data.map((order: any) => ({
+          id: order.id,
+          customerId: order.customer_id,
+          customerName: order.customer_name,
+          sellerId: order.seller_id,
+          sellerName: order.seller_name,
+          total: order.total_price,
+          status: order.status,
+          shippingAddress: order.shipping_address,
+          customerPhone: order.customer_phone,
+          createdAt: new Date(order.created_at),
+          items: order.order_items.map((item: any) => ({
+            product: {
+              id: item.products.id,
+              name: item.products.name,
+              nameAr: item.products.name_ar,
+              price: item.products.price,
+              image: item.products.image_url,
+              // ... other fields if needed
+            } as Product,
+            quantity: item.quantity
+          }))
+        }));
+
         setOrders(ordersData);
       } catch (error) {
         console.error("Error fetching orders:", error);
@@ -83,19 +80,20 @@ export function OrdersTab() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "pending":
-        return <Badge variant="secondary">{t('order.status.pending')}</Badge>;
+        return <Badge variant="secondary">{t('orders.statuses.pending')}</Badge>;
       case "processing":
-        return <Badge variant="default">{t('order.status.processing')}</Badge>;
+        return <Badge variant="default">{t('orders.statuses.processing')}</Badge>;
       case "shipped":
-        return <Badge variant="default">{t('order.status.shipped')}</Badge>;
+        return <Badge variant="default">{t('orders.statuses.shipped')}</Badge>;
       case "delivered":
-        return <Badge variant="default" className="bg-green-500 text-white">{t('order.status.delivered')}</Badge>;
+        return <Badge variant="default" className="bg-green-500 text-white">{t('orders.statuses.delivered')}</Badge>;
       case "cancelled":
-        return <Badge variant="destructive">{t('order.status.cancelled')}</Badge>;
+        return <Badge variant="destructive">{t('orders.statuses.cancelled')}</Badge>;
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }
   };
+  // ... rest of the file ...
 
   const openOrderDetails = (order: Order) => {
     setSelectedOrder(order);
@@ -140,14 +138,14 @@ export function OrdersTab() {
                         {new Date(order.createdAt).toLocaleDateString()}
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center gap-4">
                       <div className="font-medium">{formatCurrency(order.total)}</div>
                       {getStatusBadge(order.status)}
                     </div>
-                    
-                    <Button 
-                      variant="outline" 
+
+                    <Button
+                      variant="outline"
                       size="sm"
                       onClick={() => openOrderDetails(order)}
                     >
@@ -168,14 +166,14 @@ export function OrdersTab() {
             <div className="p-6">
               <div className="flex justify-between items-start mb-4">
                 <h3 className="text-xl font-bold">{t('order.details')}</h3>
-                <button 
+                <button
                   onClick={closeOrderDetails}
                   className="text-gray-500 hover:text-gray-700"
                 >
                   ✕
                 </button>
               </div>
-              
+
               <div className="space-y-6">
                 <div className="flex justify-between items-start">
                   <div>
@@ -186,9 +184,9 @@ export function OrdersTab() {
                   </div>
                   {getStatusBadge(selectedOrder.status)}
                 </div>
-                
+
                 <Separator />
-                
+
                 <div className="space-y-4">
                   <h4 className="font-medium">{t('order.items')}</h4>
                   <div className="space-y-3">
@@ -208,14 +206,14 @@ export function OrdersTab() {
                     ))}
                   </div>
                 </div>
-                
+
                 <Separator />
-                
+
                 <div className="flex justify-between">
                   <span>{t('order.total')}</span>
                   <span className="font-medium">{formatCurrency(selectedOrder.total)}</span>
                 </div>
-                
+
                 <div className="flex justify-end">
                   <Button onClick={closeOrderDetails}>{t('common.close')}</Button>
                 </div>

@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
-import { doc, getDoc, setDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { supabase } from "@/lib/supabase";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,23 +45,27 @@ export function AddressesTab() {
       }
 
       try {
-        const addressesRef = doc(db, "addresses", user.id);
-        const addressesSnap = await getDoc(addressesRef);
+        const { data: profile, error } = await supabase
+          .from("profiles")
+          .select("addresses")
+          .eq("id", user.id)
+          .single();
 
-        if (addressesSnap.exists()) {
-          const addressesData = addressesSnap.data().addresses || [];
-          setAddresses(addressesData);
+        if (error) throw error;
+
+        if (profile && profile.addresses) {
+          setAddresses(profile.addresses as Address[]);
         } else {
           setAddresses([]);
         }
       } catch (error) {
         console.error("Error fetching addresses: ", error);
-        toast({ 
-          title: t('messages.error'), 
-          description: t('messages.failedToFetchAddresses'), 
-          variant: "destructive" 
+        toast({
+          title: t('messages.error'),
+          description: t('messages.failedToFetchAddresses'),
+          variant: "destructive"
         });
-        setAddresses([]); // Set empty array even on error
+        setAddresses([]);
       } finally {
         setLoading(false);
       }
@@ -75,7 +78,7 @@ export function AddressesTab() {
 
   const handleSaveAddress = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!user) return;
 
     try {
@@ -86,12 +89,16 @@ export function AddressesTab() {
         address: formData.address,
         city: formData.city,
         postalCode: formData.postalCode,
-        isDefault: addresses.length === 0, // First address is default
+        isDefault: addresses.length === 0,
       };
 
       const updatedAddresses = [...addresses, newAddress];
-      const addressesRef = doc(db, "addresses", user.id);
-      await setDoc(addressesRef, { addresses: updatedAddresses });
+      const { error } = await supabase
+        .from("profiles")
+        .update({ addresses: updatedAddresses })
+        .eq("id", user.id);
+
+      if (error) throw error;
 
       setAddresses(updatedAddresses);
       setIsAdding(false);
@@ -103,17 +110,16 @@ export function AddressesTab() {
         postalCode: "",
       });
 
-      toast({ 
-        title: t('messages.success'), 
-        description: t('messages.addressAdded'), 
-        variant: "success" 
+      toast({
+        title: t('messages.success'),
+        description: t('messages.addressAdded')
       });
     } catch (error) {
       console.error("Error saving address: ", error);
-      toast({ 
-        title: t('messages.error'), 
-        description: t('messages.failedToAddAddress'), 
-        variant: "destructive" 
+      toast({
+        title: t('messages.error'),
+        description: t('messages.failedToAddAddress'),
+        variant: "destructive"
       });
     }
   };
@@ -127,24 +133,28 @@ export function AddressesTab() {
         isDefault: addr.id === addressId
       }));
 
-      const addressesRef = doc(db, "addresses", user.id);
-      await setDoc(addressesRef, { addresses: updatedAddresses });
+      const { error } = await supabase
+        .from("profiles")
+        .update({ addresses: updatedAddresses })
+        .eq("id", user.id);
+
+      if (error) throw error;
 
       setAddresses(updatedAddresses);
-      toast({ 
-        title: t('messages.success'), 
-        description: t('messages.defaultAddressUpdated'), 
-        variant: "success" 
+      toast({
+        title: t('messages.success'),
+        description: t('messages.defaultAddressUpdated')
       });
     } catch (error) {
       console.error("Error setting default address: ", error);
-      toast({ 
-        title: t('messages.error'), 
-        description: t('messages.failedToUpdateDefaultAddress'), 
-        variant: "destructive" 
+      toast({
+        title: t('messages.error'),
+        description: t('messages.failedToUpdateDefaultAddress'),
+        variant: "destructive"
       });
     }
   };
+  // ... rest of the file ...
 
   if (loading) {
     return (
@@ -181,8 +191,8 @@ export function AddressesTab() {
                     </div>
                     <div className="flex gap-2">
                       {!address.isDefault && (
-                        <Button 
-                          variant="outline" 
+                        <Button
+                          variant="outline"
                           size="sm"
                           onClick={() => handleSetDefault(address.id)}
                         >
@@ -203,63 +213,63 @@ export function AddressesTab() {
           {isAdding ? (
             <form onSubmit={handleSaveAddress} className="space-y-4 border rounded-lg p-4">
               <h3 className="font-medium">{t('address.addNew')}</h3>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="name">{t('address.name')}</Label>
                 <Input
                   id="name"
                   value={formData.name}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   required
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="phone">{t('address.phone')}</Label>
                 <Input
                   id="phone"
                   type="tel"
                   value={formData.phone}
-                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   required
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="address">{t('address.address')}</Label>
                 <Textarea
                   id="address"
                   value={formData.address}
-                  onChange={(e) => setFormData({...formData, address: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                   required
                 />
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="city">{t('address.city')}</Label>
                   <Input
                     id="city"
                     value={formData.city}
-                    onChange={(e) => setFormData({...formData, city: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                     required
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="postalCode">{t('address.postalCode')}</Label>
                   <Input
                     id="postalCode"
                     value={formData.postalCode}
-                    onChange={(e) => setFormData({...formData, postalCode: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })}
                   />
                 </div>
               </div>
-              
+
               <div className="flex gap-2">
                 <Button type="submit">{t('common.save')}</Button>
-                <Button 
-                  type="button" 
+                <Button
+                  type="button"
                   variant="outline"
                   onClick={() => setIsAdding(false)}
                 >

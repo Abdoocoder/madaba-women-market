@@ -16,8 +16,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useLocale } from "@/lib/locale-context";
 import { formatCurrency } from "@/lib/utils";
 import type { Product, Review } from "@/lib/types";
-import { doc, getDoc, updateDoc, arrayUnion, arrayRemove, setDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { supabase } from "@/lib/supabase";
 import { useToast } from "@/components/ui/use-toast";
 import Link from "next/link";
 
@@ -37,27 +36,68 @@ export default function ProductDetailPage() {
     useEffect(() => {
         const fetchProductAndWishlist = async () => {
             try {
-                // Fetch product from public API
-                const response = await fetch(`/api/public/products/${id}`);
-                
-                if (!response.ok) {
-                    if (response.status === 404) {
-                        notFound();
-                    }
-                    throw new Error('Failed to fetch product');
+                // Fetch product from Supabase directly for consistency
+                const { data: p, error } = await supabase
+                    .from("products")
+                    .select("*")
+                    .eq("id", id)
+                    .single()
+
+                if (error || !p) {
+                    notFound();
+                    return;
                 }
-                
-                const fetchedProduct = await response.json();
+
+                const fetchedProduct: Product = {
+                    id: p.id,
+                    name: p.name,
+                    nameAr: p.name_ar,
+                    description: p.description,
+                    descriptionAr: p.description_ar,
+                    price: p.price,
+                    category: p.category,
+                    image: p.image_url,
+                    sellerId: p.seller_id,
+                    sellerName: p.seller_name,
+                    stock: p.stock,
+                    featured: p.featured,
+                    approved: p.approved,
+                    suspended: p.suspended,
+                    purchaseCount: p.purchase_count,
+                    createdAt: new Date(p.created_at)
+                };
                 setProduct(fetchedProduct);
-                
-                // Fetch reviews (keeping mock data for now, but this should be replaced with real reviews)
-                setReviews(MOCK_REVIEWS.filter((r) => r.productId === id));
+
+                // Fetch reviews (mapping snake_case to Review interface)
+                const { data: reviewsData, error: reviewsError } = await supabase
+                    .from("reviews")
+                    .select("*")
+                    .eq("product_id", id)
+                    .order("created_at", { ascending: false })
+
+                if (reviewsData) {
+                    setReviews(reviewsData.map(r => ({
+                        id: r.id,
+                        productId: r.product_id,
+                        userId: r.user_id,
+                        userName: r.user_name,
+                        rating: r.rating,
+                        comment: r.comment,
+                        createdAt: new Date(r.created_at)
+                    })));
+                }
 
                 if (user) {
-                    const wishlistRef = doc(db, "wishlists", user.id);
-                    const wishlistSnap = await getDoc(wishlistRef);
-                    if (wishlistSnap.exists() && wishlistSnap.data().products.includes(id as string)) {
-                        setWishlisted(true);
+                    const { data: wishlistData, error: wishlistError } = await supabase
+                        .from("profiles")
+                        .select("wishlist")
+                        .eq("id", user.id)
+                        .single();
+
+                    if (wishlistData && wishlistData.wishlist && Array.isArray(wishlistData.wishlist)) {
+                        if (wishlistData.wishlist.includes(id as string)) {
+                            setWishlisted(true);
+                        }
                     }
                 }
             } catch (error) {
@@ -85,16 +125,34 @@ export default function ProductDetailPage() {
             return;
         }
 
-        const wishlistRef = doc(db, "wishlists", user.id);
-        
         try {
+            // Get current wishlist
+            const { data: profile, error: fetchError } = await supabase
+                .from("profiles")
+                .select("wishlist")
+                .eq("id", user.id)
+                .single();
+
+            if (fetchError) throw fetchError;
+
+            let currentWishlist = profile.wishlist || [];
+            let newWishlist;
+
             if (wishlisted) {
-                await updateDoc(wishlistRef, { products: arrayRemove(product.id) });
-                toast({ title: t("product.removed"), description: t("product.removedFromWishlist"), variant: "success" });
+                newWishlist = currentWishlist.filter((pid: string) => pid !== product.id);
+                toast({ title: t("product.removed"), description: t("product.removedFromWishlist") });
             } else {
-                await setDoc(wishlistRef, { products: arrayUnion(product.id) }, { merge: true });
-                toast({ title: t("product.added"), description: t("product.addedToWishlist"), variant: "success" });
+                newWishlist = [...currentWishlist, product.id];
+                toast({ title: t("product.added"), description: t("product.addedToWishlist") });
             }
+
+            const { error: updateError } = await supabase
+                .from("profiles")
+                .update({ wishlist: newWishlist })
+                .eq("id", user.id);
+
+            if (updateError) throw updateError;
+
             setWishlisted(!wishlisted);
         } catch (error) {
             console.error("Error updating wishlist: ", error);
@@ -102,39 +160,57 @@ export default function ProductDetailPage() {
         }
     };
 
-    const handleReviewSubmit = (e: React.FormEvent) => {
+    const handleReviewSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!user || !newReview) return;
 
-        const review: Review = {
-            id: new Date().toISOString(),
-            productId: product.id,
-            userId: user.id,
-            userName: user.name,
-            rating: newRating,
-            comment: newReview,
-            createdAt: new Date(),
-        };
-        setReviews([review, ...reviews]);
-        setNewReview("");
-        setNewRating(5);
-        // In a real app, you would post the review to the backend
-    };
+        try {
+            const { data, error } = await supabase
+                .from("reviews")
+                .insert({
+                    product_id: product.id,
+                    user_id: user.id,
+                    user_name: user.name,
+                    rating: newRating,
+                    comment: newReview
+                })
+                .select()
+                .single()
 
+            if (error) throw error
+
+            const review: Review = {
+                id: data.id,
+                productId: data.product_id,
+                userId: data.user_id,
+                userName: data.user_name,
+                rating: data.rating,
+                comment: data.comment,
+                createdAt: new Date(data.created_at),
+            };
+            setReviews([review, ...reviews]);
+            setNewReview("");
+            setNewRating(5);
+            toast({ title: t("common.success"), description: t("product.reviewSubmitted") });
+        } catch (error) {
+            console.error("Error submitting review:", error);
+            toast({ title: t("common.error"), description: t("product.failedToSubmitReview"), variant: "destructive" });
+        }
+    };
     const handleContactSeller = () => {
         if (!user) {
-            toast({ 
-                title: t("product.loginRequired"), 
-                description: t("product.loginToContactSeller"), 
-                variant: "destructive" 
+            toast({
+                title: t("product.loginRequired"),
+                description: t("product.loginToContactSeller"),
+                variant: "destructive"
             });
             return;
         }
-        
+
         // In a real app, this would open a chat or redirect to a messaging page
-        toast({ 
-            title: t("product.contactSeller"), 
-            description: t("product.chatFeatureComingSoon") 
+        toast({
+            title: t("product.contactSeller"),
+            description: t("product.chatFeatureComingSoon")
         });
     };
 
@@ -147,12 +223,12 @@ export default function ProductDetailPage() {
                 <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
                     <div>
                         <div className="relative aspect-square rounded-lg overflow-hidden mb-4">
-                            <Image 
-                                src={product.image || "/placeholder.svg"} 
-                                alt={product.nameAr} 
-                                fill 
-                                sizes="(max-width: 768px) 100vw, 50vw" 
-                                className="object-cover" 
+                            <Image
+                                src={product.image || "/placeholder.svg"}
+                                alt={product.nameAr}
+                                fill
+                                sizes="(max-width: 768px) 100vw, 50vw"
+                                className="object-cover"
                             />
                             {product.featured && (
                                 <Badge className="absolute top-4 right-4 bg-gradient-to-r from-purple-600 to-pink-600">
@@ -170,9 +246,8 @@ export default function ProductDetailPage() {
                                 {[...Array(5)].map((_, i) => (
                                     <Star
                                         key={i}
-                                        className={`w-5 h-5 ${
-                                            i < Math.floor(averageRating) ? "text-yellow-400 fill-yellow-400" : "text-muted-foreground"
-                                        }`}
+                                        className={`w-5 h-5 ${i < Math.floor(averageRating) ? "text-yellow-400 fill-yellow-400" : "text-muted-foreground"
+                                            }`}
                                     />
                                 ))}
                             </div>
@@ -232,9 +307,8 @@ export default function ProductDetailPage() {
                                                 {[...Array(5)].map((_, i) => (
                                                     <Star
                                                         key={i}
-                                                        className={`w-6 h-6 cursor-pointer ${
-                                                            i < newRating ? "text-yellow-400 fill-yellow-400" : "text-muted-foreground"
-                                                        }`}
+                                                        className={`w-6 h-6 cursor-pointer ${i < newRating ? "text-yellow-400 fill-yellow-400" : "text-muted-foreground"
+                                                            }`}
                                                         onClick={() => setNewRating(i + 1)}
                                                     />
                                                 ))}
@@ -274,9 +348,8 @@ export default function ProductDetailPage() {
                                                             {[...Array(5)].map((_, i) => (
                                                                 <Star
                                                                     key={i}
-                                                                    className={`w-4 h-4 ${
-                                                                        i < review.rating ? "text-yellow-400 fill-yellow-400" : "text-muted-foreground"
-                                                                    }`}
+                                                                    className={`w-4 h-4 ${i < review.rating ? "text-yellow-400 fill-yellow-400" : "text-muted-foreground"
+                                                                        }`}
                                                                 />
                                                             ))}
                                                         </div>

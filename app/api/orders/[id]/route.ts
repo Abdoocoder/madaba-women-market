@@ -1,25 +1,9 @@
-'use server'
-
 import { NextResponse, NextRequest } from 'next/server'
-import { getAdminDb } from '@/lib/firebaseAdmin'
+import { supabase } from '@/lib/supabase'
 import { getAuthenticatedUser } from '@/lib/server-auth'
-import type { Order } from '@/lib/types'
 
-/**
- * @swagger
- * /api/orders/{id}:
- *   put:
- *     description: Updates the status of an order for the authenticated seller.
- *     responses:
- *       200:
- *         description: The updated order.
- *       400:
- *         description: Bad request (e.g., missing status).
- *       401:
- *         description: Unauthorized.
- *       404:
- *         description: Order not found or access denied.
- */
+export const dynamic = 'force-dynamic'
+
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     const user = await getAuthenticatedUser(request);
     if (!user || user.role !== 'seller') {
@@ -34,26 +18,47 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
             return NextResponse.json({ message: 'Status is required' }, { status: 400 });
         }
 
-        const adminDb = getAdminDb();
-        const orderDoc = await adminDb.collection('orders').doc(orderId).get();
-        if (!orderDoc.exists) {
+        const { data: order, error: fetchError } = await supabase
+            .from('orders')
+            .select('*')
+            .eq('id', orderId)
+            .single();
+
+        if (fetchError || !order) {
             return NextResponse.json({ message: 'Order not found' }, { status: 404 });
         }
 
-        const order = { id: orderDoc.id, ...orderDoc.data() } as Order;
-        
         // Authorization check: Does the order belong to the authenticated seller?
-        if (order.sellerId !== user.id) {
+        if (order.seller_id !== user.id) {
             return NextResponse.json({ message: 'Order not found or access denied' }, { status: 404 });
         }
 
-        await adminDb.collection('orders').doc(orderId).update({
-            status,
-            updatedAt: new Date()
-        });
+        const { data: updatedOrder, error: updateError } = await supabase
+            .from('orders')
+            .update({
+                status,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', orderId)
+            .select()
+            .single();
 
-        const updatedOrder = { ...order, status, updatedAt: new Date() };
-        return NextResponse.json(updatedOrder);
+        if (updateError) throw updateError;
+
+        return NextResponse.json({
+            id: updatedOrder.id,
+            customerId: updatedOrder.customer_id,
+            customerName: updatedOrder.customer_name,
+            sellerId: updatedOrder.seller_id,
+            sellerName: updatedOrder.seller_name,
+            total: updatedOrder.total_price,
+            status: updatedOrder.status,
+            shippingAddress: updatedOrder.shipping_address,
+            customerPhone: updatedOrder.customer_phone,
+            paymentMethod: updatedOrder.payment_method,
+            createdAt: new Date(updatedOrder.created_at),
+            updatedAt: new Date(updatedOrder.updated_at)
+        });
 
     } catch (error) {
         const { id: orderId } = await params;

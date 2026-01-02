@@ -2,10 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { supabase } from "@/lib/supabase";
 import { Product } from "@/lib/types";
-import { ProductCard } from "@/components/product-card";
+import { ProductCard } from "@/components/products/product-card";
 import { useToast } from "@/components/ui/use-toast";
 
 export default function WishlistPage() {
@@ -23,15 +22,45 @@ export default function WishlistPage() {
 
             setLoadingWishlist(true);
             try {
-                const wishlistRef = doc(db, "wishlists", user.id);
-                const wishlistSnap = await getDoc(wishlistRef);
+                const { data: profile, error: profileError } = await supabase
+                    .from("profiles")
+                    .select("wishlist")
+                    .eq("id", user.id)
+                    .single();
 
-                if (wishlistSnap.exists()) {
-                    const productIds = wishlistSnap.data().products as string[];
-                    const productPromises = productIds.map(id => getDoc(doc(db, "products", id)));
-                    const productDocs = await Promise.all(productPromises);
-                    const wishlistProducts = productDocs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+                if (profileError) throw profileError;
+
+                const productIds = profile.wishlist as string[] || [];
+
+                if (productIds.length > 0) {
+                    const { data: products, error: productsError } = await supabase
+                        .from("products")
+                        .select("*")
+                        .in("id", productIds);
+
+                    if (productsError) throw productsError;
+
+                    const wishlistProducts: Product[] = products.map((p) => ({
+                        id: p.id,
+                        name: p.name,
+                        nameAr: p.name_ar,
+                        description: p.description,
+                        descriptionAr: p.description_ar,
+                        price: p.price,
+                        category: p.category,
+                        image: p.image_url,
+                        sellerId: p.seller_id,
+                        sellerName: p.seller_name,
+                        stock: p.stock,
+                        featured: p.featured,
+                        approved: p.approved,
+                        suspended: p.suspended,
+                        purchaseCount: p.purchase_count,
+                        createdAt: new Date(p.created_at)
+                    }));
                     setWishlist(wishlistProducts);
+                } else {
+                    setWishlist([]);
                 }
             } catch (error) {
                 console.error("Error fetching wishlist: ", error);
@@ -50,17 +79,23 @@ export default function WishlistPage() {
         if (!user) return;
 
         try {
-            const wishlistRef = doc(db, "wishlists", user.id);
-            await updateDoc(wishlistRef, {
-                products: wishlist.filter(p => p.id !== productId).map(p => p.id)
-            });
+            const newWishlistIds = wishlist.filter(p => p.id !== productId).map(p => p.id);
+
+            const { error } = await supabase
+                .from("profiles")
+                .update({ wishlist: newWishlistIds })
+                .eq("id", user.id);
+
+            if (error) throw error;
+
             setWishlist(wishlist.filter(p => p.id !== productId));
-            toast({ title: "Success", description: "Product removed from wishlist.", variant: "success" });
+            toast({ title: "Success", description: "Product removed from wishlist." });
         } catch (error) {
             console.error("Error removing from wishlist: ", error);
             toast({ title: "Error", description: "Failed to remove product from wishlist.", variant: "destructive" });
         }
     };
+    // ... rest of the file ...
 
 
     if (isLoading || loadingWishlist) {

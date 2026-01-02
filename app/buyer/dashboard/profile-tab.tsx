@@ -7,9 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { updateDoc, doc } from "firebase/firestore";
-import { updateProfile } from "firebase/auth";
-import { auth, db } from "@/lib/firebase";
+import { supabase } from "@/lib/supabase";
 import { User } from "lucide-react";
 import { CldUploadButton } from 'next-cloudinary';
 import { useCloudinaryConfig } from '@/hooks/use-cloudinary-config';
@@ -27,7 +25,7 @@ export function ProfileTab() {
     email: user?.email || "",
     phone: user?.phone || "",
   });
-  const [avatar, setAvatar] = useState(user?.photoURL || "");
+  const [avatar, setAvatar] = useState(user?.avatar || user?.photoURL || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -37,7 +35,7 @@ export function ProfileTab() {
         email: user.email || "",
         phone: user.phone || "",
       });
-      setAvatar(user.photoURL || "");
+      setAvatar(user.avatar || user.photoURL || "");
     }
   }, [user]);
 
@@ -47,10 +45,10 @@ export function ProfileTab() {
     if (!user || !user.id) return;
 
     if (cloudinaryResult.event !== "success" || !cloudinaryResult.info?.secure_url) {
-      toast({ 
-        title: t('messages.error'), 
-        description: t('messages.failedToUploadImage'), 
-        variant: "destructive" 
+      toast({
+        title: t('messages.error'),
+        description: t('messages.failedToUploadImage'),
+        variant: "destructive"
       });
       return;
     }
@@ -58,27 +56,26 @@ export function ProfileTab() {
     const newAvatar = cloudinaryResult.info!.secure_url;
 
     try {
-      const userDocRef = doc(db, "users", user.id);
-      await updateDoc(userDocRef, { photoURL: newAvatar });
-      
-      if(auth.currentUser) {
-        await updateProfile(auth.currentUser, { photoURL: newAvatar });
-      }
-      
+      const { error } = await supabase
+        .from("profiles")
+        .update({ avatar_url: newAvatar })
+        .eq("id", user.id);
+
+      if (error) throw error;
+
       setAvatar(newAvatar);
       await refreshAuthUser();
 
-      toast({ 
-        title: t('messages.success'), 
-        description: t('messages.avatarUpdated'), 
-        variant: "success" 
+      toast({
+        title: t('messages.success'),
+        description: t('messages.avatarUpdated')
       });
     } catch (error) {
       console.error("Error updating avatar: ", error);
-      toast({ 
-        title: t('messages.error'), 
-        description: t('messages.failedToUpdateAvatar'), 
-        variant: "destructive" 
+      toast({
+        title: t('messages.error'),
+        description: t('messages.failedToUpdateAvatar'),
+        variant: "destructive"
       });
     }
   };
@@ -88,41 +85,38 @@ export function ProfileTab() {
     setIsSubmitting(true);
 
     try {
-      if (auth.currentUser && user) {
-        // Update Firebase Auth profile
-        await updateProfile(auth.currentUser, {
-          displayName: formData.name,
-          photoURL: avatar
-        });
+      if (user) {
+        const { error } = await supabase
+          .from("profiles")
+          .update({
+            name: formData.name,
+            phone: formData.phone,
+            avatar_url: avatar
+          })
+          .eq("id", user.id);
 
-        // Update Firestore document
-        const userDocRef = doc(db, "users", user.id);
-        await updateDoc(userDocRef, {
-          name: formData.name,
-          phone: formData.phone,
-          photoURL: avatar
-        });
+        if (error) throw error;
 
         await refreshAuthUser();
-        
-        toast({ 
-          title: t('messages.success'), 
-          description: t('messages.profileUpdated'), 
-          variant: "success" 
+
+        toast({
+          title: t('messages.success'),
+          description: t('messages.profileUpdated')
         });
-        
+
         setIsEditing(false);
       }
     } catch (error: unknown) {
-      toast({ 
-        title: t('messages.error'), 
-        description: (error as Error).message || t('messages.failedToUpdateProfile'), 
-        variant: "destructive" 
+      toast({
+        title: t('messages.error'),
+        description: (error as Error).message || t('messages.failedToUpdateProfile'),
+        variant: "destructive"
       });
     } finally {
       setIsSubmitting(false);
     }
   };
+  // ... rest of the file ...
 
   return (
     <Card>
@@ -139,7 +133,7 @@ export function ProfileTab() {
                 <User className="h-12 w-12" />
               </AvatarFallback>
             </Avatar>
-            
+
             {!isCloudinaryLoading && isCloudinaryConfigured ? (
               <CldUploadButton
                 options={{
@@ -163,7 +157,7 @@ export function ProfileTab() {
               </Button>
             )}
           </div>
-          
+
           <div className="flex-1 w-full">
             {!isEditing ? (
               <div className="space-y-4">
@@ -187,7 +181,7 @@ export function ProfileTab() {
                     required
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="email">{t('admin.email')}</Label>
                   <Input
@@ -199,7 +193,7 @@ export function ProfileTab() {
                   />
                   <p className="text-xs text-gray-500">{t('profile.emailChangeNote')}</p>
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="phone">{t('profile.phone')}</Label>
                   <Input
@@ -209,14 +203,14 @@ export function ProfileTab() {
                     onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
                   />
                 </div>
-                
+
                 <div className="flex gap-2">
                   <Button type="submit" disabled={isSubmitting}>
                     {isSubmitting ? t('common.saving') : t('common.save')}
                   </Button>
-                  <Button 
-                    type="button" 
-                    variant="outline" 
+                  <Button
+                    type="button"
+                    variant="outline"
                     onClick={() => {
                       setIsEditing(false);
                       if (user) {

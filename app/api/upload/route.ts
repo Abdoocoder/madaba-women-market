@@ -1,15 +1,15 @@
-'use server'
-
 import { NextResponse, NextRequest } from 'next/server'
 import cloudinary from '@/lib/cloudinary'
 import { getAuthenticatedUser } from '@/lib/server-auth'
 
+export const dynamic = 'force-dynamic'
+
 // Define the Cloudinary upload result interface
 interface CloudinaryUploadResult {
-  secure_url: string;
-  public_id: string;
-  // Remove the [key: string]: any; to avoid the any type
-  // We only need the properties we're actually using
+    secure_url: string;
+    public_id: string;
+    // Remove the [key: string]: any; to avoid the any type
+    // We only need the properties we're actually using
 }
 
 export async function POST(request: NextRequest) {
@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     try {
         const formData = await request.formData();
         const file = formData.get('file') as File;
-        
+
         if (!file) {
             return NextResponse.json({ message: 'No file provided' }, { status: 400 });
         }
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
         // Type cast the result to our interface
         const uploadResult = result as CloudinaryUploadResult;
 
-        return NextResponse.json({ 
+        return NextResponse.json({
             url: uploadResult.secure_url,
             public_id: uploadResult.public_id
         });

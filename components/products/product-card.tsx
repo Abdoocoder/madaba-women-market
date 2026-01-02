@@ -3,7 +3,7 @@
 import type React from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { ShoppingCart, Star } from "lucide-react"
+import { ShoppingCart, Star, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -16,9 +16,10 @@ import { useRouter } from "next/navigation"
 
 interface ProductCardProps {
   product: Product
+  onRemoveFromWishlist?: (productId: string) => void
 }
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product, onRemoveFromWishlist }: ProductCardProps) {
   const { addToCart } = useCart()
   const { user } = useAuth()
   const { t, language } = useLocale()
@@ -77,6 +78,20 @@ export function ProductCard({ product }: ProductCardProps) {
             console.error("Error loading image for product:", product.id, product.image);
           }}
         />
+        {onRemoveFromWishlist && (
+          <Button
+            variant="destructive"
+            size="icon"
+            className="absolute top-2 left-2 z-10 h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              onRemoveFromWishlist(product.id)
+            }}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        )}
         {product.featured && (
           <Badge className="absolute top-2 right-2 bg-gradient-to-r from-purple-600 to-pink-600 border-none text-white">
             {t("product.featured")}

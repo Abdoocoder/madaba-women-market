@@ -10,8 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { useAuth } from '@/lib/auth-context'
 import { useLocale } from '@/lib/locale-context'
-import { db } from '@/lib/firebase'
-import { doc, updateDoc, getDoc } from 'firebase/firestore'
+import { supabase } from '@/lib/supabase'
 import { toast } from '@/components/ui/use-toast'
 
 export default function StoreSettingsPage() {
@@ -36,17 +35,19 @@ export default function StoreSettingsPage() {
 
     const fetchStoreData = async () => {
       try {
-        const userDocRef = doc(db, 'users', user.id)
-        const userDocSnap = await getDoc(userDocRef)
-        
-        if (userDocSnap.exists()) {
-          const userData = userDocSnap.data()
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single()
+
+        if (data && !error) {
           setStoreData({
-            storeName: userData.storeName || userData.name || '',
-            storeDescription: userData.storeDescription || '',
-            storeCoverImage: userData.storeCoverImage || '',
-            instagramUrl: userData.instagramUrl || '',
-            whatsappUrl: userData.whatsappUrl || ''
+            storeName: data.store_name || data.name || '',
+            storeDescription: data.store_description || '',
+            storeCoverImage: data.store_cover_image || '',
+            instagramUrl: data.instagram_url || '',
+            whatsappUrl: data.whatsapp_url || ''
           })
         }
       } catch (error) {
@@ -69,16 +70,19 @@ export default function StoreSettingsPage() {
 
     setSaving(true)
     try {
-      const userDocRef = doc(db, 'users', user.id)
-      await updateDoc(userDocRef, {
-        storeName: storeData.storeName,
-        storeDescription: storeData.storeDescription,
-        storeCoverImage: storeData.storeCoverImage,
-        instagramUrl: storeData.instagramUrl,
-        whatsappUrl: storeData.whatsappUrl
-      })
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          store_name: storeData.storeName,
+          store_description: storeData.storeDescription,
+          store_cover_image: storeData.storeCoverImage,
+          instagram_url: storeData.instagramUrl,
+          whatsapp_url: storeData.whatsappUrl
+        })
+        .eq('id', user.id)
 
-      // Refresh user data in context
+      if (error) throw error
+
       await refreshAuthUser()
 
       toast({
@@ -96,6 +100,7 @@ export default function StoreSettingsPage() {
       setSaving(false)
     }
   }
+  // ... rest of the file ...
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -151,9 +156,9 @@ export default function StoreSettingsPage() {
             />
             {storeData.storeCoverImage && (
               <div className="mt-2">
-                <Image 
-                  src={storeData.storeCoverImage} 
-                  alt={t('seller.storeCoverPreview')} 
+                <Image
+                  src={storeData.storeCoverImage}
+                  alt={t('seller.storeCoverPreview')}
                   width={800}
                   height={300}
                   className="w-full h-48 object-cover rounded-md"

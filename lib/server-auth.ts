@@ -1,42 +1,51 @@
 import { headers } from "next/headers";
-import { getAdminAuth, getAdminDb } from "./firebaseAdmin";
+import { supabase } from "./supabase";
 import { User } from "./types";
 import { NextRequest } from "next/server";
 
-// Unified function to verify Firebase ID token and get user data
+// Unified function to verify Supabase token and get user data
 async function verifyTokenAndGetUser(idToken: string): Promise<User | null> {
     try {
-        // Ensure Firebase Admin is initialized
-        const adminAuth = getAdminAuth();
-        const adminDb = getAdminDb();
-        
-        const decodedToken = await adminAuth.verifyIdToken(idToken);
-        
-        // Get user data from Firestore
-        const userDoc = await adminDb.collection('users').doc(decodedToken.uid).get();
-        
-        if (!userDoc.exists) {
+        const { data: { user: supabaseUser }, error } = await supabase.auth.getUser(idToken);
+
+        if (error || !supabaseUser) {
+            console.error('Error verifying Supabase token:', error);
             return null;
         }
 
-        const userData = userDoc.data();
-        
+        // Get user data from profiles table
+        const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', supabaseUser.id)
+            .single();
+
+        if (profileError || !profile) {
+            return {
+                id: supabaseUser.id,
+                email: supabaseUser.email || '',
+                name: supabaseUser.user_metadata?.full_name || 'Unknown User',
+                role: 'customer',
+                createdAt: new Date(supabaseUser.created_at),
+            } as User;
+        }
+
         return {
-            id: decodedToken.uid,
-            email: decodedToken.email || '',
-            name: userData?.name || decodedToken.name || 'Unknown User',
-            photoURL: userData?.photoURL || decodedToken.picture || '',
-            role: userData?.role || 'customer',
-            status: userData?.status || 'approved', // Default to approved for non-sellers
-            createdAt: userData?.createdAt || new Date(),
+            id: profile.id,
+            email: profile.email || '',
+            name: profile.name || 'Unknown User',
+            photoURL: profile.avatar_url || '',
+            role: profile.role || 'customer',
+            status: profile.status || 'approved',
+            createdAt: new Date(profile.created_at),
         } as User;
     } catch (error) {
-        console.error('Error verifying token:', error);
+        console.error('Error in verifyTokenAndGetUser:', error);
         return null;
     }
 }
 
-// Get user from Firebase ID token (for Server Components)
+// Get user from token (for Server Components)
 export async function getServerUser(): Promise<User | null> {
     try {
         const headersList = await headers();
@@ -53,7 +62,7 @@ export async function getServerUser(): Promise<User | null> {
     }
 }
 
-// Get user from Firebase ID token (for API routes)
+// Get user from token (for API routes)
 export async function getAuthenticatedUser(request: NextRequest): Promise<User | null> {
     try {
         const authHeader = request.headers.get('authorization');
@@ -65,8 +74,6 @@ export async function getAuthenticatedUser(request: NextRequest): Promise<User |
         return await verifyTokenAndGetUser(idToken);
     } catch (error) {
         console.error('Error in getAuthenticatedUser:', error);
-        console.error('This error typically occurs when Firebase Admin is not properly configured.');
-        console.error('Please check that your .env.local file contains valid Firebase Admin credentials.');
         return null;
     }
 }

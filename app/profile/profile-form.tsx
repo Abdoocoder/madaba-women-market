@@ -3,9 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
-import { doc, updateDoc } from "firebase/firestore";
-import { db, auth } from "@/lib/firebase";
-import { updateProfile, updateEmail, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
+import { supabase } from "@/lib/supabase";
 import { User, Edit3 } from "lucide-react";
 import { CldUploadButton } from 'next-cloudinary';
 import { useCloudinaryConfig } from '@/hooks/use-cloudinary-config';
@@ -40,7 +38,7 @@ export default function ProfileForm() {
         if (user) {
             setName(user.name || "");
             setEmail(user.email || "");
-            const userAvatar = user.avatar || "";
+            const userAvatar = user.avatar || user.photoURL || "";
             setAvatar(userAvatar);
             console.log("User avatar updated:", userAvatar);
         }
@@ -59,16 +57,16 @@ export default function ProfileForm() {
         // Type assertion for Cloudinary result
         const cloudinaryResult = result as { event?: string; info?: { secure_url: string } };
         console.log("Upload result:", result);
-        
+
         if (!user || !user.id) return;
 
         // Check if upload was successful
         if (cloudinaryResult.event !== "success" || !cloudinaryResult.info?.secure_url) {
             console.error("Upload failed:", result);
-            toast({ 
-                title: "Error", 
-                description: t('messages.failedToUploadImage'), 
-                variant: "destructive" 
+            toast({
+                title: "Error",
+                description: t('messages.failedToUploadImage'),
+                variant: "destructive"
             });
             return;
         }
@@ -77,19 +75,19 @@ export default function ProfileForm() {
         console.log("New avatar URL:", newAvatar);
 
         try {
-            const userDocRef = doc(db, "users", user.id);
-            await updateDoc(userDocRef, { avatar: newAvatar });
-            
-            if(auth.currentUser) {
-                await updateProfile(auth.currentUser, { photoURL: newAvatar });
-            }
-            
+            const { error } = await supabase
+                .from("profiles")
+                .update({ avatar_url: newAvatar })
+                .eq("id", user.id);
+
+            if (error) throw error;
+
             // Update local state immediately for instant UI feedback
             setAvatar(newAvatar);
-            
+
             await refreshAuthUser();
 
-            toast({ title: "Success", description: t('messages.avatarUpdated'), variant: "success" });
+            toast({ title: "Success", description: t('messages.avatarUpdated') });
         } catch (error) {
             console.error("Error updating avatar: ", error);
             toast({ title: "Error", description: t('messages.failedToUpdateAvatar'), variant: "destructive" });
@@ -98,14 +96,16 @@ export default function ProfileForm() {
 
     const handleProfileUpdate = async () => {
         if (!user || !user.id) return;
-        const userDocRef = doc(db, "users", user.id);
         try {
-            await updateDoc(userDocRef, { name });
-            if(auth.currentUser) {
-                await updateProfile(auth.currentUser, { displayName: name });
-            }
+            const { error } = await supabase
+                .from("profiles")
+                .update({ name })
+                .eq("id", user.id);
+
+            if (error) throw error;
+
             await refreshAuthUser();
-            toast({ title: "Success", description: t('messages.profileUpdated'), variant: "success" });
+            toast({ title: "Success", description: t('messages.profileUpdated') });
         } catch (error) {
             console.error("Error updating profile: ", error);
             toast({ title: "Error", description: t('messages.failedToUpdateProfile'), variant: "destructive" });
@@ -114,26 +114,25 @@ export default function ProfileForm() {
 
     const handleEmailUpdate = async () => {
         if (!user || !user.id) return;
-        const currentPassword = prompt(t('messages.enterPassword'));
-        if (!currentPassword || !auth.currentUser) return;
 
-        const credential = EmailAuthProvider.credential(auth.currentUser.email || "", currentPassword);
-        
         try {
-            await reauthenticateWithCredential(auth.currentUser, credential);
-            await updateEmail(auth.currentUser, email);
+            const { error } = await supabase.auth.updateUser({ email });
+            if (error) throw error;
 
-            const userDocRef = doc(db, "users", user.id);
-            await updateDoc(userDocRef, { email });
-            
+            await supabase
+                .from("profiles")
+                .update({ email })
+                .eq("id", user.id);
+
             await refreshAuthUser();
 
-            toast({ title: "Success", description: t('messages.emailUpdated'), variant: "success" });
+            toast({ title: "Success", description: t('messages.emailUpdated') });
         } catch (error) {
             console.error("Error updating email: ", error);
             toast({ title: "Error", description: t('messages.failedToUpdateEmail'), variant: "destructive" });
         }
     };
+    // ... rest of the file ...
 
     return (
         <div className="container mx-auto px-4 py-8">
@@ -149,7 +148,7 @@ export default function ProfileForm() {
                             </Avatar>
                             <CardTitle>{user.name}</CardTitle>
                             <CardDescription>{user.email}</CardDescription>
-                             <div className="flex items-center gap-2 mt-2">
+                            <div className="flex items-center gap-2 mt-2">
                                 <Badge>{user.role}</Badge>
                                 {user.role === 'seller' && <Badge variant={user.status === 'approved' ? 'default' : 'secondary'}>{user.status}</Badge>}
                             </div>
@@ -191,9 +190,9 @@ export default function ProfileForm() {
                                 <Label htmlFor="name">{t('admin.name')}</Label>
                                 <Input id="name" value={name} onChange={(e) => setName(e.target.value)} />
                             </div>
-                           <div className="flex justify-end">
-                              <Button onClick={handleProfileUpdate}>{t('common.save')}</Button>
-                           </div>
+                            <div className="flex justify-end">
+                                <Button onClick={handleProfileUpdate}>{t('common.save')}</Button>
+                            </div>
                             <div className="space-y-2 mt-4">
                                 <Label htmlFor="email">{t('admin.email')}</Label>
                                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">

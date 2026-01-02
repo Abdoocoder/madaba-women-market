@@ -8,8 +8,7 @@ import { ProductCard } from '@/components/products/product-card'
 import { useLocale } from '@/lib/locale-context'
 import { notFound, useParams } from 'next/navigation'
 import { Star } from 'lucide-react'
-import { db } from '@/lib/firebase'
-import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore'
+import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useAuth } from '@/lib/auth-context'
@@ -19,7 +18,7 @@ import type { User, Product, Review } from '@/lib/types'
 export default function SellerStorePage() {
   const params = useParams()
   const storeId = params.storeId as string
-  const { t, locale } = useLocale()
+  const { t, language: locale } = useLocale()
   const { user } = useAuth()
   const { toast } = useToast()
   const [seller, setSeller] = useState<User | null>(null)
@@ -31,28 +30,70 @@ export default function SellerStorePage() {
 
   useEffect(() => {
     if (!storeId) return
-    
+
     const fetchData = async () => {
       setLoading(true)
       try {
-        const userRef = doc(db, 'users', storeId)
-        const userSnap = await getDoc(userRef)
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', storeId)
+          .single()
 
-        if (!userSnap.exists() || userSnap.data().role !== 'seller') {
+        if (profileError || !profileData || profileData.role !== 'seller') {
           notFound()
           return
         }
 
-        const sellerData = { id: userSnap.id, ...userSnap.data() } as User
-        setSeller(sellerData)
-        setFollowersCount(sellerData.followersCount || 0)
+        const mappedSeller: User = {
+          id: profileData.id,
+          email: profileData.email,
+          name: profileData.name,
+          role: profileData.role,
+          status: profileData.status,
+          avatar: profileData.avatar_url,
+          photoURL: profileData.avatar_url,
+          phone: profileData.phone,
+          storeName: profileData.store_name,
+          storeDescription: profileData.store_description,
+          storeCoverImage: profileData.store_cover_image,
+          instagramUrl: profileData.instagram_url,
+          whatsappUrl: profileData.whatsapp_url,
+          rating: profileData.rating,
+          reviewCount: profileData.review_count,
+          followersCount: profileData.followers_count,
+          createdAt: new Date(profileData.created_at)
+        }
+        setSeller(mappedSeller)
+        setFollowersCount(mappedSeller.followersCount || 0)
 
-        const productsRef = collection(db, 'products')
-        const q = query(productsRef, where('sellerId', '==', storeId))
-        const querySnap = await getDocs(q)
-        setProducts(querySnap.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Product)))
-        
-        // In a real app, these would be fetched from a sub-collection on the product or seller
+        const { data: productsData, error: productsError } = await supabase
+          .from('products')
+          .select('*')
+          .eq('seller_id', storeId)
+
+        if (productsData) {
+          setProducts(productsData.map(p => ({
+            id: p.id,
+            name: p.name,
+            nameAr: p.name_ar,
+            description: p.description,
+            descriptionAr: p.description_ar,
+            price: p.price,
+            category: p.category,
+            image: p.image_url,
+            sellerId: p.seller_id,
+            sellerName: p.seller_name,
+            stock: p.stock,
+            featured: p.featured,
+            approved: p.approved,
+            suspended: p.suspended,
+            purchaseCount: p.purchase_count,
+            createdAt: new Date(p.created_at)
+          })))
+        }
+
+        // Mock reviews or fetch from Supabase
         setReviews([
           {
             id: '1',
@@ -60,15 +101,6 @@ export default function SellerStorePage() {
             rating: 5,
             comment: 'منتجات ممتازة وجودة عالية. التوصيل كان سريع جداً.',
             createdAt: new Date('2023-10-15'),
-            productId: 'mock-product-id',
-            userId: 'mock-user-id'
-          },
-          {
-            id: '2',
-            userName: 'فاطمة علي',
-            rating: 4,
-            comment: 'متجر ممتاز مع خدمة عملاء رائعة. أنصح بالشراء.',
-            createdAt: new Date('2023-11-20'),
             productId: 'mock-product-id',
             userId: 'mock-user-id'
           }
@@ -83,10 +115,11 @@ export default function SellerStorePage() {
 
     fetchData()
   }, [storeId])
+  // ... rest of the file ...
 
   useEffect(() => {
     if (!user || user.role !== 'customer' || !seller) return
-    
+
     const checkFollowingStatus = async () => {
       try {
         const response = await fetch(`/api/sellers/${storeId}/follow`, {
@@ -142,9 +175,9 @@ export default function SellerStorePage() {
     <div className="container mx-auto py-8 px-4 md:px-6">
       <Card className="mb-8 border-2 border-primary/20 shadow-xl rounded-2xl overflow-hidden">
         {seller.storeCoverImage ? (
-            <div className="relative w-full h-48 md:h-64">
-              <Image src={seller.storeCoverImage} alt={seller.storeName || seller.name} fill style={{objectFit: 'cover'}} />
-            </div>
+          <div className="relative w-full h-48 md:h-64">
+            <Image src={seller.storeCoverImage} alt={seller.storeName || seller.name} fill style={{ objectFit: 'cover' }} />
+          </div>
         ) : (
           <div className="w-full h-48 bg-gradient-to-r from-primary/10 to-secondary/10"></div>
         )}
@@ -159,18 +192,18 @@ export default function SellerStorePage() {
               {seller.storeDescription && <p className="text-muted-foreground mt-2 max-w-2xl">{seller.storeDescription}</p>}
             </div>
             <div className="flex-shrink-0 flex flex-col items-center md:items-end gap-2">
-                <div className="flex items-center gap-1 text-yellow-500">
-                    {[...Array(5)].map((_, i) => <Star key={i} className={`w-5 h-5 ${i < Math.floor(rating) ? 'fill-current' : 'stroke-current'}`} />)}
-                    <span className="text-muted-foreground text-sm ml-1">({reviewCount})</span>
-                </div>
-                <Button onClick={handleFollowStore} variant={following ? 'default' : 'outline'} disabled={!user || user.role !== 'customer'}>
-                  {following ? t('seller.following') : t('seller.followStore')} ({followersCount})
-                </Button>
+              <div className="flex items-center gap-1 text-yellow-500">
+                {[...Array(5)].map((_, i) => <Star key={i} className={`w-5 h-5 ${i < Math.floor(rating) ? 'fill-current' : 'stroke-current'}`} />)}
+                <span className="text-muted-foreground text-sm ml-1">({reviewCount})</span>
+              </div>
+              <Button onClick={handleFollowStore} variant={following ? 'default' : 'outline'} disabled={!user || user.role !== 'customer'}>
+                {following ? t('seller.following') : t('seller.followStore')} ({followersCount})
+              </Button>
             </div>
           </div>
         </CardContent>
       </Card>
-      
+
       <Tabs defaultValue="products" className="space-y-6">
         <TabsList className="grid w-full grid-cols-3 max-w-md mx-auto">
           <TabsTrigger value="products">{t('seller.products')}</TabsTrigger>
@@ -210,11 +243,10 @@ export default function SellerStorePage() {
                           {[...Array(5)].map((_, i) => (
                             <Star
                               key={i}
-                              className={`w-5 h-5 ${
-                                i < review.rating
-                                  ? 'text-yellow-500 fill-yellow-500'
-                                  : 'text-gray-300'
-                              }`}
+                              className={`w-5 h-5 ${i < review.rating
+                                ? 'text-yellow-500 fill-yellow-500'
+                                : 'text-gray-300'
+                                }`}
                             />
                           ))}
                         </div>
@@ -231,79 +263,79 @@ export default function SellerStorePage() {
             )}
           </div>
         </TabsContent>
-        
+
         <TabsContent value="about">
-            <Card className="max-w-3xl mx-auto">
-              <CardContent className="p-8">
-                <h2 className="text-2xl font-bold mb-4">{t('seller.aboutStore')}</h2>
-                {seller.storeDescription ? (
-                  <p className="text-muted-foreground mb-6 leading-relaxed">{seller.storeDescription}</p>
-                ) : (
-                  <p className="text-muted-foreground mb-6">{t('seller.noStoreDescription')}</p>
-                )}
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <div>
-                    <h3 className="text-lg font-semibold mb-2">{t('seller.storeOwner')}</h3>
-                    <p className="text-muted-foreground">{seller.name}</p>
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold mb-2">{t('seller.memberSince')}</h3>
-                    <p className="text-muted-foreground">
-                      {new Date(seller.createdAt).toLocaleDateString(locale)}
-                    </p>
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold mb-2">{t('seller.totalProducts')}</h3>
-                    <p className="text-muted-foreground">{products.length}</p>
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold mb-2">{t('seller.averageRating')}</h3>
-                    <div className="flex items-center gap-1">
-                      <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
-                      <span className="font-bold text-lg">{rating.toFixed(1)}</span>
-                      <span className="text-muted-foreground text-sm ml-1">({reviewCount} {t('product.reviews')})</span>
-                    </div>
+          <Card className="max-w-3xl mx-auto">
+            <CardContent className="p-8">
+              <h2 className="text-2xl font-bold mb-4">{t('seller.aboutStore')}</h2>
+              {seller.storeDescription ? (
+                <p className="text-muted-foreground mb-6 leading-relaxed">{seller.storeDescription}</p>
+              ) : (
+                <p className="text-muted-foreground mb-6">{t('seller.noStoreDescription')}</p>
+              )}
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">{t('seller.storeOwner')}</h3>
+                  <p className="text-muted-foreground">{seller.name}</p>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">{t('seller.memberSince')}</h3>
+                  <p className="text-muted-foreground">
+                    {new Date(seller.createdAt).toLocaleDateString(locale)}
+                  </p>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">{t('seller.totalProducts')}</h3>
+                  <p className="text-muted-foreground">{products.length}</p>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">{t('seller.averageRating')}</h3>
+                  <div className="flex items-center gap-1">
+                    <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
+                    <span className="font-bold text-lg">{rating.toFixed(1)}</span>
+                    <span className="text-muted-foreground text-sm ml-1">({reviewCount} {t('product.reviews')})</span>
                   </div>
                 </div>
-                
-                {(seller.instagramUrl || seller.whatsappUrl) && (
-                  <div className="mt-8 pt-6 border-t">
-                    <h3 className="text-lg font-semibold mb-4 text-center">{t('seller.contactUs')}</h3>
-                    <div className="flex justify-center gap-4">
-                      {seller.instagramUrl && (
-                        <a 
-                          href={seller.instagramUrl} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#833ab4] via-[#fd1d1d] to-[#fcb045] text-white rounded-md hover:opacity-90 transition-opacity"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                          </svg>
-                          Instagram
-                        </a>
-                      )}
-                      {seller.whatsappUrl && (
-                        <a 
-                          href={seller.whatsappUrl} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 px-4 py-2 bg-[#25D366] text-white rounded-md hover:bg-[#128C7E] transition-colors"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                             <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
-                          </svg>
-                          WhatsApp
-                        </a>
-                      )}
-                    </div>
+              </div>
+
+              {(seller.instagramUrl || seller.whatsappUrl) && (
+                <div className="mt-8 pt-6 border-t">
+                  <h3 className="text-lg font-semibold mb-4 text-center">{t('seller.contactUs')}</h3>
+                  <div className="flex justify-center gap-4">
+                    {seller.instagramUrl && (
+                      <a
+                        href={seller.instagramUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#833ab4] via-[#fd1d1d] to-[#fcb045] text-white rounded-md hover:opacity-90 transition-opacity"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                          <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                          <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                        </svg>
+                        Instagram
+                      </a>
+                    )}
+                    {seller.whatsappUrl && (
+                      <a
+                        href={seller.whatsappUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-[#25D366] text-white rounded-md hover:bg-[#128C7E] transition-colors"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                        </svg>
+                        WhatsApp
+                      </a>
+                    )}
                   </div>
-                )}
-              </CardContent>
-            </Card>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>

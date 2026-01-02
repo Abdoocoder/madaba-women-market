@@ -7,9 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { updatePassword, reauthenticateWithCredential, EmailAuthProvider, deleteUser, signOut } from "firebase/auth";
-import { doc, deleteDoc } from "firebase/firestore";
-import { auth, db } from "@/lib/firebase";
+import { supabase } from "@/lib/supabase";
 import { useToast } from "@/components/ui/use-toast";
 import { useLocale } from "@/lib/locale-context";
 
@@ -29,146 +27,83 @@ export function SettingsTab() {
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!auth.currentUser) return;
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      toast({ 
-        title: t('messages.error'), 
-        description: t('auth.passwordsDoNotMatch'), 
-        variant: "destructive" 
+      toast({
+        title: t('messages.error'),
+        description: t('auth.passwordsDoNotMatch'),
+        variant: "destructive"
       });
       return;
     }
 
     if (passwordData.newPassword.length < 6) {
-      toast({ 
-        title: t('messages.error'), 
-        description: t('auth.passwordTooShort'), 
-        variant: "destructive" 
+      toast({
+        title: t('messages.error'),
+        description: t('auth.passwordTooShort'),
+        variant: "destructive"
       });
       return;
     }
 
     try {
-      const credential = EmailAuthProvider.credential(
-        auth.currentUser.email || "",
-        passwordData.currentPassword
-      );
-      
-      await reauthenticateWithCredential(auth.currentUser, credential);
-      await updatePassword(auth.currentUser, passwordData.newPassword);
-      
+      const { error } = await supabase.auth.updateUser({
+        password: passwordData.newPassword
+      });
+
+      if (error) throw error;
+
       setPasswordData({
         currentPassword: "",
         newPassword: "",
         confirmPassword: ""
       });
       setIsChangingPassword(false);
-      
-      toast({ 
-        title: t('messages.success'), 
-        description: t('messages.passwordUpdated'), 
-        variant: "success" 
+
+      toast({
+        title: t('messages.success'),
+        description: t('messages.passwordUpdated')
       });
     } catch (error) {
       console.error("Error changing password: ", error);
-      let errorMessage = t('messages.failedToUpdatePassword');
-      
-      // Type assertion to access error properties
-      const authError = error as { code?: string };
-      
-      if (authError.code === 'auth/wrong-password') {
-        errorMessage = t('auth.wrongPassword');
-      } else if (authError.code === 'auth/too-many-requests') {
-        errorMessage = t('auth.tooManyRequests');
-      }
-      
-      toast({ 
-        title: t('messages.error'), 
-        description: errorMessage, 
-        variant: "destructive" 
+      toast({
+        title: t('messages.error'),
+        description: t('messages.failedToUpdatePassword'),
+        variant: "destructive"
       });
     }
   };
 
   const handleDeleteAccount = async () => {
-    if (!auth.currentUser || !user) return;
-
-    if (deleteConfirmation !== t('settings.deleteAccountConfirmation')) {
-      toast({ 
-        title: t('messages.error'), 
-        description: t('settings.deleteAccountConfirmationError'), 
-        variant: "destructive" 
-      });
-      return;
-    }
-
-    try {
-      // Re-authenticate before deletion
-      const credential = EmailAuthProvider.credential(
-        auth.currentUser.email || "",
-        passwordData.currentPassword
-      );
-      
-      await reauthenticateWithCredential(auth.currentUser, credential);
-      
-      // Delete user document from Firestore
-      const userDocRef = doc(db, "users", user.id);
-      await deleteDoc(userDocRef);
-      
-      // Delete user from Firebase Auth
-      await deleteUser(auth.currentUser);
-      
-      // Sign out
-      await signOut(auth);
-      
-      toast({ 
-        title: t('messages.success'), 
-        description: t('messages.accountDeleted'), 
-        variant: "success" 
-      });
-      
-      router.push("/");
-    } catch (error: unknown) {
-      console.error("Error deleting account: ", error);
-      let errorMessage = t('messages.failedToDeleteAccount');
-      
-      // Type assertion to access error properties
-      const authError = error as { code?: string };
-      
-      if (authError.code === 'auth/requires-recent-login') {
-        errorMessage = t('auth.requiresRecentLogin');
-      } else if (authError.code === 'auth/wrong-password') {
-        errorMessage = t('auth.wrongPassword');
-      }
-      
-      toast({ 
-        title: t('messages.error'), 
-        description: errorMessage, 
-        variant: "destructive" 
-      });
-    }
+    // Supabase client-side deletion is restricted for security.
+    // Usually handled via service role on server side or self-deletion RLS.
+    // For now, we'll show a message that this requires administrative action.
+    toast({
+      title: "Account Deletion",
+      description: "Please contact support to delete your account.",
+      variant: "default"
+    });
+    setIsDeletingAccount(false);
   };
 
   const handleLogout = async () => {
     try {
       await logout();
       router.push("/");
-      toast({ 
-        title: t('messages.success'), 
-        description: t('messages.loggedOut'), 
-        variant: "success" 
+      toast({
+        title: t('messages.success'),
+        description: t('messages.loggedOut')
       });
     } catch (error) {
       console.error("Error logging out: ", error);
-      toast({ 
-        title: t('messages.error'), 
-        description: t('messages.failedToLogout'), 
-        variant: "destructive" 
+      toast({
+        title: t('messages.error'),
+        description: t('messages.failedToLogout'),
+        variant: "destructive"
       });
     }
   };
+  // ... rest of the file ...
 
   return (
     <div className="space-y-6">
@@ -190,38 +125,38 @@ export function SettingsTab() {
                   id="current-password"
                   type="password"
                   value={passwordData.currentPassword}
-                  onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
+                  onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
                   required
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="new-password">{t('settings.newPassword')}</Label>
                 <Input
                   id="new-password"
                   type="password"
                   value={passwordData.newPassword}
-                  onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
+                  onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
                   required
                   minLength={6}
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="confirm-password">{t('settings.confirmPassword')}</Label>
                 <Input
                   id="confirm-password"
                   type="password"
                   value={passwordData.confirmPassword}
-                  onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
+                  onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
                   required
                 />
               </div>
-              
+
               <div className="flex gap-2">
                 <Button type="submit">{t('common.save')}</Button>
-                <Button 
-                  type="button" 
+                <Button
+                  type="button"
                   variant="outline"
                   onClick={() => {
                     setIsChangingPassword(false);
@@ -259,8 +194,8 @@ export function SettingsTab() {
         </CardHeader>
         <CardContent>
           {!isDeletingAccount ? (
-            <Button 
-              variant="destructive" 
+            <Button
+              variant="destructive"
               onClick={() => setIsDeletingAccount(true)}
             >
               {t('settings.deleteAccount')}
@@ -270,7 +205,7 @@ export function SettingsTab() {
               <p className="text-sm text-gray-600">
                 {t('settings.deleteAccountWarning')}
               </p>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="delete-confirmation">
                   {t('settings.typeConfirmation')} &quot;{t('settings.deleteAccountConfirmation')}&quot;
@@ -281,26 +216,26 @@ export function SettingsTab() {
                   onChange={(e) => setDeleteConfirmation(e.target.value)}
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="delete-password">{t('settings.enterPassword')}</Label>
                 <Input
                   id="delete-password"
                   type="password"
                   value={passwordData.currentPassword}
-                  onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
+                  onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
                   required
                 />
               </div>
-              
+
               <div className="flex gap-2">
-                <Button 
-                  variant="destructive" 
+                <Button
+                  variant="destructive"
                   onClick={handleDeleteAccount}
                 >
                   {t('settings.deleteAccount')}
                 </Button>
-                <Button 
+                <Button
                   variant="outline"
                   onClick={() => {
                     setIsDeletingAccount(false);

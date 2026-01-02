@@ -13,10 +13,10 @@ if (typeof window === 'undefined') {
 
 // Check if we have the required environment variables
 // Also check if we're in a server context (not client)
-const hasFirebaseConfig = 
+const hasFirebaseConfig =
   typeof window === 'undefined' &&
-  process.env.FIREBASE_PROJECT_ID && 
-  process.env.FIREBASE_CLIENT_EMAIL && 
+  process.env.FIREBASE_PROJECT_ID &&
+  process.env.FIREBASE_CLIENT_EMAIL &&
   process.env.FIREBASE_PRIVATE_KEY &&
   process.env.FIREBASE_PRIVATE_KEY !== '-----BEGIN PRIVATE KEY-----\nYOUR_ACTUAL_PRIVATE_KEY\n-----END PRIVATE KEY-----\n' &&
   !process.env.FIREBASE_PRIVATE_KEY.includes('your-');
@@ -36,8 +36,8 @@ function initializeFirebaseAdmin() {
       if (process.env.NODE_ENV === 'development') {
         console.log('FIREBASE_PROJECT_ID exists and valid:', !!(process.env.FIREBASE_PROJECT_ID && !process.env.FIREBASE_PROJECT_ID.includes('your-')));
         console.log('FIREBASE_CLIENT_EMAIL exists and valid:', !!(process.env.FIREBASE_CLIENT_EMAIL && !process.env.FIREBASE_CLIENT_EMAIL.includes('your-')));
-        console.log('FIREBASE_PRIVATE_KEY exists and valid:', !!(process.env.FIREBASE_PRIVATE_KEY && 
-          process.env.FIREBASE_PRIVATE_KEY !== '-----BEGIN PRIVATE KEY-----\nYOUR_ACTUAL_PRIVATE_KEY\n-----END PRIVATE KEY-----\n' && 
+        console.log('FIREBASE_PRIVATE_KEY exists and valid:', !!(process.env.FIREBASE_PRIVATE_KEY &&
+          process.env.FIREBASE_PRIVATE_KEY !== '-----BEGIN PRIVATE KEY-----\nYOUR_ACTUAL_PRIVATE_KEY\n-----END PRIVATE KEY-----\n' &&
           !process.env.FIREBASE_PRIVATE_KEY.includes('your-')));
       }
     } else {
@@ -86,7 +86,7 @@ export function getAdminAuth() {
     console.error('Firebase Admin not configured - check environment variables');
     throw new Error('Firebase Admin not configured - check environment variables. Make sure FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, and FIREBASE_PRIVATE_KEY are set correctly in your .env.local file.');
   }
-  
+
   // Ensure app is initialized
   if (!firebaseApp) {
     const initResult = initializeFirebaseAdmin();
@@ -95,12 +95,12 @@ export function getAdminAuth() {
       throw new Error('Firebase Admin not available - failed to initialize. Check your Firebase Admin credentials.');
     }
   }
-  
+
   if (!firebaseApp) {
     console.error('Firebase Admin not available - failed to initialize');
     throw new Error('Firebase Admin not available - failed to initialize');
   }
-  
+
   try {
     return getAuth(firebaseApp);
   } catch (error) {
@@ -115,7 +115,7 @@ export function getAdminDb() {
     console.error('Firebase Admin not configured - check environment variables');
     throw new Error('Firebase Admin not configured - check environment variables. Make sure FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, and FIREBASE_PRIVATE_KEY are set correctly in your .env.local file.');
   }
-  
+
   // Ensure app is initialized
   if (!firebaseApp) {
     const initResult = initializeFirebaseAdmin();
@@ -124,12 +124,12 @@ export function getAdminDb() {
       throw new Error('Firebase Admin not available - failed to initialize. Check your Firebase Admin credentials.');
     }
   }
-  
+
   if (!firebaseApp) {
     console.error('Firebase Admin not available - failed to initialize');
     throw new Error('Firebase Admin not available - failed to initialize');
   }
-  
+
   try {
     return getFirestore(firebaseApp);
   } catch (error) {

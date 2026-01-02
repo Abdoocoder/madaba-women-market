@@ -1,40 +1,38 @@
-'use server'
-
 import { NextResponse } from 'next/server'
-import { getAdminDb } from '@/lib/firebaseAdmin';
+import { supabase } from '@/lib/supabase';
+
+export const dynamic = 'force-dynamic'
 import type { Product } from '@/lib/types';
 
-/**
- * @swagger
- * /api/public/products:
- *   get:
- *     description: Returns the list of approved products for public access
- *     responses:
- *       200:
- *         description: A list of products.
- */
 export async function GET() {
     try {
-        const adminDb = getAdminDb();
-        const productsRef = adminDb.collection('products');
-        
-        // Only fetch approved products
-        const query = productsRef.where('approved', '==', true);
-        const snapshot = await query.get();
-        
-        const products: Product[] = [];
-        snapshot.forEach((doc) => {
-            const productData = doc.data();
-            // Only add products with valid data
-            if (productData) {
-                products.push({ id: doc.id, ...productData } as Product);
-            }
-        });
-        
-        // Filter out any products without valid IDs
-        const validProducts = products.filter(product => product.id);
-        
-        return NextResponse.json(validProducts);
+        const { data, error } = await supabase
+            .from('products')
+            .select('*')
+            .eq('approved', true);
+
+        if (error) throw error;
+
+        const products: Product[] = data.map((p: any) => ({
+            id: p.id,
+            name: p.name,
+            nameAr: p.name_ar,
+            description: p.description,
+            descriptionAr: p.description_ar,
+            price: p.price,
+            category: p.category,
+            image: p.image_url,
+            sellerId: p.seller_id,
+            sellerName: p.seller_name,
+            stock: p.stock,
+            featured: p.featured,
+            approved: p.approved,
+            suspended: p.suspended,
+            purchaseCount: p.purchase_count,
+            createdAt: new Date(p.created_at)
+        }));
+
+        return NextResponse.json(products);
     } catch (error) {
         console.error('Error fetching products:', error);
         return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });

@@ -8,8 +8,7 @@ import { ProductGridSkeleton } from "@/components/products/product-grid-skeleton
 import { SuccessStories } from "@/components/success-stories"
 import { useAuth } from "@/lib/auth-context"
 import { useLocale } from "@/lib/locale-context"
-import { collection, getDocs, query, where } from "firebase/firestore"
-import { db } from "@/lib/firebase"
+import { supabase } from "@/lib/supabase"
 import type { Product } from "@/lib/types"
 import ClientOnly from "@/components/client-only"
 import Link from "next/link"
@@ -36,38 +35,34 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // Component is mounted
-  }, [])
-
-  useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const productsQuery = query(collection(db, "products"), where("approved", "==", true))
-        const querySnapshot = await getDocs(productsQuery)
-        const fetchedProducts = querySnapshot.docs
-          .map((doc) => {
-            const productData = doc.data();
-            const product = {
-              id: doc.id,
-              ...productData,
-            } as Product;
+        const { data, error } = await supabase
+          .from("products")
+          .select("*")
+          .eq("approved", true)
 
-            // Debugging: Log product data
-            console.log("Fetched product:", product);
+        if (error) throw error
 
-            // Validate that we have all required data
-            if (!product.id || (typeof product.id === 'string' && product.id.trim() === '')) {
-              console.error("Product is missing valid ID:", productData);
-              return null; // Skip this product
-            }
-            if (!product.sellerId) {
-              console.error("Product is missing sellerId:", product);
-              return null; // Skip this product
-            }
+        const fetchedProducts: Product[] = data.map((p) => ({
+          id: p.id,
+          name: p.name,
+          nameAr: p.name_ar,
+          description: p.description,
+          descriptionAr: p.description_ar,
+          price: p.price,
+          category: p.category,
+          image: p.image_url,
+          sellerId: p.seller_id,
+          sellerName: p.seller_name,
+          stock: p.stock,
+          featured: p.featured,
+          approved: p.approved,
+          suspended: p.suspended,
+          purchaseCount: p.purchase_count,
+          createdAt: new Date(p.created_at)
+        }))
 
-            return product;
-          })
-          .filter((product): product is Product => product !== null) // Filter out null products
         setProducts(fetchedProducts)
       } catch (error) {
         console.error("Error fetching products:", error)
@@ -78,6 +73,7 @@ export default function Home() {
 
     fetchProducts()
   }, [])
+  // ... rest of the file ...
 
   const filteredAndSortedProducts = useMemo(() => {
     let filtered = products.filter(product => product.id && product.id.trim() !== '') // Filter out products without valid IDs

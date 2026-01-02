@@ -3,7 +3,7 @@ const nextConfig = {
   reactStrictMode: true,
 
   eslint: {
-    ignoreDuringBuilds: true, // ✅ مؤقتًا فقط — يمكنك تفعيله لاحقًا
+    ignoreDuringBuilds: true,
   },
 
   typescript: {
@@ -41,12 +41,8 @@ const nextConfig = {
 
   env: {
     NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
-    NEXT_PUBLIC_FIREBASE_API_KEY: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-    NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-    NEXT_PUBLIC_FIREBASE_PROJECT_ID: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-    NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-    NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-    NEXT_PUBLIC_FIREBASE_APP_ID: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   },
 
   async headers() {
@@ -68,21 +64,17 @@ const nextConfig = {
 const checkConfig = () => {
   console.log('\n🔧 Configuration Status:\n========================\n');
 
-  // --- Firebase ---
-  const firebaseVars = [
-    'NEXT_PUBLIC_FIREBASE_API_KEY',
-    'NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN',
-    'NEXT_PUBLIC_FIREBASE_PROJECT_ID',
-    'NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET',
-    'NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID',
-    'NEXT_PUBLIC_FIREBASE_APP_ID',
+  // --- Supabase ---
+  const supabaseVars = [
+    'NEXT_PUBLIC_SUPABASE_URL',
+    'NEXT_PUBLIC_SUPABASE_ANON_KEY',
   ];
-  const missingFirebase = firebaseVars.filter((key) => !process.env[key]);
+  const missingSupabase = supabaseVars.filter((key) => !process.env[key]);
 
-  if (missingFirebase.length === 0) {
-    console.log('🔥 Firebase Admin:\n✅ Firebase configuration appears valid\n');
+  if (missingSupabase.length === 0) {
+    console.log('⚡ Supabase:\n✅ Supabase configuration appears valid\n');
   } else {
-    console.warn('🔥 Firebase Admin:\n❌ Missing Firebase environment variables:\n', missingFirebase.join(', '), '\n');
+    console.warn('⚡ Supabase:\n❌ Missing Supabase environment variables:\n', missingSupabase.join(', '), '\n');
   }
 
   // --- Cloudinary ---
@@ -92,12 +84,12 @@ const checkConfig = () => {
     console.warn('🎨 Cloudinary:\n❌ Missing Cloudinary configuration');
   }
 
-  console.log('========================\n');
+  console.log('\n========================\n');
 };
 
 // ✅ Run the check only during build or dev
 if (process.env.NODE_ENV !== 'test') {
-  checkConfig();
+  // checkConfig();
 }
 
 export default nextConfig;
