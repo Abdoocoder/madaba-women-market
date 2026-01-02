@@ -55,24 +55,31 @@ export default function LoginPage() {
       if (success) {
         // Wait for auth context to update user state, then redirect based on role
         setTimeout(async () => {
-          // Fetch the user's role from Supabase
-          const { data: { user: authUser } } = await supabase.auth.getUser()
-          if (authUser) {
-            const { data: profile } = await supabase
-              .from('profiles')
-              .select('role')
-              .eq('id', authUser.id)
-              .single()
+          try {
+            // Fetch the user's role from Supabase to ensure we have the latest
+            const { data: { user: authUser } } = await supabase.auth.getUser()
+            if (authUser) {
+              const { data: profile } = await supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', authUser.id)
+                .single()
 
-            if (profile?.role === "admin") {
-              router.push("/admin")
-            } else if (profile?.role === "seller") {
-              router.push("/seller/dashboard")
-            } else if (profile?.role === "customer") {
-              router.push("/profile")
-            } else {
-              router.push("/")
+              const userRole = profile?.role || "customer"
+
+              if (userRole === "admin") {
+                router.push("/admin/dashboard")
+              } else if (userRole === "seller") {
+                router.push("/seller/dashboard")
+              } else if (userRole === "customer") {
+                router.push("/buyer/dashboard")
+              } else {
+                router.push("/")
+              }
             }
+          } catch (err) {
+            console.error("Error during redirect:", err)
+            router.push("/")
           }
         }, 300)
       }
@@ -118,11 +125,11 @@ export default function LoginPage() {
       if (success) {
         // Redirect based on user role after successful signup
         if (role === "admin") {
-          router.push("/admin")
+          router.push("/admin/dashboard")
         } else if (role === "seller") {
           router.push("/seller/dashboard")
         } else if (role === "customer") {
-          router.push("/profile")
+          router.push("/buyer/dashboard")
         } else {
           router.push("/")
         }
@@ -139,16 +146,35 @@ export default function LoginPage() {
     setError(null)
     const success = await signInWithGoogle(selectedRole)
     if (success) {
-      // Redirect based on selected role after Google sign-in
-      if (selectedRole === "admin") {
-        router.push("/admin")
-      } else if (selectedRole === "seller") {
-        router.push("/seller/dashboard")
-      } else if (selectedRole === "customer") {
-        router.push("/profile")
-      } else {
-        router.push("/")
-      }
+      // For Google sign-in, we wait for the account to be created/linked
+      // and redirect based on the actual profile role
+      setTimeout(async () => {
+        try {
+          const { data: { user: authUser } } = await supabase.auth.getUser()
+          if (authUser) {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('role')
+              .eq('id', authUser.id)
+              .single()
+
+            const userRole = profile?.role || selectedRole
+
+            if (userRole === "admin") {
+              router.push("/admin/dashboard")
+            } else if (userRole === "seller") {
+              router.push("/seller/dashboard")
+            } else if (userRole === "customer") {
+              router.push("/buyer/dashboard")
+            } else {
+              router.push("/")
+            }
+          }
+        } catch (err) {
+          console.error("Error during Google redirect:", err)
+          router.push("/")
+        }
+      }, 500)
     } else {
       setError(t("login.failedGoogle"))
     }

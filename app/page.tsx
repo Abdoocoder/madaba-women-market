@@ -153,7 +153,13 @@ export default function Home() {
                 </Button>
                 {user ? (
                   <Button asChild variant="outline" size="lg" className="bg-transparent border-primary-foreground/30 text-primary-foreground hover:bg-white/10 text-lg px-8 py-6 rounded-xl backdrop-blur-sm">
-                    <Link href="/profile">{t("header.profile")}</Link>
+                    <Link href={
+                      user.role === "admin" ? "/admin/dashboard" :
+                        user.role === "seller" ? "/seller/dashboard" :
+                          "/buyer/dashboard"
+                    }>
+                      {user.role === "customer" ? t("dashboard.title") : t("header.profile")}
+                    </Link>
                   </Button>
                 ) : (
                   <Button asChild variant="outline" size="lg" className="bg-transparent border-primary-foreground/30 text-primary-foreground hover:bg-white/10 text-lg px-8 py-6 rounded-xl backdrop-blur-sm">
