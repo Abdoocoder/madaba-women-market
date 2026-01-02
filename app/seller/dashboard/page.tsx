@@ -10,10 +10,11 @@ import { OrderList } from "@/components/seller/order-list"
 import { ProductForm } from "@/components/seller/product-form"
 import { ProductList } from "@/components/seller/product-list"
 import { StatsCard } from "@/components/seller/stats-card"
-import { Plus, DollarSign, Package, ShoppingCart, Clock, Store, Users, Eye, TrendingUp, Star } from "lucide-react"
+import { Plus, DollarSign, Package, ShoppingCart, Clock, Store, Users, Eye, TrendingUp, Star, ArrowRight } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
 import { useLocale } from "@/lib/locale-context"
 import type { Product } from "@/lib/types"
+import { motion } from "framer-motion"
 
 // Helper function to create auth headers
 const createAuthHeaders = (token: string) => ({
@@ -173,8 +174,8 @@ export default function SellerDashboardPage() {
     if (!editingProduct || !token) return
 
     try {
-      const updateData = { 
-        ...data 
+      const updateData = {
+        ...data
       }
       if (imageUrl) {
         updateData.image = imageUrl
@@ -230,113 +231,173 @@ export default function SellerDashboardPage() {
   }
 
   if (!user || user.role !== "seller") {
-    return <div>{t("common.loading")}</div>
+    return <div className="h-screen flex items-center justify-center text-muted-foreground">{t("common.loading")}</div>
   }
 
   // Check if seller is approved
   const isSellerApproved = user.status === 'approved';
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  }
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 }
+  }
+
   return (
-    <div className="container mx-auto py-8 px-4 space-y-8">
+    <div className="container mx-auto py-8 px-4 space-y-8 min-h-screen bg-muted/10">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <h1 className="text-3xl font-bold">{t("seller.dashboard")}</h1>
-        <div className="flex gap-2">
-          <Button asChild variant="outline">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">{t("seller.dashboard")}</h1>
+          <p className="text-muted-foreground mt-1">Manage your store and keep track of your performance.</p>
+        </div>
+        <div className="flex bg-card p-1 rounded-lg border shadow-sm">
+          <Button asChild variant="ghost" size="sm" className="h-9">
             <Link href="/seller/store-settings">
               <Store className="w-4 h-4 me-2" />
               {t("seller.storeSettings")}
             </Link>
           </Button>
-          <Button asChild>
+          <div className="w-px bg-border my-1"></div>
+          <Button asChild variant="ghost" size="sm" className="h-9 text-primary font-medium hover:text-primary/80">
             <Link href={`/seller/${user?.id}`}>
-              {t("seller.viewStore")}
+              {t("seller.viewStore")} <ArrowRight className="ml-1 h-3 w-3" />
             </Link>
           </Button>
         </div>
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="overview">{t("seller.overview")}</TabsTrigger>
-          <TabsTrigger value="products">{t("seller.products")}</TabsTrigger>
-          <TabsTrigger value="orders">{t("seller.orders")}</TabsTrigger>
-          <TabsTrigger value="analytics">{t("seller.analytics")}</TabsTrigger>
-          <TabsTrigger value="store">{t("seller.store")}</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-5 h-12 p-1 bg-muted/50 rounded-xl">
+          {['overview', 'products', 'orders', 'analytics', 'store'].map((tab) => (
+            <TabsTrigger
+              key={tab}
+              value={tab}
+              className="rounded-lg data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all"
+            >
+              {t(`seller.${tab}`)}
+            </TabsTrigger>
+          ))}
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <StatsCard
-              title={t("seller.totalRevenue")}
-              value={stats?.totalRevenue ? `$${stats.totalRevenue.toFixed(2)}` : "$0.00"}
-              description={t("seller.thisMonth")}
-              icon={DollarSign}
-            />
-            <StatsCard
-              title={t("seller.totalOrders")}
-              value={stats?.totalOrders?.toString() || "0"}
-              description={t("seller.completed")}
-              icon={ShoppingCart}
-            />
-            <StatsCard
-              title={t("seller.totalProducts")}
-              value={products.length.toString()}
-              description={t("seller.active")}
-              icon={Package}
-            />
-            <StatsCard
-              title={t("seller.pendingOrders")}
-              value={stats?.pendingOrders?.toString() || "0"}
-              description={t("seller.needsAttention")}
-              icon={Clock}
-            />
-          </div>
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="grid gap-4 md:grid-cols-2 lg:grid-cols-4"
+          >
+            <motion.div variants={itemVariants}>
+              <StatsCard
+                title={t("seller.totalRevenue")}
+                value={stats?.totalRevenue ? `$${stats.totalRevenue.toFixed(2)}` : "$0.00"}
+                description={t("seller.thisMonth")}
+                icon={DollarSign}
+                trend={{ value: 12, label: "vs last month", positive: true }}
+              />
+            </motion.div>
+            <motion.div variants={itemVariants}>
+              <StatsCard
+                title={t("seller.totalOrders")}
+                value={stats?.totalOrders?.toString() || "0"}
+                description={t("seller.completed")}
+                icon={ShoppingCart}
+              />
+            </motion.div>
+            <motion.div variants={itemVariants}>
+              <StatsCard
+                title={t("seller.totalProducts")}
+                value={products.length.toString()}
+                description={t("seller.active")}
+                icon={Package}
+              />
+            </motion.div>
+            <motion.div variants={itemVariants}>
+              <StatsCard
+                title={t("seller.pendingOrders")}
+                value={stats?.pendingOrders?.toString() || "0"}
+                description={t("seller.needsAttention")}
+                icon={Clock}
+                trend={{ value: 2, label: "new", positive: false }}
+              />
+            </motion.div>
+          </motion.div>
 
           <div className="grid gap-4 md:grid-cols-2">
-            <Card>
+            <Card className="border-none shadow-md">
               <CardHeader>
-                <CardTitle>{t("seller.recentProducts")}</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <Package className="h-5 w-5 text-primary" />
+                  {t("seller.recentProducts")}
+                </CardTitle>
                 <CardDescription>{t("seller.lastAdded")}</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-2">
+                <div className="space-y-4">
                   {products.slice(0, 3).map((product) => (
-                    <div key={product.id} className="flex items-center justify-between">
-                      <span className="text-sm font-medium">{product.nameAr}</span>
-                      <span className="text-sm text-muted-foreground">${product.price}</span>
+                    <div key={product.id} className="flex items-center justify-between p-3 bg-muted/20 rounded-lg hover:bg-muted/40 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 bg-muted rounded-md flex items-center justify-center">
+                          {/* In a real app we'd use the image here */}
+                          <Package className="h-5 w-5 text-muted-foreground" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold">{product.nameAr}</p>
+                          <span className="text-xs text-muted-foreground">{product.category}</span>
+                        </div>
+                      </div>
+                      <span className="font-bold text-primary">${product.price}</span>
                     </div>
                   ))}
+                  {products.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">No products yet.</p>}
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="border-none shadow-md">
               <CardHeader>
-                <CardTitle>{t("seller.storeAnalytics")}</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5 text-primary" />
+                  {t("seller.storeAnalytics")}
+                </CardTitle>
                 <CardDescription>{t("seller.storePerformance")}</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Eye className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-sm">{t("seller.storeVisitors")}</span>
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between p-2">
+                    <div className="flex items-center gap-3">
+                      <div className="h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                        <Eye className="w-4 h-4" />
+                      </div>
+                      <span className="text-sm font-medium">{t("seller.storeVisitors")}</span>
                     </div>
-                    <span className="font-medium">1,248</span>
+                    <span className="font-bold text-lg">1,248</span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Users className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-sm">{t("seller.followers")}</span>
+                  <div className="flex items-center justify-between p-2">
+                    <div className="flex items-center gap-3">
+                      <div className="h-8 w-8 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400">
+                        <Users className="w-4 h-4" />
+                      </div>
+                      <span className="text-sm font-medium">{t("seller.followers")}</span>
                     </div>
-                    <span className="font-medium">142</span>
+                    <span className="font-bold text-lg">142</span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <TrendingUp className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-sm">{t("seller.conversionRate")}</span>
+                  <div className="flex items-center justify-between p-2">
+                    <div className="flex items-center gap-3">
+                      <div className="h-8 w-8 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400">
+                        <TrendingUp className="w-4 h-4" />
+                      </div>
+                      <span className="text-sm font-medium">{t("seller.conversionRate")}</span>
                     </div>
-                    <span className="font-medium">3.2%</span>
+                    <span className="font-bold text-lg">3.2%</span>
                   </div>
                 </div>
               </CardContent>
@@ -346,43 +407,55 @@ export default function SellerDashboardPage() {
 
         <TabsContent value="products" className="space-y-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold">{t("seller.products")}</h2>
+            <h2 className="text-2xl font-bold tracking-tight">{t("seller.products")}</h2>
             {isSellerApproved ? (
-              <Button onClick={() => setShowAddForm(true)}>
+              <Button onClick={() => setShowAddForm(true)} className="shadow-lg shadow-primary/20">
                 <Plus className="mr-2 h-4 w-4" />
                 {t("seller.addProduct")}
               </Button>
             ) : (
-              <Button disabled title={t("seller.pendingApprovalMessage")}>
+              <Button disabled title={t("seller.pendingApprovalMessage")} variant="secondary">
                 <Plus className="mr-2 h-4 w-4" />
                 {t("seller.addProduct")}
               </Button>
             )}
           </div>
-          
+
           {!isSellerApproved && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+            <div className="bg-yellow-50 border border-yellow-200 dark:bg-yellow-900/10 dark:border-yellow-900/30 rounded-lg p-4 mb-4">
               <div className="flex items-center">
-                <Clock className="h-5 w-5 text-yellow-600 mr-2" />
-                <h3 className="font-medium text-yellow-800">{t("seller.pendingApprovalTitle")}</h3>
+                <Clock className="h-5 w-5 text-yellow-600 dark:text-yellow-500 mr-2" />
+                <h3 className="font-medium text-yellow-800 dark:text-yellow-400">{t("seller.pendingApprovalTitle")}</h3>
               </div>
-              <p className="text-yellow-700 mt-1">{t("seller.pendingApprovalMessage")}</p>
+              <p className="text-yellow-700 dark:text-yellow-500/80 mt-1 text-sm">{t("seller.pendingApprovalMessage")}</p>
             </div>
           )}
 
           {showAddForm && (
-            <ProductForm
-              onSubmit={handleAddProduct}
-              onCancel={() => setShowAddForm(false)}
-            />
+            <div className="bg-card p-6 rounded-xl border shadow-sm mb-6 animate-in slide-in-from-top-4 fade-in duration-300">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">New Product</h3>
+                <Button variant="ghost" size="sm" onClick={() => setShowAddForm(false)}>Cancel</Button>
+              </div>
+              <ProductForm
+                onSubmit={handleAddProduct}
+                onCancel={() => setShowAddForm(false)}
+              />
+            </div>
           )}
 
           {editingProduct && (
-            <ProductForm
-              product={editingProduct}
-              onSubmit={handleEditProduct}
-              onCancel={() => setEditingProduct(null)}
-            />
+            <div className="bg-card p-6 rounded-xl border shadow-sm mb-6 animate-in slide-in-from-top-4 fade-in duration-300">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">Edit Product</h3>
+                <Button variant="ghost" size="sm" onClick={() => setEditingProduct(null)}>Cancel</Button>
+              </div>
+              <ProductForm
+                product={editingProduct}
+                onSubmit={handleEditProduct}
+                onCancel={() => setEditingProduct(null)}
+              />
+            </div>
           )}
 
           <ProductList
@@ -393,37 +466,50 @@ export default function SellerDashboardPage() {
         </TabsContent>
 
         <TabsContent value="orders" className="space-y-6">
-          <h2 className="text-2xl font-bold">{t("seller.orders")}</h2>
-          <OrderList />
+          <Card className="border-none shadow-md">
+            <CardHeader>
+              <CardTitle>{t("seller.orders")}</CardTitle>
+              <CardDescription>Manage your orders and track shipments.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <OrderList />
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-6">
-          <h2 className="text-2xl font-bold">{t("seller.analytics")}</h2>
           <div className="grid gap-4 md:grid-cols-2">
-            <Card>
+            <Card className="border-none shadow-md">
               <CardHeader>
                 <CardTitle>{t("seller.salesAnalytics")}</CardTitle>
                 <CardDescription>{t("seller.monthlySales")}</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-64 flex items-center justify-center">
-                  <p className="text-muted-foreground">{t("seller.chartsComingSoon")}</p>
+                <div className="h-64 flex flex-col items-center justify-center bg-muted/20 rounded-lg border border-dashed">
+                  <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-3">
+                    <TrendingUp className="h-6 w-6 text-muted-foreground" />
+                  </div>
+                  <p className="text-muted-foreground font-medium">{t("seller.chartsComingSoon")}</p>
                 </div>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="border-none shadow-md">
               <CardHeader>
                 <CardTitle>{t("seller.topProducts")}</CardTitle>
                 <CardDescription>{t("seller.bestSelling")}</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-2">
-                  {products.slice(0, 5).map((product) => (
-                    <div key={product.id} className="flex items-center justify-between">
-                      <span className="text-sm font-medium">{product.nameAr}</span>
-                      <span className="text-sm text-muted-foreground">${product.price}</span>
+                <div className="space-y-4">
+                  {products.slice(0, 5).map((product, i) => (
+                    <div key={product.id} className="flex items-center justify-between p-2 border-b last:border-0">
+                      <div className="flex items-center gap-3">
+                        <span className="font-bold text-muted-foreground w-4">{i + 1}</span>
+                        <span className="text-sm font-medium">{product.nameAr}</span>
+                      </div>
+                      <span className="text-sm font-bold">${product.price}</span>
                     </div>
                   ))}
+                  {products.length === 0 && <p className="text-center text-muted-foreground py-4">No data available</p>}
                 </div>
               </CardContent>
             </Card>
@@ -431,64 +517,64 @@ export default function SellerDashboardPage() {
         </TabsContent>
 
         <TabsContent value="store" className="space-y-6">
-          <h2 className="text-2xl font-bold">{t("seller.storeManagement")}</h2>
           <div className="grid gap-6 md:grid-cols-2">
-            <Card>
+            <Card className="border-none shadow-md h-full">
               <CardHeader>
                 <CardTitle>{t("seller.storeSettings")}</CardTitle>
                 <CardDescription>{t("seller.customizeYourStore")}</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span>{t("seller.storeName")}</span>
-                  <span className="font-medium">{user.storeName || user.name}</span>
+              <CardContent className="space-y-6">
+                <div className="flex items-center justify-between border-b pb-3">
+                  <span className="text-muted-foreground text-sm">{t("seller.storeName")}</span>
+                  <span className="font-semibold text-lg">{user.storeName || user.name}</span>
+                </div>
+                <div className="flex items-center justify-between border-b pb-3">
+                  <span className="text-muted-foreground text-sm">{t("seller.storeDescription")}</span>
+                  <Badge variant={user.storeDescription ? "secondary" : "outline"}>{user.storeDescription ? t("seller.set") : t("seller.notSet")}</Badge>
+                </div>
+                <div className="flex items-center justify-between border-b pb-3">
+                  <span className="text-muted-foreground text-sm">{t("seller.storeCover")}</span>
+                  <Badge variant={user.storeCoverImage ? "secondary" : "outline"}>{user.storeCoverImage ? t("seller.set") : t("seller.notSet")}</Badge>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span>{t("seller.storeDescription")}</span>
-                  <span className="font-medium">{user.storeDescription ? t("seller.set") : t("seller.notSet")}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span>{t("seller.storeCover")}</span>
-                  <span className="font-medium">{user.storeCoverImage ? t("seller.set") : t("seller.notSet")}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span>{t("seller.socialLinks")}</span>
-                  <span className="font-medium">
+                  <span className="text-muted-foreground text-sm">{t("seller.socialLinks")}</span>
+                  <Badge variant={user.instagramUrl || user.whatsappUrl ? "secondary" : "outline"}>
                     {user.instagramUrl || user.whatsappUrl ? t("seller.set") : t("seller.notSet")}
-                  </span>
+                  </Badge>
                 </div>
-                <Button asChild className="w-full mt-4">
+                <Button asChild className="w-full mt-6 shadow-md shadow-primary/10">
                   <Link href="/seller/store-settings">
+                    <Store className="w-4 h-4 mr-2" />
                     {t("seller.editStoreSettings")}
                   </Link>
                 </Button>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="border-none shadow-md h-full">
               <CardHeader>
                 <CardTitle>{t("seller.storePerformance")}</CardTitle>
                 <CardDescription>{t("seller.trackYourGrowth")}</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span>{t("seller.totalSales")}</span>
-                  <span className="font-medium">{stats?.totalRevenue ? `$${stats.totalRevenue.toFixed(2)}` : "$0.00"}</span>
+              <CardContent className="space-y-6">
+                <div className="flex items-center justify-between border-b pb-3">
+                  <span className="text-muted-foreground text-sm">{t("seller.totalSales")}</span>
+                  <span className="font-bold text-xl text-primary">{stats?.totalRevenue ? `$${stats.totalRevenue.toFixed(2)}` : "$0.00"}</span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span>{t("seller.totalOrders")}</span>
-                  <span className="font-medium">{stats?.totalOrders?.toString() || "0"}</span>
+                <div className="flex items-center justify-between border-b pb-3">
+                  <span className="text-muted-foreground text-sm">{t("seller.totalOrders")}</span>
+                  <span className="font-bold text-lg">{stats?.totalOrders?.toString() || "0"}</span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span>{t("seller.averageRating")}</span>
-                  <div className="flex items-center gap-1">
+                <div className="flex items-center justify-between border-b pb-3">
+                  <span className="text-muted-foreground text-sm">{t("seller.averageRating")}</span>
+                  <div className="flex items-center gap-1 bg-yellow-50 dark:bg-yellow-900/10 px-2 py-0.5 rounded-full">
                     <Star className="w-4 h-4 fill-yellow-500 text-yellow-500" />
-                    <span className="font-medium">{user.rating?.toFixed(1) || "0.0"}</span>
+                    <span className="font-bold text-yellow-700 dark:text-yellow-500">{user.rating?.toFixed(1) || "0.0"}</span>
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span>{t("seller.totalFollowers")}</span>
-                  <span className="font-medium">142</span>
+                  <span className="text-muted-foreground text-sm">{t("seller.totalFollowers")}</span>
+                  <span className="font-bold text-lg">142</span>
                 </div>
               </CardContent>
             </Card>
