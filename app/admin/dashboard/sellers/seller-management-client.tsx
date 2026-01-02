@@ -100,7 +100,7 @@ export default function SellerManagementClient() {
   };
 
   if (isLoading || user?.role !== 'admin') {
-    return <div>{t('admin.loading')}</div>; 
+    return <div>{t('admin.loading')}</div>;
   }
 
   return (
@@ -125,11 +125,10 @@ export default function SellerManagementClient() {
                 <TableCell className="font-medium">{seller.name}</TableCell>
                 <TableCell>{seller.email}</TableCell>
                 <TableCell>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    seller.status === 'approved' ? 'bg-green-100 text-green-800' :
-                    seller.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                    'bg-red-100 text-red-800'
-                  }`}>
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${seller.status === 'approved' ? 'bg-green-100 text-green-800' :
+                      seller.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-red-100 text-red-800'
+                    }`}>
                     {t(`admin.${seller.status}`)}
                   </span>
                 </TableCell>
@@ -155,4 +154,4 @@ export default function SellerManagementClient() {
       </div>
     </div>
   );
-};
+}

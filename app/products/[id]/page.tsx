@@ -135,7 +135,7 @@ export default function ProductDetailPage() {
 
             if (fetchError) throw fetchError;
 
-            let currentWishlist = profile.wishlist || [];
+            const currentWishlist = profile.wishlist || [];
             let newWishlist;
 
             if (wishlisted) {
