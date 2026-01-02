@@ -1,5 +1,5 @@
 import { headers } from "next/headers";
-import { supabase } from "./supabase";
+import { supabase, supabaseAdmin } from "./supabase";
 import { User } from "./types";
 import { NextRequest } from "next/server";
 
@@ -14,7 +14,9 @@ async function verifyTokenAndGetUser(idToken: string): Promise<User | null> {
         }
 
         // Get user data from profiles table
-        const { data: profile, error: profileError } = await supabase
+        // Use supabaseAdmin if available to bypass RLS for role checks
+        const client = supabaseAdmin || supabase;
+        const { data: profile, error: profileError } = await client
             .from('profiles')
             .select('*')
             .eq('id', supabaseUser.id)
