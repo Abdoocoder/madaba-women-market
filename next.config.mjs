@@ -85,7 +85,7 @@ const checkConfig = () => {
 
 // ✅ Run the check only during build or dev
 if (process.env.NODE_ENV !== 'test') {
-  // checkConfig();
+  checkConfig();
 }
 
 export default nextConfig;
