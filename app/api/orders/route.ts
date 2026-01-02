@@ -1,9 +1,7 @@
-'use server'
-
 import { NextResponse, NextRequest } from 'next/server'
 import { getAdminDb } from '@/lib/firebaseAdmin'
 import { getAuthenticatedUser } from '@/lib/server-auth'
-import type { Order, Product,  } from '@/lib/types'
+import type { Order } from '@/lib/types'
 
 /**
  * @swagger
@@ -131,10 +129,12 @@ export async function POST(request: NextRequest) {
     const sellerRef = adminDb.collection('users').doc(storeId as string);
     const sellerSnap = await sellerRef.get();
     if (!sellerSnap.exists) {
-        return NextResponse.json({ message: 'Seller not found' }, { status: 404 });
+      return NextResponse.json({ message: 'Seller not found' }, { status: 404 });
     }
     const sellerData = sellerSnap.data();
-
+    if (!sellerData) {
+      return NextResponse.json({ message: 'Seller data is empty' }, { status: 404 });
+    }
 
     const orderData = {
       customerId: user.id,

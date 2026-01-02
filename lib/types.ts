@@ -57,10 +57,13 @@ export interface Order {
   sellerId: string
   items: CartItem[]
   total: number
-  status: "pending" | "processing" | "shipped" | "delivered"
+  totalPrice?: number // For backward compatibility or potential mismatch
+  status: "pending" | "processing" | "shipped" | "delivered" | "cancelled"
   createdAt: Date
   updatedAt?: Date
   customerName?: string
+  shippingAddress?: string
+  customerPhone?: string
 }
 
 export interface Review {

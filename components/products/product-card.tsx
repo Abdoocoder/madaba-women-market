@@ -1,7 +1,6 @@
 'use client'
 
 import type React from "react"
-import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { ShoppingCart, Star } from "lucide-react"
@@ -53,13 +52,13 @@ export function ProductCard({ product }: ProductCardProps) {
 
   // Updated product URL to point to the nested store product page
   const productUrl = `/store/${product.sellerId}/product/${product.id}`;
-  
+
   const handleCardClick = () => {
     router.push(productUrl)
   }
 
   return (
-    <Card 
+    <Card
       onClick={handleCardClick}
       className="overflow-hidden h-full flex flex-col group hover:shadow-xl transition-shadow duration-300 cursor-pointer"
     >
@@ -74,7 +73,7 @@ export function ProductCard({ product }: ProductCardProps) {
           fill
           className="object-cover transition-transform duration-300 group-hover:scale-105"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          onError={(e) => {
+          onError={() => {
             console.error("Error loading image for product:", product.id, product.image);
           }}
         />
@@ -88,7 +87,7 @@ export function ProductCard({ product }: ProductCardProps) {
         <h3 className="font-semibold text-lg mb-1 text-balance group-hover:text-primary transition-colors">
           {language === "ar" ? product.nameAr : product.name}
         </h3>
-        
+
         <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
           {language === "ar" ? product.descriptionAr : product.description}
         </p>
@@ -100,8 +99,8 @@ export function ProductCard({ product }: ProductCardProps) {
             <span className="text-muted-foreground me-1">
               {t("product.soldBy")}:
             </span>
-            <Link 
-              href={`/seller/${product.sellerId}`} 
+            <Link
+              href={`/seller/${product.sellerId}`}
               className="text-primary hover:underline font-medium"
               onClick={(e) => e.stopPropagation()} // Prevent parent Link navigation
             >
@@ -109,40 +108,40 @@ export function ProductCard({ product }: ProductCardProps) {
             </Link>
           </div>
         )}
-        
+
         <div className="flex items-center gap-1 mb-3">
           <div className="flex items-center">
             {[...Array(5)].map((_, i) => (
-              <Star 
-                key={i} 
-                className={`w-4 h-4 ${i < Math.floor(rating) ? 'fill-yellow-400 text-yellow-500' : 'text-gray-300'}`} 
+              <Star
+                key={i}
+                className={`w-4 h-4 ${i < Math.floor(rating) ? 'fill-yellow-400 text-yellow-500' : 'text-gray-300'}`}
               />
             ))}
           </div>
-          {reviewCount > 0 && 
+          {reviewCount > 0 &&
             <span className="text-xs text-muted-foreground ms-1">
               ({reviewCount})
             </span>
           }
         </div>
-        
+
         <div className="flex items-center justify-between">
           <span className="text-xl font-bold text-primary">{formatCurrency(product.price)}</span>
           <span className={`text-xs font-semibold px-2 py-1 rounded-md ${product.stock > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-            {product.stock > 0 ? `${t("product.inStock")}: ${product.stock}`: t("product.outOfStock")}
+            {product.stock > 0 ? `${t("product.inStock")}: ${product.stock}` : t("product.outOfStock")}
           </span>
         </div>
       </CardContent>
       <CardFooter className="p-3 pt-0">
-          <Button 
-            onClick={handleAddToCart} 
-            className="w-full"
-            disabled={product.stock === 0 || user?.role !== 'customer'}
-            aria-label={t('product.addToCart')}
-          >
-            <ShoppingCart className="me-2 h-4 w-4" />
-            {t("product.addToCart")}
-          </Button>
+        <Button
+          onClick={handleAddToCart}
+          className="w-full"
+          disabled={product.stock === 0 || user?.role !== 'customer'}
+          aria-label={t('product.addToCart')}
+        >
+          <ShoppingCart className="me-2 h-4 w-4" />
+          {t("product.addToCart")}
+        </Button>
       </CardFooter>
     </Card>
   )

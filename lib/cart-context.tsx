@@ -17,7 +17,7 @@ interface CartContextType {
   totalItems: number
   totalPrice: number
   // New state to track the seller of the items currently in the cart
-  storeSellerId: string | null 
+  storeSellerId: string | null
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined)
@@ -81,10 +81,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
           setStoreSellerId(fbSellerId || null)
         }
       }
-    }, (error: any) => {
+    }, (error) => {
       console.error("Firebase onSnapshot error:", error);
       // Handle permission denied errors specifically
-      if (error.code === 'permission-denied') {
+      if (error && typeof error === 'object' && 'code' in error && error.code === 'permission-denied') {
         console.error("Permission denied accessing cart. Check Firestore rules.");
       }
     })
@@ -96,15 +96,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Add proper null check for user and user.id
     if (!user || !user.id) return
-    
+
     const handler = setTimeout(async () => {
       try {
         const cartRef = doc(db, "carts", user.id)
         await setDoc(cartRef, { items, sellerId: storeSellerId })
-      } catch (error: any) {
+      } catch (error) {
         console.error("Failed to save cart to Firebase", error);
         // Handle permission denied errors specifically
-        if (error.code === 'permission-denied') {
+        if (error && typeof error === 'object' && 'code' in error && error.code === 'permission-denied') {
           console.error("Permission denied saving cart. Check Firestore rules.");
         }
       }

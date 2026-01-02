@@ -23,7 +23,6 @@ export default function LoginPage() {
   const [role, setRole] = useState<UserRole>("customer")
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [showPassword, setShowPassword] = useState(false)
   const [activeTab, setActiveTab] = useState("login")
 
   const isValidEmail = (email: string) => {
@@ -235,7 +234,7 @@ export default function LoginPage() {
                   </div>
                 </RadioGroup>
               </div>
-              
+
               {/* Minimal Registration Fields */}
               <div className="grid gap-2">
                 <Label htmlFor="name">{t("profile.name")}</Label>
@@ -248,7 +247,7 @@ export default function LoginPage() {
                   onChange={(e) => setName(e.target.value)}
                 />
               </div>
-              
+
               <div className="grid gap-2">
                 <Label htmlFor="email">{t("admin.email")}</Label>
                 <Input

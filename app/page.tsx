@@ -33,10 +33,9 @@ export default function Home() {
   const [sortOption, setSortOption] = useState<SortOption>("date-desc")
   const [products, setProducts] = useState<Product[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [, setIsMounted] = useState(false)
 
   useEffect(() => {
-    setIsMounted(true)
+    // Component is mounted
   }, [])
 
   useEffect(() => {
@@ -47,14 +46,14 @@ export default function Home() {
         const fetchedProducts = querySnapshot.docs
           .map((doc) => {
             const productData = doc.data();
-            const product: any = {
+            const product = {
               id: doc.id,
               ...productData,
-            };
-            
+            } as Product;
+
             // Debugging: Log product data
             console.log("Fetched product:", product);
-            
+
             // Validate that we have all required data
             if (!product.id || (typeof product.id === 'string' && product.id.trim() === '')) {
               console.error("Product is missing valid ID:", productData);
@@ -64,7 +63,7 @@ export default function Home() {
               console.error("Product is missing sellerId:", product);
               return null; // Skip this product
             }
-            
+
             return product;
           })
           .filter((product): product is Product => product !== null) // Filter out null products

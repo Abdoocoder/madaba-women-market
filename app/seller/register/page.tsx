@@ -11,7 +11,6 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useLocale } from "@/lib/locale-context"
 import { CATEGORIES } from "@/lib/mock-data"
-import type { User } from "@/lib/types"
 
 export default function SellerRegisterPage() {
   const { user, signUp } = useAuth()
@@ -22,12 +21,12 @@ export default function SellerRegisterPage() {
     name: user?.name || "",
     email: user?.email || "",
     phone: "",
-    
+
     // Store information (required)
     storeName: "",
     storeDescription: "",
     storeCategory: "",
-    
+
     // Optional fields (can be filled later)
     storeLogo: "",
     instagramUrl: "",
@@ -55,38 +54,38 @@ export default function SellerRegisterPage() {
       setError(t("seller.register.nameRequired"))
       return false
     }
-    
+
     if (!formData.email.trim()) {
       setError(t("seller.register.emailRequired"))
       return false
     }
-    
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(formData.email)) {
       setError(t("seller.register.validEmail"))
       return false
     }
-    
+
     if (!formData.phone.trim()) {
       setError(t("seller.register.phoneRequired"))
       return false
     }
-    
+
     if (!formData.storeName.trim()) {
       setError(t("seller.register.storeNameRequired"))
       return false
     }
-    
+
     if (!formData.storeDescription.trim()) {
       setError(t("seller.register.storeDescriptionRequired"))
       return false
     }
-    
+
     if (!formData.storeCategory) {
       setError(t("seller.register.storeCategoryRequired"))
       return false
     }
-    
+
     return true
   }
 
@@ -95,13 +94,13 @@ export default function SellerRegisterPage() {
     e.preventDefault()
     setError(null)
     setIsSubmitting(true)
-    
+
     // Validate form
     if (!validateForm()) {
       setIsSubmitting(false)
       return
     }
-    
+
     try {
       // If user is not logged in, create an account first
       if (!user) {
@@ -110,7 +109,7 @@ export default function SellerRegisterPage() {
           throw new Error(t("seller.register.accountCreationFailed"))
         }
       }
-      
+
       // Register seller information
       const response = await fetch("/api/seller/register", {
         method: "POST",
@@ -119,12 +118,12 @@ export default function SellerRegisterPage() {
         },
         body: JSON.stringify(formData),
       })
-      
+
       if (!response.ok) {
         const errorData = await response.json()
         throw new Error(errorData.message || t("seller.register.registrationFailed"))
       }
-      
+
       // Redirect to seller dashboard
       router.push("/seller/dashboard")
     } catch (err) {
@@ -149,7 +148,7 @@ export default function SellerRegisterPage() {
               <div className="md:col-span-2">
                 <h3 className="text-lg font-medium mb-4">{t("seller.register.personalInfo")}</h3>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="name">{t("seller.register.name")} *</Label>
                 <Input
@@ -159,7 +158,7 @@ export default function SellerRegisterPage() {
                   required
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="email">{t("seller.register.email")} *</Label>
                 <Input
@@ -170,7 +169,7 @@ export default function SellerRegisterPage() {
                   required
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="phone">{t("seller.register.phone")} *</Label>
                 <Input
@@ -181,12 +180,12 @@ export default function SellerRegisterPage() {
                   required
                 />
               </div>
-              
+
               {/* Store Information Section */}
               <div className="md:col-span-2 mt-6">
                 <h3 className="text-lg font-medium mb-4">{t("seller.register.storeInfo")}</h3>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="storeName">{t("seller.register.storeName")} *</Label>
                 <Input
@@ -196,11 +195,11 @@ export default function SellerRegisterPage() {
                   required
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="storeCategory">{t("seller.register.storeCategory")} *</Label>
-                <Select 
-                  value={formData.storeCategory} 
+                <Select
+                  value={formData.storeCategory}
                   onValueChange={(value) => handleSelectChange(value, "storeCategory")}
                 >
                   <SelectTrigger>
@@ -215,7 +214,7 @@ export default function SellerRegisterPage() {
                   </SelectContent>
                 </Select>
               </div>
-              
+
               <div className="md:col-span-2 space-y-2">
                 <Label htmlFor="storeDescription">{t("seller.register.storeDescription")} *</Label>
                 <Textarea
@@ -226,7 +225,7 @@ export default function SellerRegisterPage() {
                   required
                 />
               </div>
-              
+
               {/* Optional Information Section */}
               <div className="md:col-span-2 mt-6">
                 <h3 className="text-lg font-medium mb-4">{t("seller.register.optionalInfo")}</h3>
@@ -234,7 +233,7 @@ export default function SellerRegisterPage() {
                   {t("seller.register.optionalInfoDescription")}
                 </p>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="instagramUrl">{t("seller.register.instagram")}</Label>
                 <Input
@@ -245,7 +244,7 @@ export default function SellerRegisterPage() {
                   onChange={handleChange}
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="whatsappUrl">{t("seller.register.whatsapp")}</Label>
                 <Input
@@ -256,7 +255,7 @@ export default function SellerRegisterPage() {
                   onChange={handleChange}
                 />
               </div>
-              
+
               <div className="md:col-span-2 space-y-2">
                 <Label htmlFor="detailedDescription">{t("seller.register.detailedDescription")}</Label>
                 <Textarea
@@ -267,7 +266,7 @@ export default function SellerRegisterPage() {
                   placeholder={t("seller.register.detailedDescriptionPlaceholder")}
                 />
               </div>
-              
+
               <div className="md:col-span-2 space-y-2">
                 <Label htmlFor="shippingInfo">{t("seller.register.shippingInfo")}</Label>
                 <Textarea
@@ -279,17 +278,17 @@ export default function SellerRegisterPage() {
                 />
               </div>
             </div>
-            
+
             {error && (
               <div className="text-red-500 text-sm p-2 bg-red-50 rounded">
                 {error}
               </div>
             )}
-            
+
             <div className="flex justify-between pt-4">
-              <Button 
-                type="button" 
-                variant="outline" 
+              <Button
+                type="button"
+                variant="outline"
                 onClick={() => router.push("/")}
               >
                 {t("common.cancel")}

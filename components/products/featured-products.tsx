@@ -26,14 +26,14 @@ export function FeaturedProducts() {
         const products = querySnapshot.docs
           .map((doc) => {
             const productData = doc.data();
-            const product: any = {
+            const product = {
               id: doc.id,
               ...productData,
-            };
-            
+            } as Product;
+
             // Debugging: Log product data
             console.log("Fetched featured product:", product);
-            
+
             // Validate that we have all required data
             if (!product.id || (typeof product.id === 'string' && product.id.trim() === '')) {
               console.error("Featured product is missing valid ID:", productData);
@@ -43,7 +43,7 @@ export function FeaturedProducts() {
               console.error("Featured product is missing sellerId:", product);
               return null; // Skip this product
             }
-            
+
             return product;
           })
           .filter((product): product is Product => product !== null) // Filter out null products
@@ -65,7 +65,7 @@ export function FeaturedProducts() {
   return (
     <div className="py-16">
       <div className="container">
-        <motion.h2 
+        <motion.h2
           className="text-3xl font-bold text-center mb-12"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -73,7 +73,7 @@ export function FeaturedProducts() {
         >
           {t("home.featuredProducts")}
         </motion.h2>
-        <motion.div 
+        <motion.div
           className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
