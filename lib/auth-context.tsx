@@ -85,19 +85,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   useEffect(() => {
+    // Check for initial session
+    const initAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (session?.user) {
+          const profile = await fetchUserProfile(session.user.id, session.user.email)
+          if (profile) {
+            setUser(profile)
+          } else {
+            setUser({
+              id: session.user.id,
+              email: session.user.email || '',
+              name: session.user.user_metadata?.full_name || 'New User',
+              role: 'customer',
+              createdAt: new Date(session.user.created_at)
+            })
+          }
+        }
+      } catch (err) {
+        console.error("Auth init error:", err)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    initAuth()
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (session?.user) {
         const profile = await fetchUserProfile(session.user.id, session.user.email)
         if (profile) {
           setUser(profile)
         } else {
-          // If no profile exists, we might need to create it (like for Google sign-in)
-          // But usually we handle this in the sign-in/up functions
           setUser({
             id: session.user.id,
             email: session.user.email || '',
             name: session.user.user_metadata?.full_name || 'New User',
-            role: 'customer', // Default role
+            role: 'customer',
             createdAt: new Date(session.user.created_at)
           })
         }
