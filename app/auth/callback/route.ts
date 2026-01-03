@@ -34,10 +34,16 @@ export async function GET(request: Request) {
         );
         const { error } = await supabase.auth.exchangeCodeForSession(code);
         if (!error) {
+            console.log("✅ Successfully exchanged code for session");
             return NextResponse.redirect(`${origin}${next}`);
+        } else {
+            console.error("❌ Error exchanging code for session:", error);
+            // Append error info to redirect for debugging
+            return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(error.message)}&error_code=${error.code || 'unknown'}`);
         }
     }
 
     // return the user to an error page with instructions
+    console.warn("⚠️ No code found in auth callback");
     return NextResponse.redirect(`${origin}/login?error=Authentication Failed`);
 }
