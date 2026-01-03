@@ -17,7 +17,9 @@ import { supabase } from "@/lib/supabase"
 import { useSearchParams } from "next/navigation"
 import { useEffect } from "react"
 
-export default function LoginPage() {
+import { Suspense } from "react"
+
+function LoginContent() {
   const { user, login, signUp, signInWithGoogle, sendPasswordReset } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -588,5 +590,17 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    }>
+      <LoginContent />
+    </Suspense>
   )
 }
