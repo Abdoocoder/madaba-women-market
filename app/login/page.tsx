@@ -73,19 +73,27 @@ function LoginContent() {
     }
 
     try {
+      console.log("LOGIN_DEBUG: Attempting login for:", email);
       const success = await login(email, password)
+      console.log("LOGIN_DEBUG: Login result:", success);
+
       if (success) {
         // Wait for auth context to update user state, then redirect based on role
         setTimeout(async () => {
           try {
+            console.log("LOGIN_DEBUG: Inside timeout, checking user role...");
             // Fetch the user's role from Supabase to ensure we have the latest
             const { data: { user: authUser } } = await supabase.auth.getUser()
+            console.log("LOGIN_DEBUG: AuthUser found:", authUser?.email);
+
             if (authUser) {
               let { data: profile } = await supabase
                 .from('profiles')
                 .select('role')
                 .eq('id', authUser.id)
                 .single()
+
+              console.log("LOGIN_DEBUG: Profile found:", profile);
 
               // Fallback to email for migrated users
               if (!profile && authUser.email) {
@@ -95,9 +103,11 @@ function LoginContent() {
                   .ilike('email', authUser.email)
                   .single()
                 profile = emailProfile
+                console.log("LOGIN_DEBUG: Email fallback profile:", profile);
               }
 
               const userRole = profile?.role || "customer"
+              console.log("LOGIN_DEBUG: Determined Role:", userRole);
 
               if (userRole === "admin") {
                 router.push("/admin/dashboard")
@@ -108,6 +118,8 @@ function LoginContent() {
               } else {
                 router.push("/")
               }
+            } else {
+              console.warn("LOGIN_DEBUG: No authUser found in timeout check");
             }
           } catch (err) {
             console.error("Error during redirect:", err)
@@ -116,6 +128,7 @@ function LoginContent() {
         }, 300)
       }
     } catch (error: unknown) {
+      console.error("LOGIN_DEBUG: Login error caught:", error);
       const errorMessage = error instanceof Error ? error.message : String(error)
       setError(errorMessage || t("login.failedLogin"))
     } finally {

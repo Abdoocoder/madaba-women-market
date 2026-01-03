@@ -27,8 +27,14 @@ export default function AdminLayout({
   const { t } = useLocale();
 
   useEffect(() => {
-    if (!isLoading && user?.role !== 'admin') {
-      router.push('/');
+    console.log("ADMIN_LAYOUT_DEBUG: Check - isLoading:", isLoading, "User:", user?.email, "Role:", user?.role);
+    if (!isLoading) {
+      if (user?.role !== 'admin') {
+        console.warn("ADMIN_LAYOUT_DEBUG: Access denied. Redirecting to /");
+        router.push('/');
+      } else {
+        console.log("ADMIN_LAYOUT_DEBUG: Access granted.");
+      }
     }
   }, [user, isLoading, router]);
 
