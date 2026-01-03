@@ -8,7 +8,7 @@ const nextConfig = {
 
   images: {
     formats: ['image/webp', 'image/avif'],
-    unoptimized: true, // Temporarily disable image optimization
+    // unoptimized: true, // Re-enabled optimization for performance
     remotePatterns: [
       {
         protocol: 'https',

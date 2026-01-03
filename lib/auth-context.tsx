@@ -26,36 +26,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchUserProfile = async (userId: string, email?: string) => {
     try {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) return null
-
-      // Set a timeout for the fetch request
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 5000)
-
-      try {
-        const response = await fetch('/api/auth/profile', {
-          headers: {
-            'Authorization': `Bearer ${session.access_token}`
-          },
-          signal: controller.signal
-        })
-
-        clearTimeout(timeoutId)
-
-        if (response.ok) {
-          return await response.json() as User
-        }
-      } catch (fetchErr) {
-        console.warn("⚠️ Profile API fetch failed or timed out:", fetchErr)
-      } finally {
-        clearTimeout(timeoutId)
-      }
-
-      // Fallback/Legacy logic if API fails or for new users
-      console.warn("⚠️ Falling back to direct Supabase query for profile")
-
-      // 1. Try to fetch by ID (standard way)
+      // 1. Try to fetch from profiles table directly
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -63,6 +34,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .single()
 
       if (data) return data as User
+
+      if (error && error.code !== 'PGRST116') { // PGRST116 is "Row not found"
+        console.warn("⚠️ Profile fetch error:", error.message)
+      }
 
       // 2. Fallback to Email (for migrated users whose IDs changed)
       if (email) {
