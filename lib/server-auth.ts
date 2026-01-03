@@ -23,12 +23,42 @@ async function verifyTokenAndGetUser(idToken: string): Promise<User | null> {
             .single();
 
         if (profileError || !profile) {
-            return {
+            // Auto-create profile if missing (e.g., Google OAuth users)
+            const newProfile = {
                 id: supabaseUser.id,
                 email: supabaseUser.email || '',
-                name: supabaseUser.user_metadata?.full_name || 'Unknown User',
+                name: supabaseUser.user_metadata?.full_name || 'User',
                 role: 'customer',
-                createdAt: new Date(supabaseUser.created_at),
+                status: 'approved',
+                avatar_url: supabaseUser.user_metadata?.avatar_url || '',
+            };
+
+            const { data: createdProfile, error: createError } = await client
+                .from('profiles')
+                .insert(newProfile)
+                .select()
+                .single();
+
+            if (createError) {
+                console.error('Error auto-creating profile:', createError);
+                // Fallback to returning a transient user object if creation fails
+                return {
+                    id: supabaseUser.id,
+                    email: supabaseUser.email || '',
+                    name: supabaseUser.user_metadata?.full_name || 'Unknown User',
+                    role: 'customer',
+                    createdAt: new Date(supabaseUser.created_at),
+                } as User;
+            }
+
+            return {
+                id: createdProfile.id,
+                email: createdProfile.email || '',
+                name: createdProfile.name || 'Unknown User',
+                photoURL: createdProfile.avatar_url || '',
+                role: createdProfile.role || 'customer',
+                status: createdProfile.status || 'approved',
+                createdAt: new Date(createdProfile.created_at),
             } as User;
         }
 

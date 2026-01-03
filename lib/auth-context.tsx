@@ -26,6 +26,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchUserProfile = async (userId: string, email?: string) => {
     try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) return null
+
+      // Call our internal API which uses supabaseAdmin to bypass RLS
+      const response = await fetch('/api/auth/profile', {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      })
+
+      if (response.ok) {
+        return await response.json() as User
+      }
+
+      // Fallback/Legacy logic if API fails or for new users
+      console.warn("⚠️ Internal profile API failed, falling back to direct Supabase query")
+
       // 1. Try to fetch by ID (standard way)
       const { data, error } = await supabase
         .from('profiles')
@@ -47,18 +64,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           console.log("🔗 Migrated user detected. Linking profile by email:", email)
 
           // CRITICAL: Update the profile ID to match the new auth.uid()
-          // This fixes RLS and future ID lookups.
           try {
-            const { error: updateError } = await supabase
+            await supabase
               .from('profiles')
               .update({ id: userId })
               .eq('email', email)
-
-            if (updateError) {
-              console.error("⚠️ Failed to link profile ID:", updateError)
-            } else {
-              console.log("✅ Profile ID successfully linked to Auth UID")
-            }
           } catch (updateErr) {
             console.error("⚠️ Exception linking profile ID:", updateErr)
           }
@@ -67,9 +77,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       }
 
-      if (error && error.code !== 'PGRST116') {
-        throw error
-      }
       return null
     } catch (error) {
       console.error("Error fetching user profile:", error)
