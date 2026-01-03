@@ -99,12 +99,12 @@ ORDER BY tablename, policyname;
 
 ### Before vs After
 
-| Metric | Before | After | Status |
-|--------|--------|-------|--------|
-| Auth Load | ~5s | <1s | ✅ |
-| Homepage Load | Client fetch | SSR | ✅ |
-| RLS Enabled | ❌ | ✅ | ✅ |
-| Policy Count | 0 | ~20 optimized | ✅ |
+| Metric        | Before       | After          | Status |
+|---------------|--------------|----------------|--------|
+| Auth Load     | ~5s          | <1s            | ✅     |
+| Homepage Load | Client fetch | SSR            | ✅     |
+| RLS Enabled   | ❌           | ✅             | ✅     |
+| Policy Count  | 0            | ~20 optimized  | ✅     |
 
 ## Notes
 
