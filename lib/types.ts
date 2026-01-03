@@ -1,5 +1,6 @@
 export type UserRole = "customer" | "seller" | "admin"
 export type UserStatus = "pending" | "approved"
+export type SortOption = "date-desc" | "price-asc" | "price-desc" | "name-asc"
 
 export interface User {
   id: string

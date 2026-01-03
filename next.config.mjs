@@ -2,9 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
 
-  typescript: {
-    ignoreBuildErrors: true,
-  },
+
 
   images: {
     formats: ['image/webp', 'image/avif'],
@@ -29,12 +27,7 @@ const nextConfig = {
         pathname: '/**',
       }
     ],
-    localPatterns: [
-      {
-        pathname: '/**',
-        search: '**',
-      },
-    ],
+
   },
 
   compiler: {

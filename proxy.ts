@@ -1,67 +1,42 @@
-import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-export async function proxy(request: NextRequest) {
-    let response = NextResponse.next({
-        request: {
-            headers: request.headers,
-        },
-    });
+export function proxy(request: NextRequest) {
+  const url = request.nextUrl.clone();
 
-    const supabase = createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        {
-            cookies: {
-                getAll() {
-                    return request.cookies.getAll();
-                },
-                setAll(cookiesToSet) {
-                    cookiesToSet.forEach(({ name, value, options }) =>
-                        request.cookies.set(name, value)
-                    );
-                    response = NextResponse.next({
-                        request,
-                    });
-                    cookiesToSet.forEach(({ name, value, options }) =>
-                        response.cookies.set(name, value, options)
-                    );
-                },
-            },
-        }
-    );
+  /* ----------------------------------
+   * 1) SELF-HEALING AUTH REDIRECT
+   * ---------------------------------- */
+  if (url.pathname === "/" && url.searchParams.has("code")) {
+    const callbackUrl = new URL("/auth/callback", request.url);
+    callbackUrl.searchParams.set("code", url.searchParams.get("code")!);
+    callbackUrl.searchParams.set("next", url.searchParams.get("next") || "/");
 
-    // refreshing the auth token
-    const { data: { user } } = await supabase.auth.getUser();
+    return NextResponse.redirect(callbackUrl);
+  }
 
-    // SELF-HEALING FIX: Intercept "code" on homepage and redirect to callback
-    // This handles cases where Supabase Redirect URL is misconfigured to "/"
-    const url = request.nextUrl.clone();
-    if (url.pathname === "/" && url.searchParams.has("code")) {
-        const code = url.searchParams.get("code");
-        const next = url.searchParams.get("next") || "/";
+  /* ----------------------------------
+   * 2) LIGHT ROUTE GUARD (COOKIE ONLY)
+   * ---------------------------------- */
+  const protectedRoutes = ["/dashboard", "/profile", "/admin"];
+  const isProtected = protectedRoutes.some(p =>
+    url.pathname.startsWith(p)
+  );
 
-        // Construct the correct callback URL
-        const callbackUrl = new URL("/auth/callback", request.url);
-        callbackUrl.searchParams.set("code", code!);
-        callbackUrl.searchParams.set("next", next);
+  // Check for either the standard Supabase token or the custom one if helpful,
+  // but strictly following the user's request for "sb-access-token"
+  const hasSession = request.cookies.has("sb-access-token") || request.cookies.has("supabase-auth-token");
 
-        console.log("Middleware: Intercepting auth code on homepage, redirecting to callback");
-        return NextResponse.redirect(callbackUrl);
-    }
+  if (isProtected && !hasSession) {
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("next", url.pathname);
+    return NextResponse.redirect(loginUrl);
+  }
 
-    return response;
+  return NextResponse.next();
 }
 
 export const config = {
-    matcher: [
-        /*
-         * Match all request paths except for the ones starting with:
-         * - _next/static (static files)
-         * - _next/image (image optimization files)
-         * - favicon.ico (favicon file)
-         * Feel free to modify this pattern to include more paths.
-         */
-        "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
-    ],
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+  ],
 };

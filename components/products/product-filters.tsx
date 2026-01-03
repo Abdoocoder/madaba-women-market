@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { CATEGORIES } from "@/lib/mock-data"
 import { useLocale } from "@/lib/locale-context"
-import type { SortOption } from "@/app/page"
+import type { SortOption } from "@/lib/types"
 import { useState } from "react"
 
 interface ProductFiltersProps {
@@ -61,9 +61,9 @@ export function ProductFilters({
             <Filter className="h-5 w-5" />
             {t("filters.categories")}
           </CardTitle>
-          <Button 
-            variant="ghost" 
-            size="sm" 
+          <Button
+            variant="ghost"
+            size="sm"
             className="md:hidden"
             onClick={() => setShowFilters(!showFilters)}
           >
@@ -109,9 +109,9 @@ export function ProductFilters({
             <div className="flex items-center justify-between mb-3">
               <Label className="text-base font-semibold">{t("filters.categories")}</Label>
               {hasActiveFilters && (
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={handleClearFilters}
                   className="h-6 px-2 text-xs"
                 >
@@ -123,8 +123,8 @@ export function ProductFilters({
             <RadioGroup value={selectedCategory} onValueChange={onCategoryChange}>
               <div className="flex items-center space-x-2 space-x-reverse py-2">
                 <RadioGroupItem value="all" id="all" className="peer" />
-                <Label 
-                  htmlFor="all" 
+                <Label
+                  htmlFor="all"
                   className="cursor-pointer font-normal peer-data-[state=checked]:font-semibold peer-data-[state=checked]:text-primary"
                 >
                   {t("filters.allCategories")}
@@ -133,8 +133,8 @@ export function ProductFilters({
               {CATEGORIES.map((category) => (
                 <div key={category.id} className="flex items-center space-x-2 space-x-reverse py-2">
                   <RadioGroupItem value={category.id} id={category.id} className="peer" />
-                  <Label 
-                    htmlFor={category.id} 
+                  <Label
+                    htmlFor={category.id}
                     className="cursor-pointer font-normal peer-data-[state=checked]:font-semibold peer-data-[state=checked]:text-primary"
                   >
                     {language === "ar" ? category.nameAr : t(`category.${category.id}`)}
