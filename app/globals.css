@@ -116,16 +116,51 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Container configuration for Tailwind v4 */
+  --container-center: true;
+  --container-padding: 1rem;
+}
+
+@utility container {
+  margin-inline: auto;
+  padding-inline: var(--container-padding);
+  width: 100%;
+
+  @media (width >=640px) {
+    max-width: 640px;
+    --container-padding: 2rem;
+  }
+
+  @media (width >=768px) {
+    max-width: 768px;
+  }
+
+  @media (width >=1024px) {
+    max-width: 1024px;
+    --container-padding: 4rem;
+  }
+
+  @media (width >=1280px) {
+    max-width: 1280px;
+    --container-padding: 5rem;
+  }
+
+  @media (width >=1536px) {
+    max-width: 1536px;
+    --container-padding: 6rem;
+  }
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
-  
+
   /* Ensure smooth scrolling */
   html {
     scroll-behavior: smooth;
