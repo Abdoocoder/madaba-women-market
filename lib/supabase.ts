@@ -1,3 +1,4 @@
+import { createBrowserClient } from '@supabase/ssr';
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -10,10 +11,12 @@ if (!supabaseUrl || !supabaseAnonKey) {
     );
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Use createBrowserClient for client-side interactions to ensure PKCE and cookie handling
+export const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey);
 
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
+// Keep createClient for the Admin client as it's used server-side or in scripts
 export const supabaseAdmin = supabaseServiceKey
     ? createClient(supabaseUrl, supabaseServiceKey, {
         auth: {

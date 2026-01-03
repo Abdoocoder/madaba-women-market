@@ -14,10 +14,13 @@ import type { UserRole } from "@/lib/types"
 import { motion, AnimatePresence } from "framer-motion"
 import { Mail, Lock, User, Loader2, ArrowRight, Store, Eye, EyeOff } from "lucide-react"
 import { supabase } from "@/lib/supabase"
+import { useSearchParams } from "next/navigation"
+import { useEffect } from "react"
 
 export default function LoginPage() {
-  const { login, signUp, signInWithGoogle, sendPasswordReset } = useAuth()
+  const { user, login, signUp, signInWithGoogle, sendPasswordReset } = useAuth()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { t, language } = useLocale()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -28,6 +31,22 @@ export default function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [activeTab, setActiveTab] = useState<"login" | "signup">("login")
   const [showPassword, setShowPassword] = useState(false)
+
+  // Handle URL errors and auto-redirect
+  useEffect(() => {
+    const errorParam = searchParams.get('error')
+    if (errorParam) {
+      setError(decodeURIComponent(errorParam))
+    }
+
+    if (user) {
+      const redirectPath =
+        user.role === "admin" ? "/admin/dashboard" :
+          user.role === "seller" ? "/seller/dashboard" :
+            "/buyer/dashboard"
+      router.push(redirectPath)
+    }
+  }, [user, searchParams, router])
 
   const isValidEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
