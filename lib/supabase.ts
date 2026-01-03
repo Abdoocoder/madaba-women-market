@@ -11,12 +11,17 @@ if (!supabaseUrl || !supabaseAnonKey) {
     );
 }
 
-// Use createBrowserClient for client-side interactions to ensure PKCE and cookie handling
-export const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey);
+const isBrowser = typeof window !== 'undefined';
+
+// Use createBrowserClient for browser-side interactions to ensure PKCE and cookie handling
+// Use regular createClient for server-side to avoid browser-specific logic
+export const supabase = isBrowser
+    ? createBrowserClient(supabaseUrl, supabaseAnonKey)
+    : createClient(supabaseUrl, supabaseAnonKey);
 
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-// Keep createClient for the Admin client as it's used server-side or in scripts
+// Keep supabaseAdmin for administrative tasks
 export const supabaseAdmin = supabaseServiceKey
     ? createClient(supabaseUrl, supabaseServiceKey, {
         auth: {

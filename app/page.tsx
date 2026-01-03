@@ -37,9 +37,13 @@ export default function Home() {
           .select("*")
           .eq("approved", true)
 
-        if (error) throw error
+        if (error) {
+          console.error("Supabase error fetching products:", error)
+          throw error
+        }
 
-        const fetchedProducts: Product[] = data.map((p) => ({
+        console.log(`✅ Fetched ${data?.length || 0} products from Supabase`)
+        const fetchedProducts: Product[] = data.map((p: any) => ({
           id: p.id,
           name: p.name,
           nameAr: p.name_ar,

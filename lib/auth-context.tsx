@@ -29,19 +29,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) return null
 
-      // Call our internal API which uses supabaseAdmin to bypass RLS
-      const response = await fetch('/api/auth/profile', {
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`
-        }
-      })
+      // Set a timeout for the fetch request
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 5000)
 
-      if (response.ok) {
-        return await response.json() as User
+      try {
+        const response = await fetch('/api/auth/profile', {
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`
+          },
+          signal: controller.signal
+        })
+
+        clearTimeout(timeoutId)
+
+        if (response.ok) {
+          return await response.json() as User
+        }
+      } catch (fetchErr) {
+        console.warn("⚠️ Profile API fetch failed or timed out:", fetchErr)
+      } finally {
+        clearTimeout(timeoutId)
       }
 
       // Fallback/Legacy logic if API fails or for new users
-      console.warn("⚠️ Internal profile API failed, falling back to direct Supabase query")
+      console.warn("⚠️ Falling back to direct Supabase query for profile")
 
       // 1. Try to fetch by ID (standard way)
       const { data, error } = await supabase
@@ -62,17 +74,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         if (emailData) {
           console.log("🔗 Migrated user detected. Linking profile by email:", email)
-
-          // CRITICAL: Update the profile ID to match the new auth.uid()
-          try {
-            await supabase
-              .from('profiles')
-              .update({ id: userId })
-              .eq('email', email)
-          } catch (updateErr) {
-            console.error("⚠️ Exception linking profile ID:", updateErr)
-          }
-
           return { ...emailData, id: userId } as User
         }
       }
