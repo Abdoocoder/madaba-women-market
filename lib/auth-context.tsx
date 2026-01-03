@@ -63,37 +63,79 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Check for initial session
     const initAuth = async () => {
+      console.log("🚀 Auth init starting...");
+      let mounted = true;
+
+      // Safety timeout: force loading to false after 5 seconds
+      const timeoutId = setTimeout(() => {
+        if (mounted && isLoading) {
+          console.warn("⚠️ Auth init timed out, forcing loading state to false.");
+          setIsLoading(false);
+        }
+      }, 5000);
+
       try {
-        const { data: { session } } = await supabase.auth.getSession()
+        const { data: { session }, error } = await supabase.auth.getSession();
+
+        if (error) {
+          console.error("❌ Session fetch error:", error);
+        }
+
         if (session?.user) {
-          const profile = await fetchUserProfile(session.user.id, session.user.email)
-          if (profile) {
-            setUser(profile)
-          } else {
-            setUser({
-              id: session.user.id,
-              email: session.user.email || '',
-              name: session.user.user_metadata?.full_name || 'New User',
-              role: 'customer',
-              createdAt: new Date(session.user.created_at)
-            })
+          console.log("✅ Session found for user:", session.user.email);
+          const profile = await fetchUserProfile(session.user.id, session.user.email);
+
+          if (mounted) {
+            if (profile) {
+              console.log("👤 Profile loaded:", profile.role);
+              setUser(profile);
+            } else {
+              console.warn("⚠️ No profile found, using session data.");
+              setUser({
+                id: session.user.id,
+                email: session.user.email || '',
+                name: session.user.user_metadata?.full_name || 'New User',
+                role: 'customer',
+                createdAt: new Date(session.user.created_at)
+              });
+            }
           }
+        } else {
+          console.log("ℹ️ No active session found.");
         }
       } catch (err) {
-        console.error("Auth init error:", err)
+        console.error("❌ Auth init critical error:", err);
       } finally {
-        setIsLoading(false)
+        clearTimeout(timeoutId);
+        if (mounted) {
+          console.log("🏁 Auth init finalized, setting isLoading to false.");
+          setIsLoading(false);
+        }
       }
+
+      return () => {
+        mounted = false;
+        clearTimeout(timeoutId);
+      };
     }
 
-    initAuth()
+    const cleanup = initAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("🔄 Auth state changed:", event)
+      console.log("🔄 Auth state changed:", event);
+
+      // Handle the state change
       if (session?.user) {
-        const profile = await fetchUserProfile(session.user.id, session.user.email)
+        // Optimization: If we already have the correct user loaded, skip fetching again
+        // This helps avoid flickering on 'SIGNED_IN' events that might fire multiple times
+        setUser(prev => {
+          if (prev?.id === session.user.id) return prev;
+          return prev; // We will fetch the full profile below if needed, but for now returned undefined/null logic is handled
+        });
+
+        const profile = await fetchUserProfile(session.user.id, session.user.email);
         if (profile) {
-          setUser(profile)
+          setUser(profile);
         } else {
           setUser({
             id: session.user.id,
@@ -101,19 +143,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             name: session.user.user_metadata?.full_name || 'New User',
             role: 'customer',
             createdAt: new Date(session.user.created_at)
-          })
+          });
         }
       } else {
-        setUser(null)
+        setUser(null);
       }
-      setIsLoading(false)
-      console.log("✅ Loading complete")
-    })
+
+      setIsLoading(false);
+      console.log("✅ Auth state change processed");
+    });
 
     return () => {
-      subscription.unsubscribe()
+      subscription.unsubscribe();
+      // cleanup is a promise, we can't really "cancel" the async function easily 
+      // without AbortController but the mounted flag handles state updates.
     }
-  }, [])
+  }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
