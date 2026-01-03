@@ -119,7 +119,7 @@ export default function Home() {
     }>
       <div className="min-h-screen bg-background">
         {/* Hero Section */}
-        <section className="relative overflow-hidden bg-primary text-primary-foreground">
+        <section className="relative overflow-hidden bg-primary text-primary-foreground pt-16 md:pt-20">
           {/* Visual Hero Background */}
           <div className="absolute inset-0 z-0">
             <img
@@ -137,17 +137,17 @@ export default function Home() {
 
           <div className="absolute inset-0 bg-gradient-to-b from-black/10 to-transparent"></div>
 
-          <div className="container relative py-20 md:py-32">
+          <div className="container relative py-24 md:py-40">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="max-w-2xl"
+              transition={{ duration: 0.8, ease: "easeOut" }}
+              className="max-w-2xl relative z-10"
             >
-              <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 leading-tight">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 leading-tight drop-shadow-md">
                 {t("home.welcome")}
               </h1>
-              <p className="text-lg sm:text-xl md:text-2xl mb-8 text-primary-foreground/90 leading-relaxed">
+              <p className="text-lg sm:text-xl md:text-2xl mb-8 text-primary-foreground/90 leading-relaxed drop-shadow-sm">
                 {t("home.subtitle")}
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
