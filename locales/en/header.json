@@ -1,3 +1,11 @@
 {
-  "becomeSeller": "Become a Seller"
+  "products": "Products",
+  "wishlist": "Wishlist",
+  "cart": "Cart",
+  "profile": "Profile",
+  "logout": "Logout",
+  "becomeSeller": "Become a Seller",
+  "login": "Login",
+  "adminDashboard": "Admin Dashboard",
+  "sellerDashboard": "Seller Dashboard"
 }

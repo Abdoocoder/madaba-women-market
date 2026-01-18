@@ -109,8 +109,8 @@ export function SettingsTab() {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>{t('dashboard.password')}</CardTitle>
-          <CardDescription>{t('dashboard.passwordDescription')}</CardDescription>
+          <CardTitle>{t('buyer.password')}</CardTitle>
+          <CardDescription>{t('buyer.passwordDescription')}</CardDescription>
         </CardHeader>
         <CardContent>
           {!isChangingPassword ? (
@@ -177,8 +177,8 @@ export function SettingsTab() {
 
       <Card>
         <CardHeader>
-          <CardTitle>{t('dashboard.logout')}</CardTitle>
-          <CardDescription>{t('dashboard.logoutDescription')}</CardDescription>
+          <CardTitle>{t('buyer.logout')}</CardTitle>
+          <CardDescription>{t('buyer.logoutDescription')}</CardDescription>
         </CardHeader>
         <CardContent>
           <Button variant="outline" onClick={handleLogout}>

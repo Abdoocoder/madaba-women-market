@@ -121,8 +121,8 @@ export function ProfileTab() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t('dashboard.profile')}</CardTitle>
-        <CardDescription>{t('dashboard.profileDescription')}</CardDescription>
+        <CardTitle>{t('buyer.profile')}</CardTitle>
+        <CardDescription>{t('buyer.profileDescription')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="flex flex-col md:flex-row items-center gap-6">

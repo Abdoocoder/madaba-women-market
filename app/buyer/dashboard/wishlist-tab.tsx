@@ -135,8 +135,8 @@ export function WishlistTab() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t('dashboard.wishlist')}</CardTitle>
-        <CardDescription>{t('dashboard.wishlistDescription')}</CardDescription>
+        <CardTitle>{t('buyer.wishlist')}</CardTitle>
+        <CardDescription>{t('buyer.wishlistDescription')}</CardDescription>
       </CardHeader>
       <CardContent>
         {wishlist.length > 0 ? (

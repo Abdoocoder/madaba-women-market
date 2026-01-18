@@ -169,8 +169,8 @@ export function AddressesTab() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t('dashboard.addresses')}</CardTitle>
-        <CardDescription>{t('dashboard.addressesDescription')}</CardDescription>
+        <CardTitle>{t('buyer.addresses')}</CardTitle>
+        <CardDescription>{t('buyer.addressesDescription')}</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-6">

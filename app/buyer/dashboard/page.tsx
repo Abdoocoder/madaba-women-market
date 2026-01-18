@@ -40,35 +40,35 @@ export default function BuyerDashboardPage() {
   return (
     <div className="container mx-auto py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold">{t('dashboard.title')}</h1>
-        <p className="text-gray-600 mt-2">{t('dashboard.subtitle')}</p>
+        <h1 className="text-3xl font-bold">{t('buyer.title')}</h1>
+        <p className="text-gray-600 mt-2">{t('buyer.subtitle')}</p>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="profile">{t('dashboard.profile')}</TabsTrigger>
-          <TabsTrigger value="orders">{t('dashboard.orders')}</TabsTrigger>
-          <TabsTrigger value="wishlist">{t('dashboard.wishlist')}</TabsTrigger>
-          <TabsTrigger value="addresses">{t('dashboard.addresses')}</TabsTrigger>
-          <TabsTrigger value="settings">{t('dashboard.settings')}</TabsTrigger>
+          <TabsTrigger value="profile">{t('buyer.profile')}</TabsTrigger>
+          <TabsTrigger value="orders">{t('buyer.orders')}</TabsTrigger>
+          <TabsTrigger value="wishlist">{t('buyer.wishlist')}</TabsTrigger>
+          <TabsTrigger value="addresses">{t('buyer.addresses')}</TabsTrigger>
+          <TabsTrigger value="settings">{t('buyer.settings')}</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="profile">
           <ProfileTab />
         </TabsContent>
-        
+
         <TabsContent value="orders">
           <OrdersTab />
         </TabsContent>
-        
+
         <TabsContent value="wishlist">
           <WishlistTab />
         </TabsContent>
-        
+
         <TabsContent value="addresses">
           <AddressesTab />
         </TabsContent>
-        
+
         <TabsContent value="settings">
           <SettingsTab />
         </TabsContent>

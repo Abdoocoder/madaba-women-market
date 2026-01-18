@@ -1,3 +1,11 @@
 {
-  "becomeSeller": "كن بائعاً"
+  "products": "المنتجات",
+  "wishlist": "قائمة الأمنيات",
+  "cart": "السلة",
+  "profile": "الملف الشخصي",
+  "logout": "تسجيل الخروج",
+  "becomeSeller": "كن بائعاً",
+  "login": "تسجيل الدخول",
+  "adminDashboard": "لوحة الإدارة",
+  "sellerDashboard": "لوحة البائع"
 }

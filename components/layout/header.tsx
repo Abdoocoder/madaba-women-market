@@ -56,7 +56,7 @@ function UserDashboardLinks({
         <Link href="/buyer/dashboard" onClick={handleClick}>
           <Button variant="ghost" className={linkClass}>
             <LayoutDashboard className={isMobile ? "mr-2 h-4 w-4" : "mr-2 h-4 w-4"} />
-            {t("dashboard.title")}
+            {t("buyer.title")}
           </Button>
         </Link>
       )}

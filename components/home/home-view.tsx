@@ -122,7 +122,7 @@ export function HomeView({ initialProducts }: HomeViewProps) {
                                                 user.role === "seller" ? "/seller/dashboard" :
                                                     "/buyer/dashboard"
                                         }>
-                                            {user.role === "customer" ? t("dashboard.title") : t("header.profile")}
+                                            {user.role === "customer" ? t("buyer.title") : t("header.profile")}
                                         </Link>
                                     </Button>
                                 ) : (

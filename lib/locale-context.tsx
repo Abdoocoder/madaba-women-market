@@ -4,6 +4,7 @@ import type React from "react"
 import { createContext, useContext, useState, useEffect } from "react"
 
 // Import modular translation files
+import arApp from "@/locales/ar/app.json"
 import arCommon from "@/locales/ar/common.json"
 import arHome from "@/locales/ar/home.json"
 import arProduct from "@/locales/ar/product.json"
@@ -18,7 +19,12 @@ import arFaq from "@/locales/ar/faq.json"
 import arHelp from "@/locales/ar/help.json"
 import arFooter from "@/locales/ar/footer.json"
 import arHeader from "@/locales/ar/header.json"
+import arCart from "@/locales/ar/cart.json"
+import arCheckout from "@/locales/ar/checkout.json"
+import arLogin from "@/locales/ar/login.json"
+import arMessages from "@/locales/ar/messages.json"
 
+import enApp from "@/locales/en/app.json"
 import enCommon from "@/locales/en/common.json"
 import enHome from "@/locales/en/home.json"
 import enProduct from "@/locales/en/product.json"
@@ -33,6 +39,10 @@ import enFaq from "@/locales/en/faq.json"
 import enHelp from "@/locales/en/help.json"
 import enFooter from "@/locales/en/footer.json"
 import enHeader from "@/locales/en/header.json"
+import enCart from "@/locales/en/cart.json"
+import enCheckout from "@/locales/en/checkout.json"
+import enLogin from "@/locales/en/login.json"
+import enMessages from "@/locales/en/messages.json"
 
 // Combine modular translations
 
@@ -57,7 +67,29 @@ const defaultLocaleContext: LocaleContextType = {
 const LocaleContext = createContext<LocaleContextType>(defaultLocaleContext)
 
 // Combine modular translations
+// We spread them at the root AND keep them as objects to support both t("header.key") and t("key")
 const arTranslations = {
+  ...arApp,
+  ...arCommon,
+  ...arHome,
+  ...arProduct,
+  ...arProfile,
+  ...arSeller,
+  ...arAdmin,
+  ...arBuyer,
+  ...arOrders,
+  ...arPrivacy,
+  ...arTerms,
+  ...arFaq,
+  ...arHelp,
+  ...arFooter,
+  ...arHeader,
+  ...arHeader,
+  ...arCart,
+  ...arCheckout,
+  ...arLogin,
+  ...arMessages,
+  app: arApp,
   common: arCommon,
   home: arHome,
   product: arProduct,
@@ -71,10 +103,35 @@ const arTranslations = {
   faq: arFaq,
   help: arHelp,
   footer: arFooter,
-  header: arHeader
+  header: arHeader,
+  cart: arCart,
+  checkout: arCheckout,
+  login: arLogin,
+  messages: arMessages
 }
 
 const enTranslations = {
+  ...enApp,
+  ...enCommon,
+  ...enHome,
+  ...enProduct,
+  ...enProfile,
+  ...enSeller,
+  ...enAdmin,
+  ...enBuyer,
+  ...enOrders,
+  ...enPrivacy,
+  ...enTerms,
+  ...enFaq,
+  ...enHelp,
+  ...enFooter,
+  ...enHeader,
+  ...enHeader,
+  ...enCart,
+  ...enCheckout,
+  ...enLogin,
+  ...enMessages,
+  app: enApp,
   common: enCommon,
   home: enHome,
   product: enProduct,
@@ -88,7 +145,11 @@ const enTranslations = {
   faq: enFaq,
   help: enHelp,
   footer: enFooter,
-  header: enHeader
+  header: enHeader,
+  cart: enCart,
+  checkout: enCheckout,
+  login: enLogin,
+  messages: enMessages
 }
 
 const translations = {
@@ -117,47 +178,48 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
   }
 
   const t = (key: string, params?: Record<string, string | number>): string => {
-
     const translationSet = translations[language] as Record<string, any>
 
-    // Handle nested keys (e.g., "common.backToHome")
+    // 1. Try modular structure (e.g., "header.products")
     if (key.includes('.')) {
       const parts = key.split('.')
+      let current: any = translationSet
 
-      // Try to find in modular structure first
-      let current: Record<string, unknown> | string | null = translationSet
-      for (let i = 0; i < parts.length; i++) {
-        if (current && typeof current === 'object' && current !== null && parts[i] in current) {
-          current = (current as Record<string, unknown>)[parts[i]] as Record<string, unknown> | string | null
+      for (const part of parts) {
+        if (current && typeof current === 'object' && part in current) {
+          current = current[part]
         } else {
           current = null
           break
         }
       }
 
-      if (current && typeof current === 'string') {
+      if (typeof current === 'string') {
         let translation = current
-
         if (params) {
-          Object.entries(params).forEach(([paramKey, value]: [string, string | number]) => {
+          Object.entries(params).forEach(([paramKey, value]) => {
             translation = translation.replace(`{${paramKey}}`, String(value))
           })
         }
-
         return translation
       }
     }
 
-    // Fallback to flat structure for legacy keys
-    let translation = translationSet[key] as string || key
+    // 2. Direct lookup (fallback for flat keys or failed modular lookup)
+    let translation = translationSet[key]
 
-    if (params) {
-      Object.entries(params).forEach(([paramKey, value]: [string, string | number]) => {
+    // 3. Last resort: Return key itself
+    if (translation === undefined || translation === null) {
+      return key
+    }
+
+    if (typeof translation === 'string' && params) {
+      Object.entries(params).forEach(([paramKey, value]) => {
         translation = translation.replace(`{${paramKey}}`, String(value))
       })
     }
 
-    return translation
+    return String(translation)
   }
 
   const dir = language === "ar" ? "rtl" : "ltr"

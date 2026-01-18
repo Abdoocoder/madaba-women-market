@@ -119,8 +119,8 @@ export function OrdersTab() {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>{t('dashboard.orders')}</CardTitle>
-          <CardDescription>{t('dashboard.ordersDescription')}</CardDescription>
+          <CardTitle>{t('buyer.orders')}</CardTitle>
+          <CardDescription>{t('buyer.ordersDescription')}</CardDescription>
         </CardHeader>
         <CardContent>
           {orders.length === 0 ? (
