@@ -1,6 +1,0 @@
-
-C:\Users\user\Projects\madaba-women-market\tailwind.config.js
-  46:0  error  Parsing error: ',' expected
-
-✖ 1 problem (1 error, 0 warnings)
-
