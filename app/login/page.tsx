@@ -129,8 +129,26 @@ function LoginContent() {
       }
     } catch (error: unknown) {
       console.error("LOGIN_DEBUG: Login error caught:", error);
+
+      // Map Supabase errors to user-friendly messages
       const errorMessage = error instanceof Error ? error.message : String(error)
-      setError(errorMessage || t("login.failedLogin"))
+      let translationKey = "login.failedLogin"
+
+      if (errorMessage.includes("Invalid login credentials") || errorMessage.includes("Invalid email or password")) {
+        translationKey = "login.invalidCredentials"
+      } else if (errorMessage.includes("User not found")) {
+        translationKey = "login.userNotFound"
+      } else if (errorMessage.includes("Email not confirmed")) {
+        translationKey = "login.emailNotConfirmed"
+      } else if (errorMessage.includes("User account is disabled")) {
+        translationKey = "login.accountDisabled"
+      } else if (errorMessage.includes("Too many requests") || errorMessage.includes("rate limit")) {
+        translationKey = "login.tooManyAttempts"
+      } else if (errorMessage.includes("NetworkError") || errorMessage.includes("Failed to fetch")) {
+        translationKey = "login.networkError"
+      }
+
+      setError(t(translationKey))
     } finally {
       setIsSubmitting(false)
     }
