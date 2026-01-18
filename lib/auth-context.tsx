@@ -168,9 +168,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       })
 
       if (error) {
+        // Log error for debugging but don't throw to avoid crash screen
+        console.error("❌ Login failed:", error.message)
+
         // Check for common configuration issues after migration
         if (error.message?.includes("provider is not enabled")) {
-          throw new Error("تنبيه: ميزة تسجيل الدخول بالبريد الإلكتروني غير مفعّلة في إعدادات Supabase. يرجى تفعيل (Email Provider) من لوحة تحكم Supabase > Authentication > Providers.");
+          console.error("⚠️ Email provider not enabled in Supabase settings")
         }
 
         // Special check for migration: if login fails, see if they exist in profiles
@@ -184,19 +187,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           console.log("📊 Migration Check Output - Count:", count, "Error:", profileError);
 
           if (count && count > 0) {
-            throw new Error("تنبيه: حسابك موجود في متجرنا الجديد، لكنك تحتاج لضبط كلمة مرورك لأول مرة. يرجى استخدام 'نسيت كلمة المرور' لتعيين كلمة مرور جديدة.");
+            console.warn("⚠️ User exists in profiles but login failed - may need password reset");
           }
         } catch (checkErr) {
           console.error("⚠️ Error during migration check:", checkErr);
-          // Don't swallow the original error if this check fails
         }
 
-        throw error
+        return false
       }
       return true
     } catch (error: any) {
       console.error("❌ Error logging in:", error)
-      throw new Error(error.message || "Failed to login")
+      return false
     }
   }
 
@@ -213,7 +215,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       })
 
-      if (error) throw error
+      if (error) {
+        console.error("❌ Sign up failed:", error.message)
+        return false
+      }
 
       if (data.user) {
         // Create profile in profiles table
@@ -227,13 +232,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             status: role === 'seller' ? 'pending' : 'approved',
           })
 
-        if (profileError) throw profileError
+        if (profileError) {
+          console.error("❌ Profile creation failed:", profileError.message)
+          return false
+        }
       }
 
       return true
     } catch (error: any) {
       console.error("❌ Error signing up:", error)
-      throw new Error(error.message || "Failed to create account")
+      return false
     }
   }
 
