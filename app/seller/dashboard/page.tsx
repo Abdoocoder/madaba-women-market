@@ -61,7 +61,7 @@ export default function SellerDashboardPage() {
           const data = await response.json()
           setProducts(data)
         } else if (response.status === 401) {
-          console.error("Unauthorized access to products API - token may have expired")
+          console.log("⚠️ Unauthorized access to products API - token may have expired")
           // Try to refresh the token and retry
           const newToken = await getAuthToken()
           if (newToken && newToken !== token) {
@@ -101,7 +101,7 @@ export default function SellerDashboardPage() {
         const data = await response.json()
         setStats(data)
       } else if (response.status === 401) {
-        console.error("Unauthorized access to stats API - token may have expired")
+        console.log("⚠️ Unauthorized access to stats API - token may have expired")
         // Try to refresh the token and retry
         const newToken = await getAuthToken()
         if (newToken && newToken !== token) {

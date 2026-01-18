@@ -65,7 +65,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         .from('carts')
         .select('*')
         .eq('user_id', user.id)
-        .single()
+        .maybeSingle()
 
       if (data && !error) {
         if (JSON.stringify(items) !== JSON.stringify(data.items)) {

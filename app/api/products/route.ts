@@ -15,6 +15,7 @@ export async function GET(request: NextRequest) {
         }
 
         if (user.role !== 'seller') {
+            console.log('❌ Products API: Wrong role - returning 401');
             return NextResponse.json({
                 message: 'Access denied - seller role required',
                 userRole: user.role

@@ -16,7 +16,7 @@ async function authorizeSeller(request: NextRequest, productId: string): Promise
             .from('products')
             .select('*')
             .eq('id', productId)
-            .single();
+            .maybeSingle();
 
         if (error || !p) {
             return NextResponse.json({ message: 'Product not found' }, { status: 404 });
@@ -85,7 +85,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
             .update(updatedData)
             .eq('id', id)
             .select()
-            .single();
+            .maybeSingle();
 
         if (error) throw error;
 
