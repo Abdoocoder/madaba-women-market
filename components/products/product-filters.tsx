@@ -15,16 +15,17 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { CATEGORIES } from "@/lib/mock-data"
 import { useLocale } from "@/lib/locale-context"
-import type { SortOption } from "@/lib/types"
-import { useState } from "react"
+import { useState, useEffect, useTransition } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { useDebouncedCallback } from "use-debounce"
 
-interface ProductFiltersProps {
-  searchQuery: string
-  onSearchChange: (query: string) => void
-  selectedCategory: string
-  onCategoryChange: (category: string) => void
-  sortOption: SortOption
-  onSortChange: (sort: SortOption) => void
+export interface ProductFiltersProps {
+  searchQuery?: string
+  onSearchChange?: (value: string) => void
+  selectedCategory?: string
+  onCategoryChange?: (value: string) => void
+  sortOption?: string
+  onSortChange?: (value: string) => void
 }
 
 export function ProductFilters({
@@ -33,10 +34,93 @@ export function ProductFilters({
   selectedCategory,
   onCategoryChange,
   sortOption,
-  onSortChange,
-}: ProductFiltersProps) {
+  onSortChange
+}: ProductFiltersProps = {}) {
   const { t, language } = useLocale()
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const [isPending, startTransition] = useTransition()
+
   const [showFilters, setShowFilters] = useState(true)
+
+  // Determine if we are in controlled mode (props provided) or URL mode
+  const isControlled = onSearchChange !== undefined
+
+  // Get values from Props (controlled) or URL (uncontrolled)
+  const currentSearch = isControlled ? searchQuery : (searchParams.get('search') || "")
+  const currentCategory = isControlled ? selectedCategory : (searchParams.get('category') || "all")
+  const currentSort = isControlled ? sortOption : (searchParams.get('sort') || "date-desc")
+
+  const [localSearch, setLocalSearch] = useState(currentSearch || "")
+
+  // Sync local state with source if it changes
+  useEffect(() => {
+    setLocalSearch(currentSearch || "")
+  }, [currentSearch])
+
+  const createQueryString = (name: string, value: string) => {
+    const params = new URLSearchParams(searchParams.toString())
+    if (value && value !== "all" && value !== "") {
+      params.set(name, value)
+    } else {
+      params.delete(name)
+    }
+    return params.toString()
+  }
+
+  const handleSearch = useDebouncedCallback((term: string) => {
+    if (isControlled && onSearchChange) {
+      onSearchChange(term)
+    } else {
+      startTransition(() => {
+        const params = new URLSearchParams(searchParams.toString())
+        if (term) {
+          params.set('search', term)
+        } else {
+          params.delete('search')
+        }
+        router.push(`?${params.toString()}`, { scroll: false })
+      })
+    }
+  }, 300)
+
+  const handleSearchChange = (value: string) => {
+    setLocalSearch(value)
+    handleSearch(value)
+  }
+
+  const handleCategoryChange = (value: string) => {
+    if (isControlled && onCategoryChange) {
+      onCategoryChange(value)
+    } else {
+      startTransition(() => {
+        router.push(`?${createQueryString('category', value)}`, { scroll: false })
+      })
+    }
+  }
+
+  const handleSortChange = (value: string) => {
+    if (isControlled && onSortChange) {
+      onSortChange(value)
+    } else {
+      startTransition(() => {
+        router.push(`?${createQueryString('sort', value)}`, { scroll: false })
+      })
+    }
+  }
+
+  const handleClearFilters = () => {
+    setLocalSearch("")
+    if (isControlled) {
+      onSearchChange?.("")
+      onCategoryChange?.("all")
+      onSortChange?.("date-desc") // Default sort
+    } else {
+      startTransition(() => {
+        router.push('?', { scroll: false })
+      })
+    }
+  }
 
   const sortOptions = [
     { value: "date-desc", label: t("sort.newest") },
@@ -45,16 +129,13 @@ export function ProductFilters({
     { value: "name-asc", label: t("sort.nameAsc") },
   ]
 
-  const handleClearFilters = () => {
-    onSearchChange("")
-    onCategoryChange("all")
-    onSortChange("date-desc")
-  }
-
-  const hasActiveFilters = searchQuery !== "" || selectedCategory !== "all" || sortOption !== "date-desc"
+  const hasActiveFilters =
+    (currentSearch !== "") ||
+    (currentCategory !== "all") ||
+    (currentSort !== "date-desc")
 
   return (
-    <Card className="border-0 shadow-none md:border md:shadow-sm">
+    <Card className={`border-0 shadow-none md:border md:shadow-sm ${isPending ? 'opacity-70' : ''} transition-opacity`}>
       <CardHeader className="p-0 md:p-6 md:pb-4">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-lg font-semibold">
@@ -82,8 +163,8 @@ export function ProductFilters({
               <Input
                 id="search"
                 placeholder={t("filters.search")}
-                value={searchQuery}
-                onChange={(e) => onSearchChange(e.target.value)}
+                value={localSearch}
+                onChange={(e) => handleSearchChange(e.target.value)}
                 className="pr-10"
               />
             </div>
@@ -91,7 +172,7 @@ export function ProductFilters({
 
           <div>
             <Label className="text-base font-semibold mb-3 block">{t("filters.sortBy")}</Label>
-            <Select value={sortOption} onValueChange={(value) => onSortChange(value as SortOption)}>
+            <Select value={currentSort} onValueChange={handleSortChange}>
               <SelectTrigger>
                 <SelectValue placeholder={t("filters.sortBy")} />
               </SelectTrigger>
@@ -120,7 +201,7 @@ export function ProductFilters({
                 </Button>
               )}
             </div>
-            <RadioGroup value={selectedCategory} onValueChange={onCategoryChange}>
+            <RadioGroup value={currentCategory} onValueChange={handleCategoryChange}>
               <div className="flex items-center space-x-2 space-x-reverse py-2">
                 <RadioGroupItem value="all" id="all" className="peer" />
                 <Label

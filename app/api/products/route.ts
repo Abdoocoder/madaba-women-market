@@ -1,7 +1,8 @@
 import { NextResponse, NextRequest } from 'next/server'
 import { supabase } from '@/lib/supabase'
-import type { Product } from '@/lib/types'
+import type { Product, ProductDB } from '@/lib/types'
 import { getAuthenticatedUser } from '@/lib/server-auth'
+import { productSchema } from '@/lib/schemas'
 
 export async function GET(request: NextRequest) {
     try {
@@ -27,7 +28,11 @@ export async function GET(request: NextRequest) {
 
         if (error) throw error;
 
-        const products: Product[] = data.map((p: any) => ({
+        // Explicitly cast to ProductDB[] to avoid 'any'
+        // In a real app, generate types from Supabase CLI
+        const productsList = data as unknown as ProductDB[];
+
+        const products: Product[] = productsList.map((p) => ({
             id: p.id,
             name: p.name,
             nameAr: p.name_ar,
@@ -72,35 +77,31 @@ export async function POST(request: NextRequest) {
 
     try {
         const formData = await request.formData();
-        const nameAr = formData.get('nameAr') as string;
-        const descriptionAr = formData.get('descriptionAr') as string;
-        const price = Number(formData.get('price'));
-        const category = formData.get('category') as string;
-        const stock = Number(formData.get('stock'));
-        const imageUrl = formData.get('imageUrl') as string || null;
+        const rawData = {
+            nameAr: formData.get('nameAr'),
+            descriptionAr: formData.get('descriptionAr'),
+            price: formData.get('price'),
+            category: formData.get('category'),
+            stock: formData.get('stock'),
+            imageUrl: formData.get('imageUrl') || null,
+        }
+
+        const validData = productSchema.parse(rawData)
 
         const sellerId = user.id;
         const sellerName = user.name;
 
-        if (!nameAr || !descriptionAr || isNaN(price) || !category || isNaN(stock)) {
-            return NextResponse.json({ message: 'Missing or invalid required fields' }, { status: 400 });
-        }
-
-        if (price <= 0 || stock < 0) {
-            return NextResponse.json({ message: 'Price must be positive and stock cannot be negative' }, { status: 400 });
-        }
-
         const newProduct = {
-            name: nameAr,
-            name_ar: nameAr,
-            description: descriptionAr,
-            description_ar: descriptionAr,
-            price: price,
-            category: category,
-            image_url: imageUrl || '/placeholder.svg',
+            name: validData.nameAr, // Use Arabic name as main name for now
+            name_ar: validData.nameAr,
+            description: validData.descriptionAr, // Use Arabic desc as main desc
+            description_ar: validData.descriptionAr,
+            price: validData.price,
+            category: validData.category,
+            image_url: validData.imageUrl || '/placeholder.svg',
             seller_id: sellerId,
             seller_name: sellerName,
-            stock: stock,
+            stock: validData.stock,
             featured: false,
             approved: false,
         }

@@ -13,6 +13,9 @@ import { CATEGORIES } from "@/lib/mock-data"
 import { CldUploadWidget } from 'next-cloudinary'
 import type { Product } from "@/lib/types"
 import { useLocale } from "@/lib/locale-context"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { productSchema, type ProductFormValues } from "@/lib/schemas"
 
 interface ProductFormProps {
   product?: Product
@@ -22,36 +25,56 @@ interface ProductFormProps {
 
 export function ProductForm({ product, onSubmit, onCancel }: ProductFormProps) {
   const { t } = useLocale()
-  const [formData, setFormData] = useState({
-    nameAr: product?.nameAr || "",
-    descriptionAr: product?.descriptionAr || "",
-    price: product?.price ?? 0,
-    category: product?.category || "",
-    stock: product?.stock ?? 0,
-  })
   const [imagePreview, setImagePreview] = useState(product?.image || null)
   const [imageUrl, setImageUrl] = useState<string | undefined>(product?.image)
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<ProductFormValues>({
+    resolver: zodResolver(productSchema),
+    defaultValues: {
+      nameAr: product?.nameAr || "",
+      descriptionAr: product?.descriptionAr || "",
+      price: product?.price ?? 0,
+      category: product?.category || "",
+      stock: product?.stock ?? 0,
+      imageUrl: product?.image || null,
+    },
+  })
+
+  // Determine valid numeric values for controlled inputs if needed, 
+  // but with register() we rely on RHF.
+  // We'll watch category to control the Select.
+  const selectedCategory = watch("category")
 
   const handleImageUpload = (result: unknown) => {
     // Type assertion for Cloudinary result
     const cloudinaryResult = result as { info?: { secure_url: string } };
-    console.log('🎨 Cloudinary upload result:', result)
-    setImagePreview(cloudinaryResult.info!.secure_url)
-    setImageUrl(cloudinaryResult.info!.secure_url)
+    const url = cloudinaryResult.info!.secure_url
+    setImagePreview(url)
+    setImageUrl(url)
+    setValue("imageUrl", url)
   }
 
   const handleUploadError = (error: unknown) => {
     console.error('❌ Cloudinary upload error:', error)
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    onSubmit(formData, imageUrl)
+  const onFormSubmit = (data: ProductFormValues) => {
+    const submissionData = {
+      ...data,
+      nameAr: data.nameAr,
+      descriptionAr: data.descriptionAr,
+      price: data.price,
+      stock: data.stock,
+      category: data.category,
+    }
+    onSubmit(submissionData, imageUrl)
   }
-
-  // Ensure numeric values are valid numbers before passing to inputs
-  const validPrice = isNaN(formData.price) ? 0 : formData.price;
-  const validStock = isNaN(formData.stock) ? 0 : formData.stock;
 
   return (
     <Card>
@@ -59,7 +82,7 @@ export function ProductForm({ product, onSubmit, onCancel }: ProductFormProps) {
         <CardTitle>{product ? t("seller.editProduct") : t("seller.addProduct")}</CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
           <div className="space-y-2">
             <Label>{t("product.image")}</Label>
             {process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ? (
@@ -76,7 +99,7 @@ export function ProductForm({ product, onSubmit, onCancel }: ProductFormProps) {
               >
                 {({ open }) => (
                   <div
-                    className="w-full h-48 border-2 border-dashed rounded-lg flex items-center justify-center cursor-pointer relative"
+                    className="w-full h-48 border-2 border-dashed rounded-lg flex items-center justify-center cursor-pointer relative hover:bg-muted/50 transition-colors"
                     onClick={() => open()}
                   >
                     {imagePreview ? (
@@ -104,21 +127,19 @@ export function ProductForm({ product, onSubmit, onCancel }: ProductFormProps) {
             <Label htmlFor="nameAr">{t("product.name")}</Label>
             <Input
               id="nameAr"
-              value={formData.nameAr}
-              onChange={(e) => setFormData({ ...formData, nameAr: e.target.value })}
-              required
+              {...register("nameAr")}
             />
+            {errors.nameAr && <p className="text-sm text-destructive">{errors.nameAr.message}</p>}
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="descriptionAr">{t("product.description")}</Label>
             <Textarea
               id="descriptionAr"
-              value={formData.descriptionAr}
-              onChange={(e) => setFormData({ ...formData, descriptionAr: e.target.value })}
-              required
               rows={3}
+              {...register("descriptionAr")}
             />
+            {errors.descriptionAr && <p className="text-sm text-destructive">{errors.descriptionAr.message}</p>}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -129,10 +150,9 @@ export function ProductForm({ product, onSubmit, onCancel }: ProductFormProps) {
                 type="number"
                 min="0"
                 step="0.01"
-                value={validPrice}
-                onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })}
-                required
+                {...register("price", { valueAsNumber: true })}
               />
+              {errors.price && <p className="text-sm text-destructive">{errors.price.message}</p>}
             </div>
 
             <div className="space-y-2">
@@ -141,16 +161,18 @@ export function ProductForm({ product, onSubmit, onCancel }: ProductFormProps) {
                 id="stock"
                 type="number"
                 min="0"
-                value={validStock}
-                onChange={(e) => setFormData({ ...formData, stock: parseInt(e.target.value) || 0 })}
-                required
+                {...register("stock", { valueAsNumber: true })}
               />
+              {errors.stock && <p className="text-sm text-destructive">{errors.stock.message}</p>}
             </div>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="category">{t("product.category")}</Label>
-            <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
+            <Select
+              value={selectedCategory}
+              onValueChange={(val) => setValue("category", val, { shouldValidate: true })}
+            >
               <SelectTrigger>
                 <SelectValue placeholder={t("filters.allCategories")} />
               </SelectTrigger>
@@ -162,6 +184,7 @@ export function ProductForm({ product, onSubmit, onCancel }: ProductFormProps) {
                 ))}
               </SelectContent>
             </Select>
+            {errors.category && <p className="text-sm text-destructive">{errors.category.message}</p>}
           </div>
 
           <div className="flex gap-2 pt-4">

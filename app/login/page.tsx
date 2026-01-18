@@ -587,6 +587,7 @@ function LoginContent() {
           src="/madaba-hero.png"
           alt="Madaba Women Market"
           fill
+          sizes="50vw"
           className="object-cover opacity-80"
           priority
         />

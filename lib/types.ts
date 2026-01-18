@@ -88,3 +88,22 @@ export interface Seller {
   joinedAt: Date
   followersCount?: number
 }
+
+export interface ProductDB {
+  id: string
+  name: string
+  name_ar: string
+  description: string
+  description_ar: string
+  price: number
+  category: string
+  image_url: string
+  seller_id: string
+  seller_name: string
+  stock: number
+  featured: boolean
+  approved: boolean
+  suspended: boolean
+  created_at: string
+  purchase_count?: number
+}

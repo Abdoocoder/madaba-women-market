@@ -209,7 +209,7 @@ export function HomeView({ initialProducts }: HomeViewProps) {
                                         selectedCategory={selectedCategory}
                                         onCategoryChange={setSelectedCategory}
                                         sortOption={sortOption}
-                                        onSortChange={setSortOption}
+                                        onSortChange={(val) => setSortOption(val as SortOption)}
                                     />
                                 </div>
                             </aside>

@@ -37,8 +37,6 @@ export async function middleware(request: NextRequest) {
         data: { user },
     } = await supabase.auth.getUser()
 
-    console.log(`MIDDLEWARE_DEBUG: Path: ${request.nextUrl.pathname} | User: ${user?.email}`)
-
     // 1. Self-healing auth redirect (Legacy from proxy.ts, kept for safety)
     if (request.nextUrl.pathname === "/" && request.nextUrl.searchParams.has("code")) {
         const callbackUrl = new URL("/auth/callback", request.url);
@@ -52,7 +50,6 @@ export async function middleware(request: NextRequest) {
     const isProtected = protectedRoutes.some(route => request.nextUrl.pathname.startsWith(route))
 
     if (isProtected && !user) {
-        console.warn("MIDDLEWARE_DEBUG: Access denied. Redirecting to /login")
         const loginUrl = new URL("/login", request.url)
         loginUrl.searchParams.set("next", request.nextUrl.pathname)
         return NextResponse.redirect(loginUrl)
