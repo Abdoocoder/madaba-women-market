@@ -4,12 +4,28 @@ import { User } from "./types";
 import { NextRequest } from "next/server";
 
 // Unified function to verify Supabase token and get user data
-async function verifyTokenAndGetUser(idToken: string): Promise<User | null> {
+async function verifyTokenAndGetUser(accessToken: string): Promise<User | null> {
     try {
-        const { data: { user: supabaseUser }, error } = await supabase.auth.getUser(idToken);
+        // In Supabase v2, we need to create a new client with the access token
+        // to verify it properly
+        const { createClient } = await import('@supabase/supabase-js');
+        const supabaseWithToken = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+            {
+                global: {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`
+                    }
+                }
+            }
+        );
+
+        // Verify the token by getting the user
+        const { data: { user: supabaseUser }, error } = await supabaseWithToken.auth.getUser();
 
         if (error || !supabaseUser) {
-            console.error('Error verifying Supabase token:', error);
+            console.error('Error verifying Supabase token:', error?.message);
             return null;
         }
 
@@ -54,7 +70,7 @@ async function verifyTokenAndGetUser(idToken: string): Promise<User | null> {
             return {
                 id: createdProfile.id,
                 email: createdProfile.email || '',
-                name: createdProfile.name || 'Unknown User',
+                name: createdProfile.name || 'User',
                 photoURL: createdProfile.avatar_url || '',
                 role: createdProfile.role || 'customer',
                 status: createdProfile.status || 'approved',
