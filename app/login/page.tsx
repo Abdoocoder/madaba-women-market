@@ -126,6 +126,9 @@ function LoginContent() {
             router.push("/")
           }
         }, 300)
+      } else {
+        // Login failed - show error message
+        setError(t("login.invalidCredentials"))
       }
     } catch (error: unknown) {
       console.error("LOGIN_DEBUG: Login error caught:", error);

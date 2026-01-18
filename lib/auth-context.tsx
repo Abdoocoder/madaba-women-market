@@ -169,11 +169,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (error) {
         // Log error for debugging but don't throw to avoid crash screen
-        console.error("❌ Login failed:", error.message)
+        console.log("❌ Login failed:", error.message)
 
         // Check for common configuration issues after migration
         if (error.message?.includes("provider is not enabled")) {
-          console.error("⚠️ Email provider not enabled in Supabase settings")
+          console.log("⚠️ Email provider not enabled in Supabase settings")
         }
 
         // Special check for migration: if login fails, see if they exist in profiles
@@ -190,14 +190,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             console.warn("⚠️ User exists in profiles but login failed - may need password reset");
           }
         } catch (checkErr) {
-          console.error("⚠️ Error during migration check:", checkErr);
+          console.log("⚠️ Error during migration check:", checkErr);
         }
 
         return false
       }
       return true
     } catch (error: any) {
-      console.error("❌ Error logging in:", error)
+      console.log("❌ Unexpected error during login:", error)
       return false
     }
   }
