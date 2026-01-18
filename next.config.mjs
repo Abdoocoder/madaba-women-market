@@ -1,6 +1,6 @@
-/** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
+  reactStrictMode: false,
+  productionBrowserSourceMaps: false,
 
 
 
@@ -86,5 +86,6 @@ const checkConfig = () => {
 if (process.env.NODE_ENV !== 'test') {
   checkConfig();
 }
+
 
 export default nextConfig;

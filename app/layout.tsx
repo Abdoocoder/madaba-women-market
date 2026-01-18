@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { HeaderWrapper } from "@/components/layout/header-wrapper";
 import { Footer } from "@/components/layout/footer";
 import { ToasterProvider } from "@/components/toaster-provider";
+import { PWARegister } from "@/components/pwa-register";
 import "./globals.css";
 
 const cairo = Cairo({ subsets: ["arabic", "latin"] });
@@ -36,7 +37,12 @@ export const metadata = {
     index: true,
     follow: true,
   },
-  generator: 'v0.app'
+  generator: 'v0.app',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'MadabaMarket',
+  },
 };
 
 export default function RootLayout({
@@ -58,6 +64,7 @@ export default function RootLayout({
             <CartProvider>
               <LocaleProvider>
                 <ToasterProvider />
+                <PWARegister />
                 <HeaderWrapper />
                 <div className="flex-grow pt-16">{children}</div>
                 <Footer />
