@@ -42,6 +42,7 @@
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.89.0",
     "@types/dotenv": "^6.1.1",
+    "@types/uuid": "^10.0.0",
     "@vercel/analytics": "latest",
     "@vercel/speed-insights": "latest",
     "child_process": "latest",
@@ -74,6 +75,7 @@
     "tailwindcss-animate": "^1.0.7",
     "use-debounce": "^10.1.0",
     "util": "latest",
+    "uuid": "^13.0.0",
     "zod": "^3.25.67"
   },
   "devDependencies": {

@@ -16,7 +16,7 @@ export default async function Home() {
       .eq("approved", true)
 
     if (error) {
-      console.error("Supabase error fetching products (Server):", error)
+      console.error("Supabase error fetching products (Server):", JSON.stringify(error, null, 2))
     } else if (data) {
       console.log(`✅ Fetched ${data.length} products on Server`)
       initialProducts = data.map((p: any) => ({

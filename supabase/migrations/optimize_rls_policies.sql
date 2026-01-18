@@ -28,11 +28,7 @@ ON public.products FOR SELECT
 USING (
   approved = true 
   OR (SELECT auth.uid())::text = seller_id
-  OR EXISTS (
-    SELECT 1 FROM public.profiles
-    WHERE profiles.id = (SELECT auth.uid())::text
-    AND profiles.role = 'admin'
-  )
+  OR public.is_admin()
 );
 
 -- Sellers can insert their own products
@@ -40,11 +36,7 @@ CREATE POLICY "products_insert_policy"
 ON public.products FOR INSERT
 WITH CHECK (
   (SELECT auth.uid())::text = seller_id
-  OR EXISTS (
-    SELECT 1 FROM public.profiles
-    WHERE profiles.id = (SELECT auth.uid())::text
-    AND profiles.role = 'admin'
-  )
+  OR public.is_admin()
 );
 
 -- Combined UPDATE policy
@@ -52,11 +44,11 @@ CREATE POLICY "products_update_policy"
 ON public.products FOR UPDATE
 USING (
   (SELECT auth.uid())::text = seller_id
-  OR EXISTS (
-    SELECT 1 FROM public.profiles
-    WHERE profiles.id = (SELECT auth.uid())::text
-    AND profiles.role = 'admin'
-  )
+  OR public.is_admin()
+)
+WITH CHECK (
+  (SELECT auth.uid())::text = seller_id
+  OR public.is_admin()
 );
 
 -- Combined DELETE policy
@@ -64,11 +56,7 @@ CREATE POLICY "products_delete_policy"
 ON public.products FOR DELETE
 USING (
   (SELECT auth.uid())::text = seller_id
-  OR EXISTS (
-    SELECT 1 FROM public.profiles
-    WHERE profiles.id = (SELECT auth.uid())::text
-    AND profiles.role = 'admin'
-  )
+  OR public.is_admin()
 );
 
 -- ============================================
@@ -81,11 +69,7 @@ ON public.orders FOR SELECT
 USING (
   (SELECT auth.uid())::text = customer_id
   OR (SELECT auth.uid())::text = seller_id
-  OR EXISTS (
-    SELECT 1 FROM public.profiles
-    WHERE profiles.id = (SELECT auth.uid())::text
-    AND profiles.role = 'admin'
-  )
+  OR public.is_admin()
 );
 
 -- Combined INSERT policy
@@ -93,11 +77,7 @@ CREATE POLICY "orders_insert_policy"
 ON public.orders FOR INSERT
 WITH CHECK (
   (SELECT auth.uid())::text = customer_id
-  OR EXISTS (
-    SELECT 1 FROM public.profiles
-    WHERE profiles.id = (SELECT auth.uid())::text
-    AND profiles.role = 'admin'
-  )
+  OR public.is_admin()
 );
 
 -- Combined UPDATE policy
@@ -106,11 +86,12 @@ ON public.orders FOR UPDATE
 USING (
   ((SELECT auth.uid())::text = customer_id AND status = 'pending')
   OR (SELECT auth.uid())::text = seller_id
-  OR EXISTS (
-    SELECT 1 FROM public.profiles
-    WHERE profiles.id = (SELECT auth.uid())::text
-    AND profiles.role = 'admin'
-  )
+  OR public.is_admin()
+)
+WITH CHECK (
+  ((SELECT auth.uid())::text = customer_id AND status = 'pending')
+  OR (SELECT auth.uid())::text = seller_id
+  OR public.is_admin()
 );
 
 -- ============================================
@@ -126,11 +107,7 @@ USING (
     WHERE orders.id = order_items.order_id
     AND (orders.customer_id = (SELECT auth.uid())::text OR orders.seller_id = (SELECT auth.uid())::text)
   )
-  OR EXISTS (
-    SELECT 1 FROM public.profiles
-    WHERE profiles.id = (SELECT auth.uid())::text
-    AND profiles.role = 'admin'
-  )
+  OR public.is_admin()
 );
 
 -- Combined INSERT policy
@@ -142,11 +119,7 @@ WITH CHECK (
     WHERE orders.id = order_items.order_id
     AND orders.customer_id = (SELECT auth.uid())::text
   )
-  OR EXISTS (
-    SELECT 1 FROM public.profiles
-    WHERE profiles.id = (SELECT auth.uid())::text
-    AND profiles.role = 'admin'
-  )
+  OR public.is_admin()
 );
 
 -- ============================================
@@ -163,11 +136,7 @@ CREATE POLICY "reviews_insert_policy"
 ON public.reviews FOR INSERT
 WITH CHECK (
   (SELECT auth.uid())::text = user_id
-  OR EXISTS (
-    SELECT 1 FROM public.profiles
-    WHERE profiles.id = (SELECT auth.uid())::text
-    AND profiles.role = 'admin'
-  )
+  OR public.is_admin()
 );
 
 -- Combined UPDATE policy
@@ -175,11 +144,11 @@ CREATE POLICY "reviews_update_policy"
 ON public.reviews FOR UPDATE
 USING (
   (SELECT auth.uid())::text = user_id
-  OR EXISTS (
-    SELECT 1 FROM public.profiles
-    WHERE profiles.id = (SELECT auth.uid())::text
-    AND profiles.role = 'admin'
-  )
+  OR public.is_admin()
+)
+WITH CHECK (
+  (SELECT auth.uid())::text = user_id
+  OR public.is_admin()
 );
 
 -- Combined DELETE policy
@@ -187,11 +156,7 @@ CREATE POLICY "reviews_delete_policy"
 ON public.reviews FOR DELETE
 USING (
   (SELECT auth.uid())::text = user_id
-  OR EXISTS (
-    SELECT 1 FROM public.profiles
-    WHERE profiles.id = (SELECT auth.uid())::text
-    AND profiles.role = 'admin'
-  )
+  OR public.is_admin()
 );
 
 -- ============================================
@@ -203,11 +168,7 @@ CREATE POLICY "carts_select_policy"
 ON public.carts FOR SELECT
 USING (
   (SELECT auth.uid())::text = user_id
-  OR EXISTS (
-    SELECT 1 FROM public.profiles
-    WHERE profiles.id = (SELECT auth.uid())::text
-    AND profiles.role = 'admin'
-  )
+  OR public.is_admin()
 );
 
 -- Combined INSERT policy
@@ -215,11 +176,7 @@ CREATE POLICY "carts_insert_policy"
 ON public.carts FOR INSERT
 WITH CHECK (
   (SELECT auth.uid())::text = user_id
-  OR EXISTS (
-    SELECT 1 FROM public.profiles
-    WHERE profiles.id = (SELECT auth.uid())::text
-    AND profiles.role = 'admin'
-  )
+  OR public.is_admin()
 );
 
 -- Combined UPDATE policy
@@ -227,11 +184,11 @@ CREATE POLICY "carts_update_policy"
 ON public.carts FOR UPDATE
 USING (
   (SELECT auth.uid())::text = user_id
-  OR EXISTS (
-    SELECT 1 FROM public.profiles
-    WHERE profiles.id = (SELECT auth.uid())::text
-    AND profiles.role = 'admin'
-  )
+  OR public.is_admin()
+)
+WITH CHECK (
+  (SELECT auth.uid())::text = user_id
+  OR public.is_admin()
 );
 
 -- Combined DELETE policy
@@ -239,11 +196,7 @@ CREATE POLICY "carts_delete_policy"
 ON public.carts FOR DELETE
 USING (
   (SELECT auth.uid())::text = user_id
-  OR EXISTS (
-    SELECT 1 FROM public.profiles
-    WHERE profiles.id = (SELECT auth.uid())::text
-    AND profiles.role = 'admin'
-  )
+  OR public.is_admin()
 );
 
 -- ============================================
@@ -255,22 +208,25 @@ CREATE POLICY "success_stories_select_policy"
 ON public.success_stories FOR SELECT
 USING (true);
 
--- Admin-only write policy (INSERT, UPDATE, DELETE)
-CREATE POLICY "success_stories_write_policy"
-ON public.success_stories FOR ALL
-USING (
-  EXISTS (
-    SELECT 1 FROM public.profiles
-    WHERE profiles.id = (SELECT auth.uid())::text
-    AND profiles.role = 'admin'
-  )
-)
+-- Admin-only INSERT policy
+CREATE POLICY "success_stories_insert_policy"
+ON public.success_stories FOR INSERT
 WITH CHECK (
-  EXISTS (
-    SELECT 1 FROM public.profiles
-    WHERE profiles.id = (SELECT auth.uid())::text
-    AND profiles.role = 'admin'
-  )
+  public.is_admin()
+);
+
+-- Admin-only UPDATE policy
+CREATE POLICY "success_stories_update_policy"
+ON public.success_stories FOR UPDATE
+USING (
+  public.is_admin()
+);
+
+-- Admin-only DELETE policy
+CREATE POLICY "success_stories_delete_policy"
+ON public.success_stories FOR DELETE
+USING (
+  public.is_admin()
 );
 
 -- ============================================
@@ -283,11 +239,7 @@ ON public.profiles FOR SELECT
 USING (
   (role = 'seller' AND status = 'approved')
   OR (SELECT auth.uid())::text = id
-  OR EXISTS (
-    SELECT 1 FROM public.profiles
-    WHERE profiles.id = (SELECT auth.uid())::text
-    AND profiles.role = 'admin'
-  )
+  OR (SELECT (auth.jwt() -> 'app_metadata' ->> 'role')) = 'admin'
 );
 
 -- Individuals can insert their own profile (initial setup)
@@ -295,11 +247,7 @@ CREATE POLICY "profiles_insert_policy"
 ON public.profiles FOR INSERT
 WITH CHECK (
   (SELECT auth.uid())::text = id
-  OR EXISTS (
-    SELECT 1 FROM public.profiles
-    WHERE profiles.id = (SELECT auth.uid())::text
-    AND profiles.role = 'admin'
-  )
+  OR public.is_admin()
 );
 
 -- Individuals can update their own profile, admins can update all
@@ -307,22 +255,14 @@ CREATE POLICY "profiles_update_policy"
 ON public.profiles FOR UPDATE
 USING (
   (SELECT auth.uid())::text = id
-  OR EXISTS (
-    SELECT 1 FROM public.profiles
-    WHERE profiles.id = (SELECT auth.uid())::text
-    AND profiles.role = 'admin'
-  )
+  OR public.is_admin()
 );
 
 -- Only admins can delete profiles
 CREATE POLICY "profiles_delete_policy"
 ON public.profiles FOR DELETE
 USING (
-  EXISTS (
-    SELECT 1 FROM public.profiles
-    WHERE profiles.id = (SELECT auth.uid())::text
-    AND profiles.role = 'admin'
-  )
+  public.is_admin()
 );
 
 -- ============================================

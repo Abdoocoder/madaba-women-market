@@ -3,8 +3,7 @@
 -- ============================================
 -- This fixes the mutable search_path warning for is_admin function
 
--- Drop and recreate is_admin function with secure search_path
-DROP FUNCTION IF EXISTS public.is_admin();
+-- Recreate is_admin function with secure search_path
 
 CREATE OR REPLACE FUNCTION public.is_admin()
 RETURNS boolean
@@ -13,11 +12,11 @@ SECURITY DEFINER
 SET search_path = public, pg_temp
 STABLE
 AS $$
-  SELECT EXISTS (
-    SELECT 1
-    FROM public.profiles
-    WHERE id = auth.uid()::text
-    AND role = 'admin'
+  -- Check if user is admin via JWT metadata (which we now sync)
+  -- This breaks recursion with the profiles table
+  SELECT COALESCE(
+    (SELECT (auth.jwt() -> 'app_metadata' ->> 'role')) = 'admin',
+    false
   );
 $$;
 

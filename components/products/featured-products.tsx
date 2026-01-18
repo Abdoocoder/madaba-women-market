@@ -45,7 +45,7 @@ export function FeaturedProducts() {
 
         setFeaturedProducts(products)
       } catch (error) {
-        console.error("Error fetching featured products:", error)
+        console.error("Error fetching featured products:", JSON.stringify(error, null, 2))
       } finally {
         setIsLoading(false)
       }

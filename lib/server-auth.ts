@@ -17,7 +17,8 @@ async function verifyTokenAndGetUser(accessToken: string): Promise<User | null> 
         console.log('🔑 Verifying token of length:', accessToken?.length);
 
         // Get user from JWT token using admin client
-        let { data: { user: supabaseUser }, error } = await supabaseAdmin.auth.getUser(accessToken);
+        const { data: { user: initialUser }, error } = await supabaseAdmin.auth.getUser(accessToken);
+        let supabaseUser = initialUser;
 
         // Fallback to regular supabase client if admin fails (sometimes token verification differs)
         if (error || !supabaseUser) {
@@ -36,11 +37,13 @@ async function verifyTokenAndGetUser(accessToken: string): Promise<User | null> 
 
         // Get user data from profiles table using admin client (bypasses RLS)
         // First try by ID
-        let { data: profile, error: profileError } = await supabaseAdmin
+        const { data: initialProfile, error: profileError } = await supabaseAdmin
             .from('profiles')
             .select('*')
             .eq('id', supabaseUser.id)
             .maybeSingle();
+
+        let profile = initialProfile;
 
         // If not found by ID, try by email (to handle legacy profiles or Auth ID changes)
         if (!profile) {

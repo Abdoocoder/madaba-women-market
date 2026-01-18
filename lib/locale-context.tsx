@@ -34,9 +34,7 @@ import enHelp from "@/locales/en/help.json"
 import enFooter from "@/locales/en/footer.json"
 import enHeader from "@/locales/en/header.json"
 
-// Legacy imports for compatibility (will be removed after migration)
-import arLegacy from "@/locales/ar.json"
-import enLegacy from "@/locales/en.json"
+// Combine modular translations
 
 type Language = "ar" | "en"
 
@@ -60,7 +58,6 @@ const LocaleContext = createContext<LocaleContextType>(defaultLocaleContext)
 
 // Combine modular translations
 const arTranslations = {
-  ...arLegacy, // Keep legacy translations for backward compatibility
   common: arCommon,
   home: arHome,
   product: arProduct,
@@ -78,7 +75,6 @@ const arTranslations = {
 }
 
 const enTranslations = {
-  ...enLegacy, // Keep legacy translations for backward compatibility
   common: enCommon,
   home: enHome,
   product: enProduct,
