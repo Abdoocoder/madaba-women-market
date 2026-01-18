@@ -31,7 +31,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .from('profiles')
         .select('*')
         .eq('id', userId)
-        .single()
+        .maybeSingle()
 
       if (data) return data as User
 
@@ -45,7 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .from('profiles')
           .select('*')
           .ilike('email', email)
-          .single()
+          .maybeSingle()
 
         if (emailData) {
           console.log("🔗 Migrated user detected. Linking profile by email:", email)

@@ -10,15 +10,29 @@ async function verifyTokenAndGetUser(accessToken: string): Promise<User | null> 
 
         // Use supabaseAdmin to verify JWT if available, otherwise skip server auth
         if (!supabaseAdmin) {
+            console.error('❌ Supabase Admin client not configured - check SUPABASE_SERVICE_ROLE_KEY environment variable');
             return null;
         }
+
+        console.log('🔑 Verifying token of length:', accessToken?.length);
 
         // Get user from JWT token using admin client
-        const { data: { user: supabaseUser }, error } = await supabaseAdmin.auth.getUser(accessToken);
+        let { data: { user: supabaseUser }, error } = await supabaseAdmin.auth.getUser(accessToken);
 
+        // Fallback to regular supabase client if admin fails (sometimes token verification differs)
         if (error || !supabaseUser) {
-            return null;
+            console.warn('⚠️ Admin token verification failed, trying public client fallback...');
+            const { data: { user: fallbackUser }, error: fallbackError } = await supabase.auth.getUser(accessToken);
+            if (!fallbackError && fallbackUser) {
+                supabaseUser = fallbackUser;
+                console.log('✅ Fallback token verification successful');
+            } else {
+                console.error('❌ Token verification failed:', error?.message || fallbackError?.message || 'No user found');
+                return null;
+            }
         }
+
+        console.log(`👤 Token verified for user: ${supabaseUser.email} (${supabaseUser.id})`);
 
         // Get user data from profiles table using admin client (bypasses RLS)
         // First try by ID
@@ -33,7 +47,7 @@ async function verifyTokenAndGetUser(accessToken: string): Promise<User | null> 
             const { data: emailProfile, error: emailError } = await supabaseAdmin
                 .from('profiles')
                 .select('*')
-                .eq('email', supabaseUser.email)
+                .ilike('email', supabaseUser.email || '')
                 .maybeSingle();
 
             if (emailProfile) {
@@ -41,11 +55,12 @@ async function verifyTokenAndGetUser(accessToken: string): Promise<User | null> 
                 const { data: updatedProfile, error: updateError } = await supabaseAdmin
                     .from('profiles')
                     .update({ id: supabaseUser.id })
-                    .eq('email', supabaseUser.email)
+                    .eq('id', emailProfile.id) // Use the ID we just found to be safe
                     .select()
                     .maybeSingle();
 
                 if (!updateError && updatedProfile) {
+                    console.log(`✅ Automatically updated profile ID for ${supabaseUser.email} to ${supabaseUser.id}`);
                     profile = updatedProfile;
 
                     // NEW: Migrate all references to the old ID to the new ID

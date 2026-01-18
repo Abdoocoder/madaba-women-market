@@ -91,7 +91,7 @@ function LoginContent() {
                 .from('profiles')
                 .select('role')
                 .eq('id', authUser.id)
-                .single()
+                .maybeSingle()
 
               console.log("LOGIN_DEBUG: Profile found:", profile);
 
@@ -101,7 +101,7 @@ function LoginContent() {
                   .from('profiles')
                   .select('role')
                   .ilike('email', authUser.email)
-                  .single()
+                  .maybeSingle()
                 profile = emailProfile
                 console.log("LOGIN_DEBUG: Email fallback profile:", profile);
               }
