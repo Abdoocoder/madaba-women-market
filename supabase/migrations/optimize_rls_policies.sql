@@ -12,7 +12,7 @@ BEGIN
     FOR r IN (SELECT schemaname, tablename, policyname 
               FROM pg_policies 
               WHERE schemaname = 'public' 
-              AND tablename IN ('products', 'orders', 'order_items', 'reviews', 'carts', 'success_stories'))
+              AND tablename IN ('products', 'orders', 'order_items', 'reviews', 'carts', 'success_stories', 'profiles'))
     LOOP
         EXECUTE format('DROP POLICY IF EXISTS %I ON %I.%I', r.policyname, r.schemaname, r.tablename);
     END LOOP;
@@ -266,6 +266,58 @@ USING (
   )
 )
 WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM public.profiles
+    WHERE profiles.id = (SELECT auth.uid())::text
+    AND profiles.role = 'admin'
+  )
+);
+
+-- ============================================
+-- 7. PROFILES TABLE - Optimized
+-- ============================================
+
+-- Consolidate: Anyone can view approved sellers, individuals can view own profile, admins view all
+CREATE POLICY "profiles_select_policy"
+ON public.profiles FOR SELECT
+USING (
+  (role = 'seller' AND status = 'approved')
+  OR (SELECT auth.uid())::text = id
+  OR EXISTS (
+    SELECT 1 FROM public.profiles
+    WHERE profiles.id = (SELECT auth.uid())::text
+    AND profiles.role = 'admin'
+  )
+);
+
+-- Individuals can insert their own profile (initial setup)
+CREATE POLICY "profiles_insert_policy"
+ON public.profiles FOR INSERT
+WITH CHECK (
+  (SELECT auth.uid())::text = id
+  OR EXISTS (
+    SELECT 1 FROM public.profiles
+    WHERE profiles.id = (SELECT auth.uid())::text
+    AND profiles.role = 'admin'
+  )
+);
+
+-- Individuals can update their own profile, admins can update all
+CREATE POLICY "profiles_update_policy"
+ON public.profiles FOR UPDATE
+USING (
+  (SELECT auth.uid())::text = id
+  OR EXISTS (
+    SELECT 1 FROM public.profiles
+    WHERE profiles.id = (SELECT auth.uid())::text
+    AND profiles.role = 'admin'
+  )
+);
+
+-- Only admins can delete profiles
+CREATE POLICY "profiles_delete_policy"
+ON public.profiles FOR DELETE
+USING (
   EXISTS (
     SELECT 1 FROM public.profiles
     WHERE profiles.id = (SELECT auth.uid())::text

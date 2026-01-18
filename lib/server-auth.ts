@@ -120,6 +120,18 @@ async function verifyTokenAndGetUser(accessToken: string): Promise<User | null> 
             profile = createdProfile;
         }
 
+        if (!profile) {
+            console.log(`🔍 No profile found for ${supabaseUser.email} even after migration attempt. Using fallback object.`);
+            return {
+                id: supabaseUser.id,
+                email: supabaseUser.email || '',
+                name: supabaseUser.user_metadata?.full_name || 'User',
+                role: 'customer',
+                status: 'approved',
+                createdAt: new Date(supabaseUser.created_at),
+            } as User;
+        }
+
         return {
             id: profile.id,
             email: profile.email || '',

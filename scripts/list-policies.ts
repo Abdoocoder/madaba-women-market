@@ -1,52 +1,49 @@
+
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
-dotenv.config({ path: '.env.local' });
+import path from 'path';
+
+dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-const supabase = createClient(supabaseUrl!, supabaseServiceKey!);
+const supabaseAdmin = createClient(supabaseUrl!, supabaseServiceKey!);
 
-async function checkPolicies() {
-    console.log('--- RLS POLICIES FOR profiles ---');
-    const { data, error } = await supabase.rpc('get_policies', { table_name: 'profiles' });
+async function listPolicies() {
+    console.log('📋 Fetching all RLS policies from pg_policies...');
+
+    const { data, error } = await supabaseAdmin.rpc('get_all_policies');
 
     if (error) {
-        // If RPC doesn't exist, try querying pg_policies
-        const { data: policies, error: pgError } = await supabase
+        // If the RPC doesn't exist, try a direct query (using admin client)
+        console.log('⚠️ get_all_policies RPC failed, trying direct select from pg_policies...');
+        const { data: policies, error: queryError } = await supabaseAdmin
             .from('pg_policies')
             .select('*')
-            .eq('tablename', 'profiles');
+            .eq('schemaname', 'public');
 
-        if (pgError) {
-            // If that fails too, try a raw SQL query via a temporary function if possible
-            // Or just assume we need to add a policy.
-            console.log('Could not fetch policies via traditional means. Trying raw SQL...');
-            const { data: rawData, error: rawError } = await supabase.rpc('exec_sql', {
-                sql_query: "SELECT * FROM pg_policies WHERE tablename = 'profiles'"
-            });
-            if (rawError) {
-                console.error('Final attempt failed:', rawError);
+        if (queryError) {
+            console.error('❌ Error fetching from pg_policies:', queryError.message);
+
+            // Try another way: using a custom SQL query if possible
+            console.log('🔄 Trying to list tablenames and policies via generic query...');
+            const { data: tables, error: tablesError } = await supabaseAdmin
+                .from('pg_tables')
+                .select('tablename')
+                .eq('schemaname', 'public');
+
+            if (tablesError) {
+                console.error('❌ Error fetching tables:', tablesError.message);
             } else {
-                console.log(rawData);
+                console.log('Tables found:', tables.map(t => t.tablename).join(', '));
             }
         } else {
-            console.log(policies);
+            console.log('✅ Policies found:', JSON.stringify(policies, null, 2));
         }
     } else {
-        console.log(data);
+        console.log('✅ Policies found via RPC:', JSON.stringify(data, null, 2));
     }
 }
 
-// Since I might not have these RPCs, let's just try to see if an authenticated user can read their OWN profile.
-async function testSelfRead() {
-    const adminId = 'e659eb07-e435-46ab-9aae-bdce2cc86dc7';
-    const adminEmail = 'abdoocoder@gmail.com';
-
-    console.log(`\nTesting self-read for ${adminEmail}...`);
-
-    // We need a real JWT to test this properly.
-    // But wait, I can just check if THERE ARE ANY policies at all.
-}
-
-checkPolicies();
+listPolicies();
