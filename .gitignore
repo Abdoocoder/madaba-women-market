@@ -48,3 +48,7 @@ next-auth.session-token
 *.sln
 *.sw?
 .env
+
+# Sensitive account documentation
+ACCOUNTS.md
+ACCOUNTS_BACKUP.md
