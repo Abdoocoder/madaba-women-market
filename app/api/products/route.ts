@@ -2,10 +2,25 @@ import { NextResponse, NextRequest } from 'next/server'
 import { supabase } from '@/lib/supabase'
 import type { Product, ProductDB } from '@/lib/types'
 import { getAuthenticatedUser } from '@/lib/server-auth'
-import { productSchema } from '@/lib/schemas'
+import { productSchema, productQuerySchema } from '@/lib/schemas'
+import { z } from 'zod'
 
 export async function GET(request: NextRequest) {
     try {
+        const { searchParams } = new URL(request.url);
+
+        // Input validation using Zod
+        const queryParams = {
+            page: searchParams.get('page'),
+            limit: searchParams.get('limit'),
+            category: searchParams.get('category'),
+            search: searchParams.get('search'),
+            sellerId: searchParams.get('sellerId'),
+        };
+
+        const validatedQuery = productQuerySchema.parse(queryParams);
+        const { page, limit, category, search, sellerId } = validatedQuery;
+
         const user = await getAuthenticatedUser(request);
 
         if (!user) {
@@ -14,23 +29,40 @@ export async function GET(request: NextRequest) {
             }, { status: 401 });
         }
 
-        if (user.role !== 'seller') {
-            console.log('❌ Products API: Wrong role - returning 401');
-            return NextResponse.json({
-                message: 'Access denied - seller role required',
-                userRole: user.role
-            }, { status: 401 });
+        // Base query
+        let query = supabase
+            .from('products')
+            .select('*', { count: 'exact' });
+
+        // Filters
+        if (sellerId) {
+            query = query.eq('seller_id', sellerId);
+        } else if (user.role === 'seller') {
+            // If seller role and no specific sellerId, default to current user's products
+            query = query.eq('seller_id', user.id);
+        } else if (user.role !== 'admin') {
+            // For customers/others, only show approved products
+            query = query.eq('approved', true).eq('suspended', false);
         }
 
-        const { data, error } = await supabase
-            .from('products')
-            .select('*')
-            .eq('seller_id', user.id);
+        if (category) {
+            query = query.eq('category', category);
+        }
+
+        if (search) {
+            query = query.or(`name.ilike.%${search}%,name_ar.ilike.%${search}%,description.ilike.%${search}%,description_ar.ilike.%${search}%`);
+        }
+
+        // Pagination
+        const from = (page - 1) * limit;
+        const to = from + limit - 1;
+
+        const { data, error, count } = await query
+            .order('created_at', { ascending: false })
+            .range(from, to);
 
         if (error) throw error;
 
-        // Explicitly cast to ProductDB[] to avoid 'any'
-        // In a real app, generate types from Supabase CLI
         const productsList = data as unknown as ProductDB[];
 
         const products: Product[] = productsList.map((p) => ({
@@ -49,12 +81,30 @@ export async function GET(request: NextRequest) {
             approved: p.approved,
             suspended: p.suspended,
             purchaseCount: p.purchase_count,
+            rating: p.rating,
+            reviewCount: p.review_count,
             createdAt: new Date(p.created_at)
         }));
 
-        return NextResponse.json(products);
-    } catch (error) {
+        return NextResponse.json({
+            items: products,
+            pagination: {
+                total: count,
+                page,
+                limit,
+                totalPages: count ? Math.ceil(count / limit) : 0
+            }
+        });
+    } catch (error: any) {
         console.error('Error fetching products:', error);
+
+        if (error instanceof z.ZodError) {
+            return NextResponse.json({
+                message: 'Invalid query parameters',
+                errors: error.errors
+            }, { status: 400 });
+        }
+
         return NextResponse.json({
             message: 'Internal Server Error',
             error: error instanceof Error ? error.message : 'Unknown error'

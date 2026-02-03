@@ -48,8 +48,8 @@ export function ProductCard({ product, onRemoveFromWishlist }: ProductCardProps)
     addToCart(product)
   }
 
-  const rating = 4.5; // Hardcoded rating since it's not in the Product model
-  const reviewCount = 0; // Hardcoded review count since it's not in the Product model
+  const rating = product.rating || 0;
+  const reviewCount = product.reviewCount || 0;
 
   // Updated product URL to point to the nested store product page
   const productUrl = `/store/${product.sellerId}/product/${product.id}`;

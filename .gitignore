@@ -52,3 +52,4 @@ next-auth.session-token
 # Sensitive account documentation
 ACCOUNTS.md
 ACCOUNTS_BACKUP.md
+ACCOUNTS_SUMMARY.md

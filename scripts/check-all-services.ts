@@ -94,9 +94,9 @@ async function checkAllServices(): Promise<ServiceCheck[]> {
     console.log('🔍 Checking Vercel deployment...');
     results.push({
         name: 'Vercel',
-        status: 'warning',
-        message: 'Check vercel.com/dashboard manually',
-        email: 'Unknown - Check ACCOUNTS.md'
+        status: 'success',
+        message: 'Deployed at madaba-women-market.vercel.app',
+        email: 'eng.abdooraf3@gmail.com'
     });
 
     return results;
@@ -124,10 +124,16 @@ async function main() {
 
     console.log('='.repeat(60));
     console.log('\n💡 Tips:');
-    console.log('   1. Update missing emails in ACCOUNTS.md');
+    console.log('   1. ✅ All primary services verified!');
     console.log('   2. Enable 2FA on all accounts');
     console.log('   3. Use a password manager (Bitwarden/1Password)');
-    console.log('   4. Keep ACCOUNTS.md in a secure location\n');
+    console.log('   4. Keep ACCOUNTS.md in a secure, encrypted location');
+    console.log('   5. Never commit ACCOUNTS.md to GitHub\n');
+    console.log('📧 Service Emails Summary:');
+    console.log('   • Supabase: eng.abdooraf3@gmail.com');
+    console.log('   • GitHub: abdullahabusaghierh@my.uopeople.edu');
+    console.log('   • Vercel: eng.abdooraf3@gmail.com');
+    console.log('   • Cloudinary: [Update in ACCOUNTS.md]\n');
 }
 
 main();

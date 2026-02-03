@@ -45,6 +45,8 @@ export interface Product {
   wishlisted?: boolean
   // Purchase count for popularity tracking
   purchaseCount?: number
+  rating?: number
+  reviewCount?: number
 }
 
 export interface CartItem {
@@ -106,4 +108,6 @@ export interface ProductDB {
   suspended: boolean
   created_at: string
   purchase_count?: number
+  rating?: number
+  review_count?: number
 }

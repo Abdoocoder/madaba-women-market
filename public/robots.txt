@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://madaba-women-market.vercel.app/sitemap.xml
