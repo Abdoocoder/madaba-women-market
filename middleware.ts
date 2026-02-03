@@ -1,12 +1,37 @@
 import { createServerClient } from "@supabase/ssr"
 import { NextResponse, type NextRequest } from "next/server"
 
+// Simple in-memory rate limiter for Edge Runtime
+// Note: This is per-instance and will reset on redeploys/instance cold starts
+const rateLimitMap = new Map<string, { count: number; lastReset: number }>()
+const RATE_LIMIT = 100 // max 100 requests
+const WINDOW_MS = 60 * 1000 // per 1 minute
+
 export async function middleware(request: NextRequest) {
     let response = NextResponse.next({
         request: {
             headers: request.headers,
         },
     })
+
+    // 0. Simple Rate Limiting
+    const ip = request.ip || request.headers.get("x-forwarded-for") || "unknown"
+    const now = Date.now()
+    const rateData = rateLimitMap.get(ip) || { count: 0, lastReset: now }
+
+    if (now - rateData.lastReset > WINDOW_MS) {
+        rateData.count = 1
+        rateData.lastReset = now
+    } else {
+        rateData.count++
+    }
+
+    rateLimitMap.set(ip, rateData)
+
+    if (rateData.count > RATE_LIMIT) {
+        console.warn(`[RateLimit] Blocked IP: ${ip} (${rateData.count} requests in window)`)
+        return new NextResponse("Too Many Requests", { status: 429 })
+    }
 
     const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
