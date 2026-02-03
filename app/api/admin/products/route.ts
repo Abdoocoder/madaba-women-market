@@ -2,20 +2,56 @@ import { NextResponse, NextRequest } from 'next/server'
 import { supabase } from '@/lib/supabase'
 import { getAuthenticatedUser } from '@/lib/server-auth'
 import type { Product } from '@/lib/types'
+import { z } from 'zod'
+import { productQuerySchema } from '@/lib/schemas'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
     try {
+        const { searchParams } = new URL(request.url);
+
+        // Input validation using Zod
+        const queryParams = {
+            page: searchParams.get('page'),
+            limit: searchParams.get('limit'),
+            category: searchParams.get('category'),
+            search: searchParams.get('search'),
+            sellerId: searchParams.get('sellerId'),
+        };
+
+        const validatedQuery = productQuerySchema.parse(queryParams);
+        const { page, limit, category, search, sellerId } = validatedQuery;
+
         const user = await getAuthenticatedUser(request);
 
         if (!user || user.role !== 'admin') {
             return NextResponse.json({ message: 'Access denied' }, { status: 403 });
         }
 
-        const { data, error } = await supabase
+        // Base query
+        let query = supabase
             .from('products')
-            .select('*');
+            .select('*', { count: 'exact' });
+
+        // Filters
+        if (sellerId) {
+            query = query.eq('seller_id', sellerId);
+        }
+        if (category) {
+            query = query.eq('category', category);
+        }
+        if (search) {
+            query = query.or(`name.ilike.%${search}%,name_ar.ilike.%${search}%,description.ilike.%${search}%,description_ar.ilike.%${search}%`);
+        }
+
+        // Pagination
+        const from = (page - 1) * limit;
+        const to = from + limit - 1;
+
+        const { data, error, count } = await query
+            .order('created_at', { ascending: false })
+            .range(from, to);
 
         if (error) throw error;
 
@@ -38,9 +74,25 @@ export async function GET(request: NextRequest) {
             createdAt: new Date(p.created_at)
         }));
 
-        return NextResponse.json(products);
-    } catch (error) {
+        return NextResponse.json({
+            items: products,
+            pagination: {
+                total: count,
+                page,
+                limit,
+                totalPages: count ? Math.ceil(count / limit) : 0
+            }
+        });
+    } catch (error: any) {
         console.error('Error fetching products:', error);
+
+        if (error instanceof z.ZodError) {
+            return NextResponse.json({
+                message: 'Invalid query parameters',
+                errors: error.errors
+            }, { status: 400 });
+        }
+
         return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
     }
 }
