@@ -174,7 +174,7 @@ export function ProductForm({ product, onSubmit, onCancel }: ProductFormProps) {
               onValueChange={(val) => setValue("category", val, { shouldValidate: true })}
             >
               <SelectTrigger>
-                <SelectValue placeholder={t("filters.allCategories")} />
+                <SelectValue placeholder={t("filtersShared.allCategories")} />
               </SelectTrigger>
               <SelectContent>
                 {CATEGORIES.map((cat) => (

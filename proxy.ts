@@ -7,7 +7,7 @@ const rateLimitMap = new Map<string, { count: number; lastReset: number }>()
 const RATE_LIMIT = 100 // max 100 requests
 const WINDOW_MS = 60 * 1000 // per 1 minute
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
     let response = NextResponse.next({
         request: {
             headers: request.headers,
@@ -15,7 +15,8 @@ export async function middleware(request: NextRequest) {
     })
 
     // 0. Simple Rate Limiting
-    const ip = request.ip || request.headers.get("x-forwarded-for") || "unknown"
+    // Use type assertion to bypass the NextRequest.ip type error in Next.js 16
+    const ip = (request as any).ip || request.headers.get("x-forwarded-for") || "unknown"
     const now = Date.now()
     const rateData = rateLimitMap.get(ip) || { count: 0, lastReset: now }
 

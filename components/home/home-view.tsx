@@ -219,7 +219,7 @@ export function HomeView({ initialProducts }: HomeViewProps) {
                                 {filteredAndSortedProducts.length === 0 ? (
                                     <div className="flex flex-col items-center justify-center py-20 text-center border-2 border-dashed border-muted rounded-3xl bg-muted/5">
                                         <p className="text-xl font-medium text-muted-foreground mb-2">{t("home.noProducts")}</p>
-                                        <p className="text-sm text-muted-foreground/70">Try adjusting your filters or search query.</p>
+                                        <p className="text-sm text-muted-foreground/70">{t("home.adjustFilters")}</p>
                                     </div>
                                 ) : (
                                     <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">

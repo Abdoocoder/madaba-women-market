@@ -12,7 +12,28 @@
   "hide": "إخفاء",
   "show": "عرض",
   "clear": "مسح",
+  "becomeSellerTitle": "ابدأ بيع منتجاتك",
+  "becomeSellerDescription": "انضم إلى مجتمع سوق مادبا للسيدات وابدأ ببيع منتجاتك وتحقيق النجاح من خلال التجارة الإلكترونية",
   "unauthorized": "وصول غير مصرح به",
   "becomeSeller": "نمكّن النساء… ونفتح لهن أبواب النجاح. ✨",
-  "currency": "د.أ"
+  "currency": "د.أ",
+  "filtersShared": {
+    "categories": "الفئات",
+    "search": "بحث",
+    "sortBy": "ترتيب حسب",
+    "allCategories": "جميع الفئات"
+  },
+  "sortShared": {
+    "newest": "الأحدث",
+    "priceAsc": "السعر: من الأقل للأعلى",
+    "priceDesc": "السعر: من الأعلى للأقل",
+    "nameAsc": "الاسم: أ-ي"
+  },
+  "categoriesShared": {
+    "fashion": "أزياء",
+    "beauty": "جمال",
+    "jewelry": "مجوهرات",
+    "accessories": "إكسسوارات",
+    "home": "منزل"
+  }
 }

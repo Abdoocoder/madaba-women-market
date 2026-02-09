@@ -11,6 +11,7 @@
   "passwordsDontMatch": "Passwords do not match",
   "passwordLength": "Password must be at least 6 characters long",
   "failedLogin": "Failed to login. Please check your credentials.",
+  "invalidCredentials": "Invalid credentials. Please try again.",
   "failedSignup": "Failed to create account. Please try again.",
   "failedGoogle": "Failed to sign in with Google. Please try again.",
   "loggingIn": "Logging in...",

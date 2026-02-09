@@ -12,7 +12,29 @@
   "hide": "Hide",
   "show": "Show",
   "clear": "Clear",
+  "becomeSellerTitle": "Start selling your products",
+  "becomeSellerDescription": "Join the Madaba Women's Market community and start selling your products and achieve success through e-commerce.",
+  "adjustFilters": "Try adjusting your filters or search query.",
   "unauthorized": "Unauthorized access",
   "becomeSeller": "Empowering Women… Opening Doors to Success. ✨",
-  "currency": "JOD"
+  "currency": "JOD",
+  "filtersShared": {
+    "categories": "Categories",
+    "search": "Search",
+    "sortBy": "Sort By",
+    "allCategories": "All Categories"
+  },
+  "sortShared": {
+    "newest": "Newest",
+    "priceAsc": "Price: Low to High",
+    "priceDesc": "Price: High to Low",
+    "nameAsc": "Name: A-Z"
+  },
+  "categoriesShared": {
+    "fashion": "Fashion",
+    "beauty": "Beauty",
+    "jewelry": "Jewelry",
+    "accessories": "Accessories",
+    "home": "Home"
+  }
 }

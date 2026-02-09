@@ -123,10 +123,10 @@ export function ProductFilters({
   }
 
   const sortOptions = [
-    { value: "date-desc", label: t("sort.newest") },
-    { value: "price-asc", label: t("sort.priceAsc") },
-    { value: "price-desc", label: t("sort.priceDesc") },
-    { value: "name-asc", label: t("sort.nameAsc") },
+    { value: "date-desc", label: t("sortShared.newest") },
+    { value: "price-asc", label: t("sortShared.priceAsc") },
+    { value: "price-desc", label: t("sortShared.priceDesc") },
+    { value: "name-asc", label: t("sortShared.nameAsc") },
   ]
 
   const hasActiveFilters =
@@ -140,7 +140,7 @@ export function ProductFilters({
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-lg font-semibold">
             <Filter className="h-5 w-5" />
-            {t("filters.categories")}
+            {t("filtersShared.categories")}
           </CardTitle>
           <Button
             variant="ghost"
@@ -156,13 +156,13 @@ export function ProductFilters({
         <div className="space-y-6">
           <div>
             <Label htmlFor="search" className="text-base font-semibold mb-3 block">
-              {t("filters.search")}
+              {t("filtersShared.search")}
             </Label>
             <div className="relative">
               <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 id="search"
-                placeholder={t("filters.search")}
+                placeholder={t("filtersShared.search")}
                 value={localSearch}
                 onChange={(e) => handleSearchChange(e.target.value)}
                 className="pr-10"
@@ -171,10 +171,10 @@ export function ProductFilters({
           </div>
 
           <div>
-            <Label className="text-base font-semibold mb-3 block">{t("filters.sortBy")}</Label>
+            <Label className="text-base font-semibold mb-3 block">{t("filtersShared.sortBy")}</Label>
             <Select value={currentSort} onValueChange={handleSortChange}>
               <SelectTrigger>
-                <SelectValue placeholder={t("filters.sortBy")} />
+                <SelectValue placeholder={t("filtersShared.sortBy")} />
               </SelectTrigger>
               <SelectContent>
                 {sortOptions.map((option) => (
@@ -188,7 +188,7 @@ export function ProductFilters({
 
           <div>
             <div className="flex items-center justify-between mb-3">
-              <Label className="text-base font-semibold">{t("filters.categories")}</Label>
+              <Label className="text-base font-semibold">{t("filtersShared.categories")}</Label>
               {hasActiveFilters && (
                 <Button
                   variant="ghost"
@@ -208,7 +208,7 @@ export function ProductFilters({
                   htmlFor="all"
                   className="cursor-pointer font-normal peer-data-[state=checked]:font-semibold peer-data-[state=checked]:text-primary"
                 >
-                  {t("filters.allCategories")}
+                  {t("filtersShared.allCategories")}
                 </Label>
               </div>
               {CATEGORIES.map((category) => (
@@ -218,7 +218,7 @@ export function ProductFilters({
                     htmlFor={category.id}
                     className="cursor-pointer font-normal peer-data-[state=checked]:font-semibold peer-data-[state=checked]:text-primary"
                   >
-                    {language === "ar" ? category.nameAr : t(`category.${category.id}`)}
+                    {language === "ar" ? category.nameAr : t(`categoriesShared.${category.id}`)}
                   </Label>
                 </div>
               ))}
