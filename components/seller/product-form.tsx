@@ -189,7 +189,7 @@ export function ProductForm({ product, onSubmit, onCancel }: ProductFormProps) {
 
           <div className="flex gap-2 pt-4">
             <Button type="submit" className="flex-1">
-              {product ? t("seller.saveChanges") : t("seller.addProductButton")}
+              {product ? t("seller.saveChanges") : t("seller.addProduct")}
             </Button>
             <Button type="button" variant="outline" onClick={onCancel} className="flex-1 bg-transparent">
               {t("common.cancel")}

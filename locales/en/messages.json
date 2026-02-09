@@ -17,5 +17,12 @@
   "failedToUpdateAvatar": "Failed to update avatar",
   "profileUpdated": "Profile updated successfully",
   "failedToUpdateProfile": "Failed to update profile",
-  "saving": "Saving..."
+  "saving": "Saving...",
+  "failedToFetchData": "Failed to fetch data",
+  "storeSettingsUpdated": "Store settings updated successfully",
+  "failedToUpdateStoreSettings": "Failed to update store settings",
+  "failedToFetchWishlist": "Failed to fetch wishlist",
+  "productRemovedFromWishlist": "Product removed from wishlist",
+  "failedToRemoveFromWishlist": "Failed to remove product from wishlist",
+  "productAddedToCart": "Product added to cart"
 }

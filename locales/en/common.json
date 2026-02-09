@@ -36,5 +36,7 @@
     "jewelry": "Jewelry",
     "accessories": "Accessories",
     "home": "Home"
-  }
+  },
+  "viewDetails": "View Details",
+  "close": "Close"
 }

@@ -14,5 +14,6 @@
   "password": "Password",
   "passwordDescription": "Change your password",
   "logout": "Logout",
-  "logoutDescription": "Sign out of your account"
+  "logoutDescription": "Sign out of your account",
+  "emptyWishlist": "Your wishlist is empty"
 }

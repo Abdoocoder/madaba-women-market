@@ -17,5 +17,12 @@
   "failedToUpdateAvatar": "فشل في تحديث الصورة الشخصية",
   "profileUpdated": "تم تحديث الملف الشخصي بنجاح",
   "failedToUpdateProfile": "فشل في تحديث الملف الشخصي",
-  "saving": "جارٍ الحفظ..."
+  "saving": "جارٍ الحفظ...",
+  "failedToFetchData": "فشل في تحميل البيانات",
+  "storeSettingsUpdated": "تم تحديث إعدادات المتجر بنجاح",
+  "failedToUpdateStoreSettings": "فشل في تحديث إعدادات المتجر",
+  "failedToFetchWishlist": "فشل في جلب قائمة الأمنيات",
+  "productRemovedFromWishlist": "تمت إزالة المنتج من قائمة الأمنيات",
+  "failedToRemoveFromWishlist": "فشل في إزالة المنتج من قائمة الأمنيات",
+  "productAddedToCart": "تمت إضافة المنتج إلى السلة"
 }

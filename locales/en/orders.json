@@ -16,5 +16,7 @@
     "shipped": "Shipped",
     "delivered": "Delivered",
     "cancelled": "Cancelled"
-  }
+  },
+  "details": "Order Details",
+  "items": "Items"
 }

@@ -28,5 +28,6 @@
   "processing": "Processing...",
   "clearCart": "Clear Cart",
   "freeShipping": "Free Shipping",
-  "freeShippingDescription": "Free shipping on all orders within Madaba"
+  "freeShippingDescription": "Free shipping on all orders within Madaba",
+  "addToCart": "Add to Cart"
 }

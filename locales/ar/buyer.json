@@ -14,5 +14,6 @@
   "password": "كلمة المرور",
   "passwordDescription": "تغيير كلمة المرور الخاصة بك",
   "logout": "تسجيل الخروج",
-  "logoutDescription": "تسجيل الخروج من حسابك"
+  "logoutDescription": "تسجيل الخروج من حسابك",
+  "emptyWishlist": "قائمة الرغبات فارغة"
 }

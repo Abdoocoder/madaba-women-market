@@ -100,5 +100,7 @@
   },
   "pendingApprovalTitle": "Account Pending Approval",
   "pendingApprovalMessage": "Your seller account is pending admin approval. You will be able to add products once approved.",
-  "productCreationError": "Failed to create product. Please try again."
+  "productCreationError": "Failed to create product. Please try again.",
+  "editProduct": "Edit Product",
+  "saveChanges": "Save Changes"
 }
